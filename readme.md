@@ -52,14 +52,55 @@ integracje:
 3. artefakt - punkty ruchu, generowanei zasobów, zwiększanie przyrostów
 
 
+****
+Frakcje - Makowski Piotr
+1. bastion - wszystkie jednostki + fabryka bastrakcyjna kreatur
+2. typy ruchy
+3. Rozwiązanie buga inifnite move range
+Integracje:
+1. Mapa przygody - zamek
+2. czary - jednorożec, ent
+3. artefakty - złoty łuk, brak złamanej strzały na zasięg
+4. skille - offence, armorer,  [ bardziej dla skills]
+5. Morale + luck
 
+
+Split na aplikacje serwerową - Swidłowski Jakub
+1. economy - spring - inicjalizacja gameEngine (singleton)
+2. Inicjalizacja SWAGGER!
+3. wystawienie metod get i post jakimś rest api
+4. Dockeryzacja
+
+
+Artefakry - Ratajczak Monika
+1. Sloty na artefakty
+2. Primary 4 dowolne
+3. Set smoka
+4. Zasoby - wóz z węglem, worek ze złotem
+5. Spells - orb, księga
+6. Spells* - odporność na jakieś zaklęcie
+
+
+Zapis - odczyt gry. Szymański Adrian
+1. Przeniesienie statystyk do bazy danych
+2. Zapisanie stanu gry - poprawnie wczytana mapa, poprawnie wczytany bohater i jego wszelakie statsy
+3. wczytanie stanu gry
+4. Inicjalizacja hibernate local
+5. inicjalizacja hibernate w springu na serwerze
+6. Zapisywanie map z edytora
+
+
+AI - Krzysztof Niemir
+1. AI  potrafi się poruszać i robi sensowne ruchy w fazie ekonomii
+2. Ai potrafi się porusząc i robi sensowne ruchy w fazie walki
+3. Potrafi korzystać z zaklęć
+
+
+Pola specjalne - RYbarczyk Bartek, Kubiś Juliusz
+1. Pola - zamień, tylko latające mogą ominąć. 
+2. Integracja z czarami buff/debuff w tym licznik ile tur ma trwać buff/debuff
+3. Edytor mapy, zapisywany do pliku
+4. Edytor pola ekonomi, wszystkie dostępne zamk, kapliczki, kopalnie etc
 
 do wyboru
 1. skills
-2. artefakty
-3. frakcje
-4. pola specjalne + edytor, jako libka mapa przygody + walka
-5. AI? Bot go gry jako player2
-6. gra sieciowa
-7. przeniesienie do weba server + client webowy
-8. zapis odczyt stanu gry - baza danych
