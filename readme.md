@@ -51,13 +51,21 @@ integracje:
 2. skille - widzenie + ruch
 3. artefakt - punkty ruchu, generowanei zasobów, zwiększanie przyrostów
 
-
+Frakcje - Makowski Piotr
+1. bastion - wszystkie jednostki + fabryka bastrakcyjna kreatur
+2. typy ruchy
+3. Rozwiązanie buga inifnite move range
+Integracje:
+1. Mapa przygody - zamek
+2. czary - jednorożec, ent
+3. artefakty - złoty łuk, brak złamanej strzały na zasięg
+4. skille - offence, armorer,  [ bardziej dla skills]
+5. Morale + luck
 
 
 do wyboru
 1. skills
 2. artefakty
-3. frakcje
 4. pola specjalne + edytor, jako libka mapa przygody + walka
 5. AI? Bot go gry jako player2
 6. gra sieciowa
