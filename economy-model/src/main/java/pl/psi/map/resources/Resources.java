@@ -4,7 +4,7 @@ import lombok.Value;
 @Value
 public class Resources {
 
-    int gold; //no need for private cause lombok Value marks it as private
+    int gold;
     int wood;
     int ore;
     int mercury;

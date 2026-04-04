@@ -18,6 +18,7 @@ public class BoardEconomyEngine {
     private final PropertyChangeSupport observerSupport = new PropertyChangeSupport(this);
     Map<Point, MapObjectIf> interactables;
     private int turnCounter;
+    private int dayCounter;
 
 
     public BoardEconomyEngine(final EconomyHero hero1, final EconomyHero hero2, Map<Point, MapObjectIf> map) {
@@ -120,9 +121,25 @@ public class BoardEconomyEngine {
         }
     }
 
-    private void endOfDay(){ // called after both players pass
+    public void endOfDay(){ // called after both players pass
+        dayCounter++;
+        if (dayCounter >= 7){
+            dayCounter = 0;
+            endOfWeek();
+        }
         System.out.println("End of day");
         generateResourcesEndDay();
+    }
+
+    private void endOfWeek(){
+        System.out.println("End of week");
+        createUnitsAtTowns();
+    }
+
+    private void createUnitsAtTowns() {
+        for (MapObjectIf mapObject : interactables.values()) {
+            mapObject.generateUnits();
+        }
     }
 
     private void generateResourcesEndDay(){

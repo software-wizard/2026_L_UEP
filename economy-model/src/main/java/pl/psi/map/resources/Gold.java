@@ -30,10 +30,12 @@ public class Gold implements InteractableIf {
     public void endOfTurn() {}
 
     @Override
-    public void enter(EconomyHero hero) {}
+    public void generateResource() {}
 
     @Override
-    public void generateResource() {}
+    public void generateUnits() {
+
+    }
 
     @Override
     public EconomyHero getOwner() {
@@ -41,7 +43,7 @@ public class Gold implements InteractableIf {
     }
 
     @Override
-    public EnterAction onEnter() {
+    public EnterAction firstInteraction() {
         return null;
     }
 

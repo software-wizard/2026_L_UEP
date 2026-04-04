@@ -6,11 +6,12 @@ import pl.psi.map.resources.Resources;
 import java.util.Set;
 
 public interface BuildingType {
-    void applyEffect(Town town, EconomyHero hero);
-
+    void generateResources(EconomyHero hero);
     Resources getCost();
     boolean isBuiltIn(Town town);
-    void buildIn(Town town, EconomyHero hero);
-    Set<BuildingType> getPrerequisites();  // <-- add this
     void registerInTown(Town town);
+    Set<BuildingType> getPrerequisites();
+    Set<TownCapability> getProvidedCapabilities();
+    boolean isUpgraded();
+    int getGrowth();
 }

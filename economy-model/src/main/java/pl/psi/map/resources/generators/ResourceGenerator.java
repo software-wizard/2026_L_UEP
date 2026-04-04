@@ -29,13 +29,15 @@ public class ResourceGenerator implements InteractableIf, ResourceGenIf {
     }
 
     @Override
+    public void generateUnits() {
+
+    }
+
+    @Override
     public void endOfTurn() {}
 
     @Override
-    public void enter(EconomyHero hero) {}
-
-    @Override
-    public EnterAction onEnter() {
+    public EnterAction firstInteraction() {
         return null;
     }
 

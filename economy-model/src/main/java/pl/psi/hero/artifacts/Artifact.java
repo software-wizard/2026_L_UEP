@@ -38,12 +38,12 @@ public class Artifact implements InteractableIf {
     }
 
     @Override
-    public void enter(EconomyHero hero) {
+    public void generateResource() {
 
     }
 
     @Override
-    public void generateResource() {
+    public void generateUnits() {
 
     }
 
@@ -63,7 +63,7 @@ public class Artifact implements InteractableIf {
     }
 
     @Override
-    public EnterAction onEnter() {
+    public EnterAction firstInteraction() {
         return null;
     }
 

@@ -15,12 +15,12 @@ public class testMapObjectPickupable implements MapObjectIf {
     }
 
     @Override
-    public void enter(EconomyHero hero) {
+    public void generateResource() {
 
     }
 
     @Override
-    public void generateResource() {
+    public void generateUnits() {
 
     }
 
@@ -40,7 +40,7 @@ public class testMapObjectPickupable implements MapObjectIf {
     }
 
     @Override
-    public EnterAction onEnter() {
+    public EnterAction firstInteraction() {
         return null;
     }
 
