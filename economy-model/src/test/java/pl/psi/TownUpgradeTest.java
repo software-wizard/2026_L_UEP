@@ -89,6 +89,7 @@ public class TownUpgradeTest {
     @Test
     void shouldBuildTownHallThenCityHallThenCapitol() {
 
+        town.setOwner(hero);
         town.buildAllPrerequisites(TownBuilding.CAPITOL);
         town.build(TownBuilding.CAPITOL, hero);
 

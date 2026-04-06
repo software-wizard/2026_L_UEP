@@ -59,11 +59,6 @@ public enum TownBuilding implements BuildingType {
     }
 
     @Override
-    public void registerInTown(Town town) {
-        town.addTownBuilding(this);
-    }
-
-    @Override
     public Set<TownCapability> getProvidedCapabilities() {
         switch (this) {
             case MAGE_GUILD_LVL_1:
@@ -120,15 +115,6 @@ public enum TownBuilding implements BuildingType {
 
     public Resources getCost() {
         return cost;
-    }
-
-    @Override
-    public boolean isBuiltIn(Town town) {
-        return town.hasBuilt(this);
-    }
-
-    public void buildIn(Town town, EconomyHero hero) {
-        town.build(this, hero);
     }
 
     public Category getCategory() {

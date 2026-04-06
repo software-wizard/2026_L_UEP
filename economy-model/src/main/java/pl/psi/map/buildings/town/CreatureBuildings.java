@@ -56,11 +56,6 @@ public enum CreatureBuildings implements BuildingType {
         this.baseBuilding = baseBuilding;
     }
 
-    @Override
-    public void registerInTown(Town town) {
-        town.addCreatureBuilding(this);
-    }
-
     public int getGrowth() {
         // Jeśli to ulepszenie, pobierz wzrost z bazy
         return baseBuilding == null ? growth : baseBuilding.growth;
@@ -82,11 +77,6 @@ public enum CreatureBuildings implements BuildingType {
 
     @Override
     public void generateResources(EconomyHero hero) {
-    }
-
-    @Override
-    public boolean isBuiltIn(Town town) {
-        return town.hasBuilt(this);
     }
 
     public static Optional<CreatureBuildings> getBuildingForCreature(CreatureStatistic creature) {

@@ -17,15 +17,14 @@ public class Town implements BuildingIf {
     @Getter
     @Setter
     EconomyHero owner;
-    private final Set<TownBuilding> builtTownBuildings = new HashSet<>();
-    private final Set<CreatureBuildings> builtCreatureBuildings = new HashSet<>();
+    private final Set<BuildingType> builtBuildings = new HashSet<>();
     private final Set<TownCapability> activeCapabilities = new HashSet<>();
     private final Map<BuildingType, Integer> unitPool = new HashMap<>();
 
     public Town(EconomyHero owner) {
-        this.builtTownBuildings.add(TownBuilding.VILLAGE_HALL);
-        this.builtTownBuildings.add(TownBuilding.FORT);
-        this.builtCreatureBuildings.add(CreatureBuildings.CURSED_TEMPLE);
+        this.builtBuildings.add(TownBuilding.VILLAGE_HALL);
+        this.builtBuildings.add(TownBuilding.FORT);
+        this.builtBuildings.add(CreatureBuildings.CURSED_TEMPLE);
         this.owner = owner;
     }
 
@@ -36,48 +35,39 @@ public class Town implements BuildingIf {
     }
 
     private void buildBuilding(BuildingType building, EconomyHero hero) {
-        if (building.isBuiltIn(this)) {
+        if (hero == null) {
+            throw new IllegalArgumentException("Hero is null, check if town has owner");
+        }
+        if (hasBuilt(building)) {
             throw new IllegalStateException("Building already constructed.");
         }
 
+        // Generic prerequisite check works for any BuildingType
         boolean allBuilt = building.getPrerequisites().stream()
-                .allMatch(prereq -> prereq.isBuiltIn(this));
+                .allMatch(this::hasBuilt);
 
         if (!allBuilt) {
             throw new IllegalStateException("Prerequisites not met for " + building);
         }
 
-        if (!hero.canAfford(building.getCost()))
-        {
+        if (!hero.canAfford(building.getCost())) {
             throw new IllegalStateException("Can't afford " + building);
         }
 
         hero.pay(building.getCost());
-        building.registerInTown(this);
+
+        this.builtBuildings.add(building);
+
+        // Update town state
         this.activeCapabilities.addAll(building.getProvidedCapabilities());
-        if (!building.isUpgraded()) {
+
+        if (!building.isUpgraded() && building instanceof CreatureBuildings) {
             unitPool.put(building, building.getGrowth());
         }
     }
 
-    public boolean hasBuilt(TownBuilding building) {
-        return builtTownBuildings.contains(building);
-    }
-
-    public boolean hasBuilt(CreatureBuildings building) {
-        return builtCreatureBuildings.contains(building);
-    }
-
     public boolean hasBuilt(BuildingType building) {
-        return building.isBuiltIn(this);
-    }
-
-    public void addTownBuilding(TownBuilding building) {
-        builtTownBuildings.add(building);
-    }
-
-    public void addCreatureBuilding(CreatureBuildings building) {
-        builtCreatureBuildings.add(building);
+        return builtBuildings.contains(building);
     }
 
     //TESTING FUNCTION
@@ -94,10 +84,9 @@ public class Town implements BuildingIf {
     public void generateUnits() {
         double modifier = getGrowthModifier(); // Bonusy z Fortu/Cytadeli/Zamku
 
-        for (CreatureBuildings b : builtCreatureBuildings) {
+        for (BuildingType b : builtBuildings) {
             if (!b.isUpgraded()) {
                 int growth = (int) (b.getGrowth() * modifier);
-                int current = unitPool.getOrDefault(b, 0);
                 addUnitToPool(b,growth);
             }
         }
@@ -125,7 +114,7 @@ public class Town implements BuildingIf {
         }
     }
 
-    public void addUnitToPool(CreatureBuildings building, int amount) {
+    public void addUnitToPool(BuildingType building, int amount) {
         int current = unitPool.getOrDefault(building, 0);
         unitPool.put(building, current + amount);
     }
@@ -141,7 +130,7 @@ public class Town implements BuildingIf {
 
     @Override
     public void generateResource() {
-        for (TownBuilding building : builtTownBuildings) {
+        for (BuildingType building : builtBuildings) {
             building.generateResources(owner);
         }
     }
