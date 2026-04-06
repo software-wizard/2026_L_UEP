@@ -22,10 +22,16 @@ public class Town implements BuildingIf {
     private final Map<BuildingType, Integer> unitPool = new HashMap<>();
 
     public Town(EconomyHero owner) {
+        setupTown();
+
+        this.owner = owner;
+    }
+
+    private void setupTown() {
         this.builtBuildings.add(TownBuilding.VILLAGE_HALL);
         this.builtBuildings.add(TownBuilding.FORT);
         this.builtBuildings.add(CreatureBuildings.CURSED_TEMPLE);
-        this.owner = owner;
+        addUnitToPool(CreatureBuildings.CURSED_TEMPLE, CreatureBuildings.CURSED_TEMPLE.getGrowth());
     }
 
     //Budynki

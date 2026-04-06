@@ -111,4 +111,11 @@ public class CreatureShopTest {
         town.build(TownBuilding.MAGE_GUILD_LVL_2, hero1);
         assertTrue(town.hasCapability(TownCapability.SPELL_PURCHASE)); // Still exists
     }
+
+    @Test
+    void buyingCreatureShouldRemoveTheCorrectNumberFromPool(){
+        assertEquals(12, town.getAvailableUnits(CreatureBuildings.CURSED_TEMPLE));
+        town.buyUnits(CreatureBuildings.CURSED_TEMPLE, 3);
+        assertEquals(9, town.getAvailableUnits(CreatureBuildings.CURSED_TEMPLE));
+    }
 }

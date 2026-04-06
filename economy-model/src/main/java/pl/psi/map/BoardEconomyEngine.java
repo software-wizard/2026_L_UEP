@@ -43,15 +43,17 @@ public class BoardEconomyEngine {
     }
 
     public boolean canEnter(final Point point) {
-        if (!isHero(point)) {
-            return isEnterable(point);
+        // Allow entering if there is a building AND (no hero OR it's the current hero)
+        if (isEnterable(point)) {
+            return !isHero(point) || isCurrentHero(point);
         }
         return false;
     }
 
     public boolean canInteract(Point point) {
-        if (!isHero(point)) {
-            return getInteractable(point).isPresent();
+        // Allow interaction if it's interactable AND (no hero OR it's the current hero)
+        if (getInteractable(point).isPresent()) {
+            return !isHero(point) || isCurrentHero(point);
         }
         return false;
     }
