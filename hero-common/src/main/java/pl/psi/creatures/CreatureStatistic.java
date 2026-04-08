@@ -49,7 +49,41 @@ public enum CreatureStatistic implements CreatureStatisticIf
         true ), //
     GHOST_DRAGON( "Ghost Dragon", 19, 17, 200, 14, Range.closed( 25, 50 ), 7,
         "When situation seems hopeless, take a chance on the best enemy stack! If you'll get lucky, half their hit points will be gone instantly!! Ageing ability makes ghost dragons as dangerous as other lvl7 creatures.\nSpecial: -1 to enemy morale ; 20% chance to age enemy (halve hit points of all stack members).\n",
-        true );//
+        true ),
+    // Bastion FRACTION
+    CENTAUR( "Centaur", 5, 3, 8, 6, Range.closed( 2, 3 ), 1,
+        "Good lvl1 unit,fast and durable(for lvl1 unit).",false ), //
+    BATTLE_CENTAUR( "Battle_Centaur", 6, 3, 10, 8, Range.closed( 2, 3 ), 1,
+        "Faster ,more durable centaur.", true ), //
+    DWARF( "Dwarf", 6, 7, 20, 3, Range.closed( 2, 4 ), 2,
+        "Very durable.",false ), //
+    DWARF_WARRIOR( "Dwarf_Warrior", 7, 7, 20, 5, Range.closed( 2, 4 ), 2,
+        "Faster ,more durable centaur.", true ), //
+    ELF( "Elf", 9, 5, 15, 6, Range.closed( 3, 5 ), 2,
+        "Very durable.",false ), //
+    HIGH_ELF( "High_Elf", 9, 5, 15, 7, Range.closed( 3, 5 ), 3,
+        "Faster ,more durable centaur.", true ), //
+    PEGASUS( "Pegasus", 9, 8, 30, 8, Range.closed( 5, 9 ), 4,
+        "Very durable.",false ), //
+    SILVER_PEGASUS( "Silver_Pegasus", 9, 10, 30, 12, Range.closed( 5, 9 ), 4,
+        "Faster ,more durable centaur.", true ), //
+    TREEMAN( "Treeman", 9, 12, 55, 3, Range.closed( 10, 14 ), 5,
+        "Very durable.",false ), //
+    ENT( "Ent", 9, 12, 65, 4, Range.closed( 10, 14 ), 5,
+        "Faster ,more durable centaur.", true ), //
+    UNICORN( "Unicorn", 15, 14, 90, 7, Range.closed( 5, 9 ), 6,
+        "Very durable.",false ), //
+    BATTLE_UNICORN( "Battle_Unicorn", 15, 14, 110, 9, Range.closed( 5, 9 ), 6,
+        "Faster ,more durable centaur.", true ), //
+    GREEN_DRAGON( "Green_Dragon", 18, 18, 180, 10, Range.closed( 40, 50 ), 7,
+        "Very durable.",false ), //
+    GOLD_DRAGON( "Gold_Dragon", 27, 27, 250, 16, Range.closed( 40, 50 ), 7,
+        "Faster ,more durable centaur.", true );
+
+
+
+
+
 
     @Getter
     private final String name;
