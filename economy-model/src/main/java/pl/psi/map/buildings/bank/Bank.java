@@ -62,4 +62,9 @@ public class Bank implements BuildingIf {
     public EnterAction secondInteraction() {
         return null;
     }
+
+    @Override
+    public void resetBuildingOption() {
+
+    }
 }

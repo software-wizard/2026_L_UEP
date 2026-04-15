@@ -20,6 +20,7 @@ public class Town implements BuildingIf {
     private final Set<BuildingType> builtBuildings = new HashSet<>();
     private final Set<TownCapability> activeCapabilities = new HashSet<>();
     private final Map<BuildingType, Integer> unitPool = new HashMap<>();
+    private boolean canBuildBuilding = true;
 
     public Town(EconomyHero owner) {
         setupTown();
@@ -41,6 +42,9 @@ public class Town implements BuildingIf {
     }
 
     private void buildBuilding(BuildingType building, EconomyHero hero) {
+        if(!canBuildBuilding){
+            throw new IllegalStateException("Cannot build a second building in this town this turn");
+        }
         if (hero == null) {
             throw new IllegalArgumentException("Hero is null, check if town has owner");
         }
@@ -70,6 +74,8 @@ public class Town implements BuildingIf {
         if (!building.isUpgraded() && building instanceof CreatureBuildings) {
             unitPool.put(building, building.getGrowth());
         }
+
+        canBuildBuilding = false;
     }
 
     public boolean hasBuilt(BuildingType building) {
@@ -162,5 +168,10 @@ public class Town implements BuildingIf {
     @Override
     public EnterAction secondInteraction() {
         return new EnterAction(EnterActionType.OPEN_UPGRADE, this);
+    }
+
+    @Override
+    public void resetBuildingOption() {
+        canBuildBuilding = true;
     }
 }

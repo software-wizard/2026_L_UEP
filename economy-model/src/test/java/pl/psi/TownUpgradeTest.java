@@ -141,4 +141,10 @@ public class TownUpgradeTest {
         // Verify town state didn't change
         assertFalse(town.hasBuilt(TownBuilding.BLACKSMITH));
     }
+
+    @Test
+    void shouldNotBeAbleToBuildSecondBuildingInTurn(){
+        town.build(TownBuilding.TAVERN, hero);
+        assertThrows(IllegalStateException.class, () -> town.build(TownBuilding.MAGE_GUILD_LVL_1, hero));
+    }
 }

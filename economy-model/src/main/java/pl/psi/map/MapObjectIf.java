@@ -13,6 +13,7 @@ public interface MapObjectIf {
     EconomyHero getOwner();
     EnterAction firstInteraction();
     EnterAction secondInteraction();
+    void resetBuildingOption();
     //TODO dopisać te metody, na koniec tury musi być wywoływane
     enum typeOfObject{
         GENERATOR,

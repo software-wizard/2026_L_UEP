@@ -47,6 +47,11 @@ public class ResourceGenerator implements InteractableIf, ResourceGenIf {
     }
 
     @Override
+    public void resetBuildingOption() {
+
+    }
+
+    @Override
     public String getPath() {
         return type.getImagePath();
     }

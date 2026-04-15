@@ -71,4 +71,9 @@ public class Artifact implements InteractableIf {
     public EnterAction secondInteraction() {
         return null;
     }
+
+    @Override
+    public void resetBuildingOption() {
+
+    }
 }

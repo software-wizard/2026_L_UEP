@@ -131,6 +131,13 @@ public class BoardEconomyEngine {
         }
         System.out.println("End of day");
         generateResourcesEndDay();
+        resetBuldingOptionAtTowns();
+    }
+
+    private void resetBuldingOptionAtTowns() {
+        for (MapObjectIf mapObject : interactables.values()) {
+            mapObject.resetBuildingOption();
+        }
     }
 
     private void endOfWeek(){

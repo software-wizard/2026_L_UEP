@@ -58,4 +58,9 @@ public class EconomySpell implements InteractableIf {
     public EnterAction secondInteraction() {
         return null;
     }
+
+    @Override
+    public void resetBuildingOption() {
+
+    }
 }

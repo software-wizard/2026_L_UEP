@@ -48,4 +48,9 @@ public class testMapObjectPickupable implements MapObjectIf {
     public EnterAction secondInteraction() {
         return null;
     }
+
+    @Override
+    public void resetBuildingOption() {
+
+    }
 }
