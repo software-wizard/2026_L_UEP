@@ -1,5 +1,4 @@
 package pl.psi;
-
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import pl.psi.creatures.Creature;
@@ -26,7 +25,7 @@ public class Board {
         this(aCreatures1, aCreatures2);
         addSpecialFields(aSpecialFields);
         addCreaturesSetPositions(bankCreatures);
-//        addCreaturesInCircle(aCreatures1, new Point(5,5),4.0);
+
     }
 
     private void addCreatures(final List<Creature> aCreatures, final int aXPosition) {
@@ -40,14 +39,12 @@ public class Board {
             mapWithSpecialFields.put(entry.getKey(), entry.getValue());
         }
     }
-
     //Utworzyłem te metodę, aby móc dodawać nowe pola specjalne do istniejącej planszy np. za pomocą zaklęć
     public void addSpecialFieldOpen(final BiMap<BattlePoint, SpecialField> aSpecialFields) {
         for (BattlePoint battlePoint : aSpecialFields.keySet()) {
             mapWithSpecialFields.put(battlePoint, aSpecialFields.get(battlePoint));
         }
     }
-
 
     private void addCreaturesSetPositions(final Map<BattlePoint, Creature> creaturesToPositions) {
         map.putAll(creaturesToPositions);
@@ -79,13 +76,11 @@ public class Board {
                 if (mapWithSpecialFields.containsKey(path.get(i))) {
                     SpecialField currentField = mapWithSpecialFields.get(path.get(i));
 
-                    //Ten warunek sprawdza, czy pole specjalne na ściezce ruchu powinno aktywowac sie po przejsciu jednostki
                     if (currentField.getFieldName().equals(FieldType.TRIGGERED_BY_STEPPING)) {
                         currentField.doSomething(aCreature);
                     }
                 }
             }
-
             //jesli jednostka nie umarła podczas ruchu to sprawdzane jest ostatnie pole
             if (!aCreature.isAlive()) {
                 return;
@@ -94,20 +89,18 @@ public class Board {
         }
     }
 
-//        //nowa wersja
-        void move0(final Creature aCreature, final BattlePoint aPoint) {
-            if (canMove(aCreature, aPoint)) {
-                if (mapWithSpecialFields.containsKey(aPoint)) {
-                    SpecialField tile = mapWithSpecialFields.get(aPoint);
-                    tile.doSomething(aCreature);
-                }
-                map.inverse()
-                        .remove(aCreature);
-                map.put(aPoint, aCreature);
-//                aCreature.setCurrentPoint(aPoint);
-
+    void move0(final Creature aCreature, final BattlePoint aPoint) {
+        if (canMove(aCreature, aPoint)) {
+            if (mapWithSpecialFields.containsKey(aPoint)) {
+                SpecialField tile = mapWithSpecialFields.get(aPoint);
+                tile.doSomething(aCreature);
             }
+            double distance = getPosition(aCreature).distance(aPoint);
+            map.inverse().remove(aCreature);
+            map.put(aPoint, aCreature);
+            aCreature.reduceMovePoints(distance);
         }
+    }
 
     boolean canMove(final Creature aCreature, final BattlePoint aBattlePoint) {
         if (map.containsKey(aBattlePoint)) {
@@ -117,7 +110,8 @@ public class Board {
             mapWithSpecialFields.get(aBattlePoint).canInteract(aCreature);
         }
         final BattlePoint oldPosition = getPosition(aCreature);
-        return aBattlePoint.distance(oldPosition.getX(), oldPosition.getY()) < aCreature.getMoveRange();
+        double distance = aBattlePoint.distance(oldPosition.getX(), oldPosition.getY());
+        return distance < aCreature.getRemainingMovePoints();
     }
 
     BattlePoint getPosition(Creature aCreature) {
@@ -139,21 +133,16 @@ public class Board {
     public void removeCreature(Creature creature) {
         map.inverse().remove(creature);
     }
-
     //Metoda ma na celu określenie trasy po której nastąpił ruch,
     public List<BattlePoint> examinePath(BattlePoint start, BattlePoint end) {
 
         List<BattlePoint> path = new ArrayList<>();
-
         //zmienne określające kierunek w zależności od pozycji
         int dx = Integer.signum(end.getX() - start.getX());
         int dy = Integer.signum(end.getY() - start.getY());
-
-
         //współrzędne startowe
         int x = start.getX();
         int y = start.getY();
-
 
         while (x != end.getX() || y != end.getY()) {
             if (x != end.getX()) x += dx;

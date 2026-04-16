@@ -119,7 +119,8 @@ public class EconomyHero implements PropertyChangeListener
 
     public enum Fraction
     {
-        NECROPOLIS
+        NECROPOLIS,
+        BASTION
     }
 
     public void addExperience(final int experienceToAdd) {

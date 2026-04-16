@@ -35,7 +35,6 @@ public class Creature implements PropertyChangeListener {
     @Setter
     private int amount;
 
-
     @Getter
     @Setter(AccessLevel.PROTECTED)
     private int currentHp;
@@ -43,18 +42,20 @@ public class Creature implements PropertyChangeListener {
     private DamageCalculatorIf calculator;
     private final List<ActiveSpellEffect> activeSpellEffects = new ArrayList<>();
     private float reduceDemegeFactor;
+    private int remainingMovePoints;
 
     Creature() {
     }
 
     private Creature(final CreatureStatisticIf aStats, final DamageCalculatorIf aCalculator,
-                     final int aAmount ) {
+                     final int aAmount) {
         stats = aStats;
         amount = aAmount;
         currentHp = stats.getMaxHp();
         calculator = aCalculator;
         reduceDemegeFactor = 1;
         this.originalStats = aStats;
+        remainingMovePoints = aStats.getMoveRange();
     }
 
     public void attack(final Creature aDefender) {
@@ -79,11 +80,10 @@ public class Creature implements PropertyChangeListener {
         if (hp <= 0) {
             aDefender.setCurrentHp(aDefender.getMaxHp() - hp);
             aDefender.setAmount(aDefender.getAmount() - 1);
-        }
-        else{
+        } else {
             aDefender.setCurrentHp(hp);
         }
-        aDefender.setAmount(aDefender.getAmount() - amountToSubstract * (int) Math.ceil(1-reduceDemegeFactor));
+        aDefender.setAmount(aDefender.getAmount() - amountToSubstract * (int) Math.ceil(1 - reduceDemegeFactor));
     }
 
     public int getMaxHp() {
@@ -109,7 +109,6 @@ public class Creature implements PropertyChangeListener {
         return stats.getAttack();
     }
 
-
     public void applyTemporaryBuff(BuffSpell buffSpell) {
         this.getActiveSpellEffects().add(new ActiveSpellEffect(buffSpell, buffSpell.getDuration()));
 
@@ -117,24 +116,32 @@ public class Creature implements PropertyChangeListener {
         if (originalStats instanceof CreatureStats) {
             modifiedStats = new CreatureStats((CreatureStats) originalStats);
         } else {
-            modifiedStats = originalStats; // ewentualnie obsłuż inaczej lub rzuć wyjątek
+            modifiedStats = originalStats;
         }
 
         for (ActiveSpellEffect effect : activeSpellEffects) {
             modifiedStats = effect.getSpell().modifyStats(modifiedStats);
         }
-        this.stats = modifiedStats;
+        this.stats = modifiedStats; // ewentualnie obsłuż inaczej lub rzuć wyjątek
     }
-
 
     public int getArmor() {
         return stats.getArmor();
+    }
+
+    public int getRemainingMovePoints() {
+        return remainingMovePoints;
+    }
+
+    public void reduceMovePoints(double distance) {
+        remainingMovePoints -= (int) Math.ceil(distance);
     }
 
     @Override
     public void propertyChange(final PropertyChangeEvent evt) {
         if (TurnQueue.END_OF_TURN.equals(evt.getPropertyName())) {
             counterAttackCounter = 1;
+            remainingMovePoints = stats.getMoveRange();
             updateActiveSpells();
         }
     }
@@ -162,7 +169,6 @@ public class Creature implements PropertyChangeListener {
         this.stats = modifiedStats;
     }
 
-
     protected void restoreCurrentHpToMax() {
         currentHp = stats.getMaxHp();
     }
@@ -182,7 +188,6 @@ public class Creature implements PropertyChangeListener {
         }
     }
 
-
     public static class Builder {
         private int amount = 1;
         private DamageCalculatorIf calculator = new DefaultDamageCalculator(new Random());
@@ -197,7 +202,8 @@ public class Creature implements PropertyChangeListener {
             amount = aAmount;
             return this;
         }
-        public  Builder reduceDemegeFactor(float aReduceDemegeFactor) {
+
+        public Builder reduceDemegeFactor(float aReduceDemegeFactor) {
             return this;
         }
 

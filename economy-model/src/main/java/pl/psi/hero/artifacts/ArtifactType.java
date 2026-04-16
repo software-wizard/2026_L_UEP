@@ -26,7 +26,7 @@ public enum ArtifactType {
     TITANS_GLADIUS("Titan's Gladius", "/objects/Artifact_Titan's_Gladius.gif", new Statistics(12, -3, 0, 0), 10000),
     TITANS_THUNDER("Titan's Thunder", "/objects/Artifact_Titan's_Thunder.gif", new Statistics(9, 9, 8, 8), 40000),
     TUNIC_OF_THE_CYCLOPS_KING("Tunic of the Cyclops King", "/objects/Artifact_Tunic_of_the_Cyclops_King.gif", new Statistics(4, 0, 0, 0), 4000),
-
+    GOLDEN_BOW("Golden Bow","",new Statistics(0,0,0,0),3000)
     // Add more artifacts as needed
 
     ;

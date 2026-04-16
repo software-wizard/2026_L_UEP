@@ -1,5 +1,6 @@
 package pl.psi.gui.startchoice;
 
+import pl.psi.creatures.EconomyBastionFactory;
 import pl.psi.creatures.EconomyNecropolisFactory;
 import pl.psi.creatures.EconomyCreature;
 import pl.psi.hero.EconomyHero;
@@ -124,6 +125,13 @@ public enum HeroType {
         return new HeroData(new Statistics(2, 0, 1, 1), List.of(
                 factory.create(false, 1, 40)
         ));
+    }),
+    DANIEL("Daniel",EconomyHero.Fraction.BASTION,()->{
+        var factory = new EconomyBastionFactory();
+        return new HeroData(new Statistics(1, 1, 1, 1), List.of(
+                factory.create(false, 1, 40)
+        ));
+
     });
 
     public static List<String> getHeroNamesForFraction(EconomyHero.Fraction fraction) {
@@ -131,7 +139,9 @@ public enum HeroType {
         switch (fraction) {
             case NECROPOLIS:
                 return List.of("Sandro", "Vidomina", "Nimbus", "Thant", "Xsi", "Moandor", "Isra", "Clavius", "Tamika", "Galthran", "Vokial", "Straker", "Septienna", "Naadir", "Fiona", "Charna");
-            default:
+            case BASTION:
+                return List.of("Daniel");
+                default:
                 return List.of();  // Return an empty list for unknown fractions
         }
     }
