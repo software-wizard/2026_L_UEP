@@ -4,8 +4,8 @@ import com.google.common.collect.BiMap;
 import pl.psi.Spells.Spell;
 import pl.psi.creatures.Creature;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
+//import java.beans.PropertyChangeListener;
+//import java.beans.PropertyChangeSupport;
 import java.util.Map;
 import java.util.Optional;
 
@@ -18,7 +18,7 @@ public class GameEngine {
     private static final String SPELL_CAST = "SPELL_CAST";
     private final TurnQueue turnQueue;
     private Board board;
-    private final PropertyChangeSupport observerSupport = new PropertyChangeSupport(this);
+//    private final PropertyChangeSupport observerSupport = new PropertyChangeSupport(this);
     private final Hero hero1;
     private final Hero hero2;
 
@@ -76,7 +76,7 @@ public class GameEngine {
 
     public void move(final BattlePoint aBattlePoint) {
         board.move(turnQueue.getCurrentCreature(), aBattlePoint);
-        observerSupport.firePropertyChange(CREATURE_MOVED, null, aBattlePoint);
+//        observerSupport.firePropertyChange(CREATURE_MOVED, null, aBattlePoint);
     }
 
     public Optional<Creature> getCreature(final BattlePoint aBattlePoint) {
@@ -87,10 +87,10 @@ public class GameEngine {
         turnQueue.next();
     }
 
-    public void addObserver(final PropertyChangeListener aObserver) {
-        observerSupport.addPropertyChangeListener(aObserver);
-        turnQueue.addObserver(aObserver);
-    }
+//    public void addObserver(final PropertyChangeListener aObserver) {
+//        observerSupport.addPropertyChangeListener(aObserver);
+//        turnQueue.addObserver(aObserver);
+//    }
 
     public boolean canAttack(final BattlePoint aBattlePoint) {
         double distance = board.getPosition(turnQueue.getCurrentCreature())
@@ -128,7 +128,7 @@ public class GameEngine {
     }
 
     private void notifySpellCast(Spell spell) {
-        observerSupport.firePropertyChange(SPELL_CAST, null, spell);
+//        observerSupport.firePropertyChange(SPELL_CAST, null, spell);
     }
 
     public static class BuffField {

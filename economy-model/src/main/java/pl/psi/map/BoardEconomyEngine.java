@@ -5,8 +5,8 @@ import pl.psi.map.buildings.enterAction.EnterAction;
 import pl.psi.map.buildings.BuildingIf;
 import pl.psi.economy.Point;
 
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
+//import java.beans.PropertyChangeListener;
+//import java.beans.PropertyChangeSupport;
 import java.util.Map;
 import java.util.Optional;
 
@@ -15,7 +15,7 @@ public class BoardEconomyEngine {
     public static final String HERO_MOVED = "HERO_MOVED";
     private final TurnQueueEconomy turnQueue;
     private final BoardEconomy board;
-    private final PropertyChangeSupport observerSupport = new PropertyChangeSupport(this);
+//    private final PropertyChangeSupport observerSupport = new PropertyChangeSupport(this);
     Map<Point, MapObjectIf> interactables;
     private int turnCounter;
 
@@ -57,7 +57,7 @@ public class BoardEconomyEngine {
 
     public void move(final Point point) {
         board.move(turnQueue.getCurrentHero(), point);
-        observerSupport.firePropertyChange(HERO_MOVED, null, point);
+//        observerSupport.firePropertyChange(HERO_MOVED, null, point);
     }
 
     public void interact(final Point point) {
@@ -132,10 +132,10 @@ public class BoardEconomyEngine {
         }
 
 
-    public void addObserver(final PropertyChangeListener aObserver) {
-        observerSupport.addPropertyChangeListener(aObserver);
-        turnQueue.addObserver(aObserver);
-    }
+//    public void addObserver(final PropertyChangeListener aObserver) {
+//        observerSupport.addPropertyChangeListener(aObserver);
+//        turnQueue.addObserver(aObserver);
+//    }
 
     public boolean isCurrentHero(Point point) {
         return Optional.of(turnQueue.getCurrentHero()).equals(board.getHero(point));
@@ -156,15 +156,15 @@ public class BoardEconomyEngine {
 
 
     public void openShop(BuildingIf buildingOpt) {
-        observerSupport.firePropertyChange("OPEN_SHOP", null, new Object[]{getCurrentHero(), buildingOpt});
+//        observerSupport.firePropertyChange("OPEN_SHOP", null, new Object[]{getCurrentHero(), buildingOpt});
     }
 
     public void openUpgrades(BuildingIf buildingOpt) {
-        observerSupport.firePropertyChange("OPEN_UPGRADES", null, new Object[]{getCurrentHero(),buildingOpt});
+//        observerSupport.firePropertyChange("OPEN_UPGRADES", null, new Object[]{getCurrentHero(),buildingOpt});
     }
 
     public void enterBank(BuildingIf building){
-        observerSupport.firePropertyChange("ENTER_BANK", null, new Object[]{getCurrentHero(), building});
+//        observerSupport.firePropertyChange("ENTER_BANK", null, new Object[]{getCurrentHero(), building});
     }
 }
 
