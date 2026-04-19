@@ -41,7 +41,7 @@ public class MainBattleController implements PropertyChangeListener {
         spellUIManager = new SpellUIManager(gameEngine, spellManager, this::refreshGui);
 
         refreshGui();
-        gameEngine.addObserver(this);
+//        gameEngine.addObserver(this);
 
         passButton.setOnMouseClicked(e -> pass());
 

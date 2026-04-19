@@ -40,7 +40,7 @@ public class EconomyBoardController implements PropertyChangeListener {
     private void initialize() {
         refreshGui();
         updateResourceDisplay();
-        gameEngine.addObserver(this);
+//        gameEngine.addObserver(this);
         passButton.setOnMouseClicked(e -> gameEngine.pass());
         equipmentButton.setOnMouseClicked(e -> showEquipment());
     }

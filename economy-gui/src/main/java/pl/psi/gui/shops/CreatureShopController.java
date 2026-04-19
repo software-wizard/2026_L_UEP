@@ -45,7 +45,7 @@ public class CreatureShopController implements PropertyChangeListener
     void initialize()
     {
         refreshGui();
-        economyEngine.addObserver( EconomyEngine.HERO_BOUGHT_CREATURE, this );
+//        economyEngine.addObserver( EconomyEngine.HERO_BOUGHT_CREATURE, this );
     }
 
     public void refreshGui()

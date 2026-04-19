@@ -19,9 +19,24 @@ public class BattleController {
         this.gameStateService = gameStateService;
     }
 
+//    @PostMapping("/start")
+//    public ResponseEntity<String> startBattle(@RequestBody List<Hero> heroes) {
+//        this.gameStateService.startBattle(heroes.get(0), heroes.get(1));
+//        return ResponseEntity.ok("Battle engine started successfully.");
+//    }
+//
+//    @PostMapping("/pass")
+//    public ResponseEntity<String> pass() {
+//        this.gameStateService.getGameEngine().pass();
+//        return ResponseEntity.ok("Turn passed");
+//    }
+
     @PostMapping("/start")
-    public ResponseEntity<String> startBattle(@RequestBody List<Hero> heroes) {
-        this.gameStateService.startBattle(heroes.get(0), heroes.get(1));
+    public ResponseEntity<String> startBattle() {
+        Hero hero1 = new Hero(List.of(), List.of());
+        Hero hero2 = new Hero(List.of(), List.of());
+
+        this.gameStateService.startBattle(hero1, hero2);
         return ResponseEntity.ok("Battle engine started successfully.");
     }
 
