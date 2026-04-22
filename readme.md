@@ -102,5 +102,13 @@ Pola specjalne - RYbarczyk Bartek, Kubiś Juliusz
 3. Edytor mapy, zapisywany do pliku
 4. Edytor pola ekonomi, wszystkie dostępne zamk, kapliczki, kopalnie etc
 
-do wyboru
-1. skills
+skills - Łyskawa Mateusz
+1. Okienko bohatera
+2. Exp, lvl up -> wybieramy 1 z 2 skilli. Slotów 8,10
+3. learning
+4. Morale + luck
+4. Taktyka
+5. logistyka
+6. pathfinding
+7. Elemental masteries
+8. Heurystyka losowości
