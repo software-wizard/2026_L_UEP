@@ -25,6 +25,6 @@ public class DebuffField extends SpecialField {
                         .description("temporary debuff")
                         .build()
         );
-        aCreature.applyTemporaryBuff(buff);
+        aCreature.applySpellEffect(buff, 3);
     }
 }

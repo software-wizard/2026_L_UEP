@@ -25,6 +25,6 @@ public class BuffField extends SpecialField {
                         .description("temporary buff")
                         .build()
         );
-        aCreature.applyTemporaryBuff(buff);
+        aCreature.applySpellEffect(buff, 3);
     }
 }

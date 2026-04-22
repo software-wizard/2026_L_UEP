@@ -110,8 +110,8 @@ public class Creature implements PropertyChangeListener {
     }
 
 
-    public void applyTemporaryBuff(BuffSpell buffSpell) {
-        this.getActiveSpellEffects().add(new ActiveSpellEffect(buffSpell, buffSpell.getDuration()));
+    public void applySpellEffect(Spell spell, int duration) {
+        this.getActiveSpellEffects().add(new ActiveSpellEffect(spell, duration));
 
         CreatureStatisticIf modifiedStats;
         if (originalStats instanceof CreatureStats) {
@@ -175,11 +175,15 @@ public class Creature implements PropertyChangeListener {
         return stats.getMoveRange();
     }
 
-    public void applyMagicDamage(Spell aDamageSpell) {
+    public void applyMagicDamage(Spell aDamageSpell, int aSpellPower) {
         if (isAlive()) {
-            final int magicDamage = getCalculator().calculateMagicDamage(this, aDamageSpell);
+            final int magicDamage = getCalculator().calculateMagicDamage(this, aDamageSpell, aSpellPower);
             applyDamage(this, magicDamage);
         }
+    }
+
+    public void applyMagicDamage(Spell aDamageSpell) {
+        applyMagicDamage(aDamageSpell, 1);
     }
 
 

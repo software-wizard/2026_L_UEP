@@ -58,37 +58,31 @@ abstract class AbstractCalculateDamageStrategy implements DamageCalculatorIf
     }
 
     @Override
-    public int calculateMagicDamage(Creature aDefender, Spell aSpell) {
+    public int calculateMagicDamage(Creature aDefender, Spell aSpell, int aSpellPower) {
         final int armor = getArmor(aDefender);
 
-        int minDamage;
-        int maxDamage;
+        int baseDamage;
 
         switch (aSpell.getSpellLevel()) {
             case 1:
-                minDamage = 10;
-                maxDamage = 20;
+                baseDamage = 10;
                 break;
             case 2:
-                minDamage = 20;
-                maxDamage = 30;
+                baseDamage = 20;
                 break;
             case 3:
-                minDamage = 30;
-                maxDamage = 40;
+                baseDamage = 30;
                 break;
             default:
-                throw new IllegalArgumentException("Invalid spell level: " + aSpell.getSpellLevel());
+                baseDamage = 10;
         }
 
-        int randValue = rand.nextInt(maxDamage - minDamage + 1) + minDamage;
+        // Formula: (Base + SpellPower * 10) reduced by armor
+        // Every point of armor reduces magic damage by 2%, up to 80% reduction
+        double armorReduction = Math.min(0.8, armor * 0.02);
+        double totalDamage = (baseDamage + (aSpellPower * 10)) * (1 - armorReduction);
 
-        double reducedDamage = randValue * (1 - (armor * 0.025));
-        if (reducedDamage < 0) {
-            reducedDamage = 0;
-        }
-
-        return (int) reducedDamage;
+        return (int) Math.max(1, totalDamage);
     }
 
     protected int getArmor( final Creature aDefender )

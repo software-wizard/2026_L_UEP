@@ -26,11 +26,19 @@ public class SpellUIManager {
     }
 
     public void openSpellDialog() {
+        Hero currentHero = gameEngine.getCurrentHero();
+        if (!currentHero.getSpellCastingState().canCast()) {
+            Alert blocked = new Alert(Alert.AlertType.WARNING);
+            blocked.setTitle("Ograniczenie");
+            blocked.setHeaderText(null);
+            blocked.setContentText("Bohater już rzucił zaklęcie w tej rundzie!");
+            blocked.showAndWait();
+            return;
+        }
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/spell-dialog.fxml"));
             VBox dialogRoot = loader.load();
             SpellDialogController controller = loader.getController();
-            Hero currentHero = gameEngine.getCurrentHero();
 
             controller.setSpells(currentHero.getSpells(), spell -> {
                 spellManager.activate(spell);
@@ -46,11 +54,11 @@ public class SpellUIManager {
         }
     }
 
-    public void confirmSpellCast(Creature creature, BattlePoint targetPoint) {
+    public void confirmSpellCast(BattlePoint targetPoint) {
         Spell selectedSpell = spellManager.getSelectedSpell();
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Potwierdzenie zaklęcia");
-        alert.setHeaderText("Rzucić zaklęcie " + selectedSpell.getName() + " na " + creature + "?");
+        alert.setHeaderText("Rzucić zaklęcie " + selectedSpell.getName() + " w wybrany obszar?");
 
         ButtonType okButton = new ButtonType("Tak", ButtonBar.ButtonData.OK_DONE);
         ButtonType cancelButton = new ButtonType("Nie", ButtonBar.ButtonData.CANCEL_CLOSE);
@@ -58,7 +66,15 @@ public class SpellUIManager {
 
         alert.showAndWait().ifPresent(type -> {
             if (type == okButton) {
-                gameEngine.castSpell(selectedSpell, creature);
+                try {
+                    gameEngine.castSpell(selectedSpell, targetPoint);
+                } catch (IllegalStateException ex) {
+                    Alert error = new Alert(Alert.AlertType.WARNING);
+                    error.setTitle("Ograniczenie");
+                    error.setHeaderText(null);
+                    error.setContentText(ex.getMessage());
+                    error.showAndWait();
+                }
             }
             spellManager.deactivate();
             guiRefresher.run();

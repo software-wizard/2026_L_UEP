@@ -9,25 +9,54 @@ class MapTile extends StackPane
 {
 
     private final Rectangle rect;
+    private final Rectangle highlightRect;
     private final Label label;
+    private Color originalColor = Color.WHITE;
 
     MapTile( final String aName )
     {
         rect = new Rectangle( 50, 50 );
-        rect.setFill( Color.WHITE );
+        rect.setFill( originalColor );
         rect.setStroke( Color.RED );
-        getChildren().add( rect );
+
+        highlightRect = new Rectangle( 50, 50 );
+        highlightRect.setFill( Color.TRANSPARENT );
+        highlightRect.setMouseTransparent( true ); // Allow clicks to pass through
+
+        getChildren().addAll( rect, highlightRect );
+        
         label = new Label( aName );
         getChildren().add( label );
     }
 
-    void setName( final String aName )
+    public void setHighlightColor( Color aColor )
+    {
+        highlightRect.setFill( aColor );
+    }
+
+    public void clearHighlight()
+    {
+        highlightRect.setFill( Color.TRANSPARENT );
+    }
+
+    public void setName( final String aName )
     {
         label.setText( aName );
     }
 
-    void setBackground( final Color aColor )
+    public void setBackground( final Color aColor )
+    {
+        originalColor = aColor;
+        rect.setFill( aColor );
+    }
+
+    public void setHoverBackground( final Color aColor )
     {
         rect.setFill( aColor );
+    }
+
+    public void clearHoverBackground()
+    {
+        rect.setFill( originalColor );
     }
 }

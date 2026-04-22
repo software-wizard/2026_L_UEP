@@ -7,24 +7,24 @@ import pl.psi.creatures.CreatureStats;
 
 
 @Getter
-public class BuffSpell extends Spell {
+public class DebuffSpell extends Spell {
 
-    private final CreatureStats buffStats;
+    private final CreatureStats debuffStats;
 
 
-    public BuffSpell(String name, int spellLevel, int duration, CreatureStats buffStats) {
+    public DebuffSpell(String name, int spellLevel, int duration, CreatureStats debuffStats) {
         super(name, spellLevel, duration);
-        this.buffStats = buffStats;
+        this.debuffStats = debuffStats;
     }
 
-    public BuffSpell(String name, int spellLevel, int duration, CreatureStats buffStats, SpellAreaIf areaStrategy) {
+    public DebuffSpell(String name, int spellLevel, int duration, CreatureStats debuffStats, SpellAreaIf areaStrategy) {
         super(name, spellLevel, duration, areaStrategy);
-        this.buffStats = buffStats;
+        this.debuffStats = debuffStats;
     }
 
     @Override
     public void cast(Creature targetCreature, int spellPower) {
-        // In Heroes 3, spell power extends buff duration
+        // In Heroes 3, spell power extends debuff duration
         int effectiveDuration = this.getDuration() + spellPower;
         targetCreature.applySpellEffect(this, effectiveDuration);
     }
@@ -32,17 +32,15 @@ public class BuffSpell extends Spell {
     @Override
     public CreatureStats modifyStats(CreatureStatisticIf base) {
         return CreatureStats.builder()
-                .attack(base.getAttack() + buffStats.getAttack())
-                .armor(base.getArmor() + buffStats.getArmor())
-                .maxHp(base.getMaxHp() + buffStats.getMaxHp())
-                .moveRange(base.getMoveRange() + buffStats.getMoveRange())
+                .attack(base.getAttack() - debuffStats.getAttack())
+                .armor(base.getArmor() - debuffStats.getArmor())
+                .maxHp(base.getMaxHp() - debuffStats.getMaxHp())
+                .moveRange(base.getMoveRange() - debuffStats.getMoveRange())
                 .name(base.getName())
                 .description(base.getDescription())
                 .tier(base.getTier())
                 .damage(base.getDamage())
                 .isUpgraded(base.isUpgraded())
                 .build();
-
-
     }
 }
