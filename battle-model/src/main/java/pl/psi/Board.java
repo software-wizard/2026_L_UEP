@@ -1,4 +1,5 @@
 package pl.psi;
+
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import pl.psi.creatures.Creature;
@@ -25,7 +26,6 @@ public class Board {
         this(aCreatures1, aCreatures2);
         addSpecialFields(aSpecialFields);
         addCreaturesSetPositions(bankCreatures);
-
     }
 
     private void addCreatures(final List<Creature> aCreatures, final int aXPosition) {
@@ -39,7 +39,7 @@ public class Board {
             mapWithSpecialFields.put(entry.getKey(), entry.getValue());
         }
     }
-    //Utworzyłem te metodę, aby móc dodawać nowe pola specjalne do istniejącej planszy np. za pomocą zaklęć
+
     public void addSpecialFieldOpen(final BiMap<BattlePoint, SpecialField> aSpecialFields) {
         for (BattlePoint battlePoint : aSpecialFields.keySet()) {
             mapWithSpecialFields.put(battlePoint, aSpecialFields.get(battlePoint));
@@ -81,7 +81,7 @@ public class Board {
                     }
                 }
             }
-            //jesli jednostka nie umarła podczas ruchu to sprawdzane jest ostatnie pole
+
             if (!aCreature.isAlive()) {
                 return;
             }
@@ -90,16 +90,17 @@ public class Board {
     }
 
     void move0(final Creature aCreature, final BattlePoint aPoint) {
-        if (canMove(aCreature, aPoint)) {
-            if (mapWithSpecialFields.containsKey(aPoint)) {
-                SpecialField tile = mapWithSpecialFields.get(aPoint);
-                tile.doSomething(aCreature);
-            }
-            double distance = getPosition(aCreature).distance(aPoint);
-            map.inverse().remove(aCreature);
-            map.put(aPoint, aCreature);
-            aCreature.reduceMovePoints(distance);
+        // No canMove() re-check here — move() already validated before calling us.
+        // Re-checking would cause a mismatch if path special-field effects changed
+        // remainingMovePoints mid-move, silently blocking an already-highlighted tile.
+        if (mapWithSpecialFields.containsKey(aPoint)) {
+            SpecialField tile = mapWithSpecialFields.get(aPoint);
+            tile.doSomething(aCreature);
         }
+        double distance = getPosition(aCreature).distance(aPoint);
+        map.inverse().remove(aCreature);
+        map.put(aPoint, aCreature);
+        aCreature.reduceMovePoints(distance);
     }
 
     boolean canMove(final Creature aCreature, final BattlePoint aBattlePoint) {
@@ -133,14 +134,14 @@ public class Board {
     public void removeCreature(Creature creature) {
         map.inverse().remove(creature);
     }
-    //Metoda ma na celu określenie trasy po której nastąpił ruch,
+
     public List<BattlePoint> examinePath(BattlePoint start, BattlePoint end) {
 
         List<BattlePoint> path = new ArrayList<>();
-        //zmienne określające kierunek w zależności od pozycji
+
         int dx = Integer.signum(end.getX() - start.getX());
         int dy = Integer.signum(end.getY() - start.getY());
-        //współrzędne startowe
+
         int x = start.getX();
         int y = start.getY();
 

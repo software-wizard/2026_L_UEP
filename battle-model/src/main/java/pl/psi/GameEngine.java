@@ -69,7 +69,6 @@ public class GameEngine {
         }
     }
 
-
     public boolean canMove(final BattlePoint aBattlePoint) {
         return board.canMove(turnQueue.getCurrentCreature(), aBattlePoint);
     }
@@ -77,6 +76,11 @@ public class GameEngine {
     public void move(final BattlePoint aBattlePoint) {
         board.move(turnQueue.getCurrentCreature(), aBattlePoint);
         observerSupport.firePropertyChange(CREATURE_MOVED, null, aBattlePoint);
+        // Advance the turn after moving, same as attack() does.
+        // Without this the GUI redraws with the same creature still active but a
+        // reduced remainingMovePoints, so the highlighted reachable area visually
+        // shrinks mid-turn and mismatches what was shown before the click.
+        pass();
     }
 
     public Optional<Creature> getCreature(final BattlePoint aBattlePoint) {
@@ -111,7 +115,6 @@ public class GameEngine {
     public void interact(BattlePoint aCurrentBattlePoint) {
         board.interact(turnQueue.getCurrentCreature(), aCurrentBattlePoint);
     }
-
 
     public Hero getCurrentHero() {
         Creature current = turnQueue.getCurrentCreature();
