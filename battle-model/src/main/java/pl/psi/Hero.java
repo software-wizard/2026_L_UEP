@@ -1,5 +1,6 @@
 package pl.psi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import pl.psi.Spells.ActiveSpellEffect;
@@ -13,14 +14,16 @@ import lombok.Getter;
  */
 public class Hero {
     @Getter
-    private final List< Creature > creatures;
+    private List< Creature > creatures = List.of();
     @Getter
     private List<Spell> spells;
 
     public Hero(final List< Creature > aCreatures, List<Spell> aSpells)
     {
         creatures = aCreatures;
-        spells = new java.util.ArrayList<>(aSpells);
+        spells = new ArrayList<>(aSpells);
+    }
+    public Hero() {
     }
 
     public void apply(Spell s, Creature c) {

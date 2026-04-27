@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import lombok.Getter;
+import lombok.Setter;
 import pl.psi.creatures.EconomyCreature;
 import pl.psi.hero.artifacts.Artifact;
 import pl.psi.hero.artifacts.EconomySpell;
@@ -17,21 +18,25 @@ import pl.psi.map.resources.Resources;
 
 public class EconomyHero implements PropertyChangeListener
 {
-    private final Fraction fraction;
-    private final List< EconomyCreature > creatureList;
-    @Getter
+    @Getter @Setter
+    private Fraction fraction = null;
+    @Getter @Setter
+    private List< EconomyCreature > creatureList = List.of();
+    @Getter @Setter
     private Resources resources;
     @Getter
     private final int moveRange = 10;
+    @Getter @Setter
     private int remainingMoves;
+    @Getter @Setter
     private int experience;
-    @Getter
+    @Getter @Setter
     public int level;
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-    @Getter
+    @Getter @Setter
     private List<AbstractSkill> skills;
-
-    private final Statistics baseStatistics;
+    @Getter @Setter
+    private Statistics baseStatistics = null;
     private final List<Artifact> artifacts = new ArrayList<>();
     @Getter
     private final List<EconomySpell> spells = new ArrayList<>();
@@ -44,6 +49,8 @@ public class EconomyHero implements PropertyChangeListener
         resources = aResources;
         baseStatistics = aStats;
         skills = new ArrayList<>();
+    }
+    public EconomyHero() {
     }
 
     public void resetMoveRange() {

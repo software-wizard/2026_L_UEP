@@ -44,7 +44,7 @@ public class Creature implements PropertyChangeListener {
     private final List<ActiveSpellEffect> activeSpellEffects = new ArrayList<>();
     private float reduceDemegeFactor;
 
-    Creature() {
+    public Creature() {
     }
 
     private Creature(final CreatureStatisticIf aStats, final DamageCalculatorIf aCalculator,

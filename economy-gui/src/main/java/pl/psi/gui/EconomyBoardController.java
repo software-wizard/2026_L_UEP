@@ -1,127 +1,132 @@
 package pl.psi.gui;
 
+import javafx.scene.input.MouseEvent;
+import javafx.scene.input.MouseButton;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.input.MouseButton;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import pl.psi.converter.EcoBattleConverter;
-import pl.psi.creatures.EconomyCreature;
 import pl.psi.hero.EconomyHero;
 import pl.psi.hero.Statistics;
-import pl.psi.map.BoardEconomyEngine;
 import pl.psi.map.MapObjectIf;
-import pl.psi.map.buildings.bank.Bank;
-import pl.psi.map.buildings.town.Town;
-import pl.psi.map.resources.Resources;
 import pl.psi.economy.Point;
+import pl.psi.map.resources.Resources;
+
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.Map;
+import java.util.Optional;
 
 public class EconomyBoardController implements PropertyChangeListener {
-    private final BoardEconomyEngine gameEngine;
-    @FXML private GridPane gridMap;
-    @FXML private Button passButton,equipmentButton;
-    @FXML private Label goldLabel, woodLabel, oreLabel, mercuryLabel, sulphurLabel, crystalLabel, gemsLabel,attackLabel,defenceLabel,powerLabel,knowledgeLabel;
+    private static final String BASE_URL = "http://localhost:8080/api/board";
+    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-    private final EconomyHero battleHero1;
-    private final EconomyHero battleHero2;
+    @FXML private GridPane gridMap;
+    @FXML private Button passButton, equipmentButton;
+    @FXML private Label goldLabel, woodLabel, oreLabel, mercuryLabel, sulphurLabel, crystalLabel, gemsLabel, attackLabel, defenceLabel, powerLabel, knowledgeLabel;
 
     public EconomyBoardController(final EconomyHero hero1, final EconomyHero hero2, Map<Point, MapObjectIf> map) {
-        this.gameEngine = new BoardEconomyEngine(hero1, hero2, map);
-        this.battleHero1 = hero1;
-        this.battleHero2 = hero2;
+        try {
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(BASE_URL + "/start?fraction1=NECROPOLIS&fraction2=NECROPOLIS"))
+                    .POST(HttpRequest.BodyPublishers.noBody()).build();
+            httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @FXML
     private void initialize() {
         refreshGui();
-        updateResourceDisplay();
-//        gameEngine.addObserver(this);
-        passButton.setOnMouseClicked(e -> gameEngine.pass());
+
+        passButton.setOnMouseClicked(e -> {
+            postAction("/pass", -1, -1);
+            refreshGui();
+        });
+
         equipmentButton.setOnMouseClicked(e -> showEquipment());
     }
 
     private void refreshGui() {
-        gridMap.getChildren().clear();
-        for (int x = 0; x < 18; x++) {
-            for (int y = 0; y < 9; y++) {
-                Point point = new Point(x, y);
-                EconomyTile tile = new EconomyTile("");
-                renderTileContent(point, tile);
-                bindTileEvents(point, tile);
-                gridMap.add(tile, x, y);
+        for (int x = 0; x < 20; x++) {
+            for (int y = 0; y < 14; y++) {
+                final int currentX = x;
+                final int currentY = y;
+
+                final EconomyTile mapTile = new EconomyTile("");
+
+                if (getBoolean("/isCurrentHero", currentX, currentY)) {
+                    mapTile.setBackground(Color.GREENYELLOW);
+                } else if (getBoolean("/isHero", currentX, currentY)) {
+                    mapTile.setBackground(Color.RED);
+                }
+
+                Optional<MapObjectIf> mapObject = getMapObject(currentX, currentY);
+                if (mapObject.isPresent()) {
+                    mapTile.setImage(mapObject.get().getPath());
+                }
+
+                if (getBoolean("/canMove", currentX, currentY)) {
+                    mapTile.setBackground(Color.GREY);
+                    mapTile.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+                        if (e.getButton() == MouseButton.PRIMARY) {
+                            postAction("/move", currentX, currentY);
+                            refreshGui();
+                        }
+                    });
+                }
+
+                if (getBoolean("/canAttack", currentX, currentY)) {
+                    mapTile.setBackground(Color.INDIANRED);
+                    mapTile.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+                        // Handle attack logic
+                    });
+                }
+
+                if (getBoolean("/canInteract", currentX, currentY)) {
+                    mapTile.setBackground(Color.YELLOW);
+                    mapTile.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+                        if (e.getButton() == MouseButton.PRIMARY) {
+                            postAction("/interact", currentX, currentY);
+                            refreshGui();
+                        }
+                    });
+                }
+
+                if (getBoolean("/canEnter", currentX, currentY)) {
+                    mapTile.setBackground(Color.BLUE);
+                    mapTile.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
+                        if (e.getButton() == MouseButton.PRIMARY) {
+                            postAction("/enter", currentX, currentY);
+                        } else if (e.getButton() == MouseButton.SECONDARY) {
+                            postAction("/secondInteraction", currentX, currentY);
+                        }
+                        refreshGui();
+                    });
+                }
+
+                gridMap.add(mapTile, x, y);
             }
         }
-        updateDisplay();
+        updateResources();
+        updateStats();
     }
 
-    private void renderTileContent(Point point, EconomyTile tile) {
-        if (gameEngine.isCurrentHero(point)) {
-            tile.setImage("/heroes/hero1.png");
-        }
+    private void updateResources() {
+        EconomyHero currentHero = getCurrentHero();
+        if (currentHero == null) return;
 
-        if (gameEngine.isHero(point) && !gameEngine.isCurrentHero(point)) {
-            tile.setName("Other Hero");
-        }
-
-        gameEngine.getMapObject(point).ifPresent(mapObject -> {tile.setImage(mapObject.getPath());});
-
-        if (gameEngine.canMove(point)) {
-            tile.setBackground(Color.GREY);
-        } else if (gameEngine.canAttack(point)) {
-            tile.setBackground(Color.RED);
-        } else if (gameEngine.canInteract(point)) {
-            tile.setBackground(Color.YELLOW);
-        }
-    }
-
-    private void bindTileEvents(Point point, EconomyTile tile) {
-        if (gameEngine.canMove(point)) {
-            tile.setOnMouseClicked(e -> {
-                if (e.getButton() == MouseButton.PRIMARY) {
-                    gameEngine.move(point);
-                }
-            });
-        }
-
-        if (gameEngine.canInteract(point)) {
-            tile.setOnMouseClicked(e -> {
-                gameEngine.move(point);
-                gameEngine.interact(point);
-                System.out.println("Interaction at: " + point);
-                refreshGui();
-            });
-        }
-
-        if (gameEngine.canAttack(point)) {
-            tile.setOnMouseClicked(e -> EcoBattleConverter.startBattle(battleHero1, battleHero2));
-        }
-
-        if (gameEngine.canEnter(point)) {
-            tile.setOnMouseClicked(e -> {
-                if (e.getButton() == MouseButton.PRIMARY) {
-                    gameEngine.move(point); // Ensure hero enters
-                    gameEngine.enter(point);
-                } else if (e.getButton() == MouseButton.SECONDARY) {
-                    gameEngine.move(point);
-                    gameEngine.secondInteraction(point);
-                }
-            });
-        }
-
-    }
-
-    private void updateDisplay(){
-        updateResourceDisplay();
-        updateStatsDisplay();
-    }
-
-    private void updateResourceDisplay() {
-        Resources res = gameEngine.getCurrentHero().getResources();
+        Resources res = currentHero.getResources();
         goldLabel.setText("Gold: " + res.getGold());
         woodLabel.setText("Wood: " + res.getWood());
         oreLabel.setText("Ore: " + res.getOre());
@@ -131,44 +136,62 @@ public class EconomyBoardController implements PropertyChangeListener {
         gemsLabel.setText("Gems: " + res.getGems());
     }
 
-    private void updateStatsDisplay() {
-        Statistics stats = gameEngine.getCurrentHero().getTotalStatistics();
+    private void updateStats() {
+        EconomyHero currentHero = getCurrentHero();
+        if (currentHero == null) return;
+
+        Statistics stats = currentHero.getTotalStatistics();
         attackLabel.setText("Attack: " + stats.getAttack());
         defenceLabel.setText("Defense: " + stats.getDefense());
         powerLabel.setText("Power: " + stats.getPower());
         knowledgeLabel.setText("Knowledge: " + stats.getKnowledge());
     }
 
-
     private void showEquipment() {
-        WindowManager.openEquipment(gameEngine.getCurrentHero());
+        WindowManager.openEquipment(getCurrentHero());
+    }
+
+
+    private boolean getBoolean(String endpoint, int x, int y) {
+        try {
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(BASE_URL + endpoint + "?x=" + x + "&y=" + y)).GET().build();
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            return Boolean.parseBoolean(res.body());
+        } catch (Exception e) { return false; }
+    }
+
+    private void postAction(String endpoint, int x, int y) {
+        try {
+            String url = x >= 0 ? BASE_URL + endpoint + "?x=" + x + "&y=" + y : BASE_URL + endpoint;
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).POST(HttpRequest.BodyPublishers.noBody()).build();
+            httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    private Optional<MapObjectIf> getMapObject(int x, int y) {
+        try {
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(BASE_URL + "/mapObject?x=" + x + "&y=" + y)).GET().build();
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() == 200 && res.body() != null && !res.body().isEmpty()) {
+                return Optional.of(objectMapper.readValue(res.body(), MapObjectIf.class));
+            }
+        } catch (Exception e) { }
+        return Optional.empty();
+    }
+
+    private EconomyHero getCurrentHero() {
+        try {
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(BASE_URL + "/currentHero")).GET().build();
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() == 200) {
+                return objectMapper.readValue(res.body(), EconomyHero.class);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         refreshGui();
-        switch (evt.getPropertyName()) {
-            case "OPEN_SHOP":
-                Object[] data = (Object[]) evt.getNewValue();
-                EconomyHero hero = (EconomyHero) data[0];
-                Town optionalTown = (Town) data[1];
-                WindowManager.openShop(hero, optionalTown);
-                break;
-
-            case "OPEN_UPGRADES":
-                Object[] data1 = (Object[]) evt.getNewValue();
-                EconomyHero hero1 = (EconomyHero) data1[0];
-                Town town1 = (Town) data1[1];
-                WindowManager.openUpgrades(hero1, town1);
-                break;
-
-            case "ENTER_BANK":
-                Object[] data2 = (Object[]) evt.getNewValue();
-                EconomyHero hero2 = (EconomyHero) data2[0];
-                Bank bank = (Bank) data2[1];
-                Map<Point, EconomyCreature> enemies = bank.getEnemies();
-                EcoBattleConverter.startBankBattle(hero2, enemies);
-                break;
-        }
     }
 }
