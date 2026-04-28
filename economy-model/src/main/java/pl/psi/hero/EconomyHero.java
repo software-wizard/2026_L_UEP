@@ -5,6 +5,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import lombok.Getter;
 import pl.psi.creatures.EconomyCreature;
@@ -17,6 +18,9 @@ import pl.psi.map.resources.Resources;
 
 public class EconomyHero implements PropertyChangeListener
 {
+    private static final int MIN_INITIAL_EXPERIENCE = 40;
+    private static final int MAX_INITIAL_EXPERIENCE = 90;
+
     private final Fraction fraction;
     private final List< EconomyCreature > creatureList;
     @Getter
@@ -44,6 +48,7 @@ public class EconomyHero implements PropertyChangeListener
         resources = aResources;
         baseStatistics = aStats;
         skills = new ArrayList<>();
+        experience = ThreadLocalRandom.current().nextInt(MIN_INITIAL_EXPERIENCE, MAX_INITIAL_EXPERIENCE + 1);
     }
 
     public void resetMoveRange() {
@@ -123,19 +128,70 @@ public class EconomyHero implements PropertyChangeListener
     }
 
     public void addExperience(final int experienceToAdd) {
+        if (experienceToAdd <= 0) {
+            return;
+        }
         int oldLevel = this.level;
         this.experience += experienceToAdd;
 
-        while (this.experience >= getExperienceForNextLevel(this.level)) {
-            this.experience -= getExperienceForNextLevel(this.level);
+        while (this.experience >= getExperienceForNextLevel(this.level + 1)) {
+            this.experience -= getExperienceForNextLevel(this.level + 1);
             this.level++;
             pcs.firePropertyChange("levelUp", oldLevel, this.level);
             oldLevel = this.level;
         }
     }
 
-    private int getExperienceForNextLevel(int currentLevel) {
-        return 100 + (currentLevel * 50);
+    public int getExperience() {
+        return experience;
+    }
+
+    private int getExperienceForNextLevel(final int nextLevel) {
+        if (nextLevel <= 1) {
+            return 0;
+        }
+        if (nextLevel == 2) {
+            return 1000;
+        }
+        if (nextLevel == 3) {
+            return 1000;
+        }
+        if (nextLevel == 4) {
+            return 1200;
+        }
+        if (nextLevel == 5) {
+            return 1400;
+        }
+        if (nextLevel == 6) {
+            return 1600;
+        }
+        if (nextLevel == 7) {
+            return 1800;
+        }
+        if (nextLevel == 8) {
+            return 2000;
+        }
+        if (nextLevel == 9) {
+            return 2200;
+        }
+        if (nextLevel == 10) {
+            return 2500;
+        }
+        if (nextLevel == 11) {
+            return 2800;
+        }
+        if (nextLevel == 12) {
+            return 3100;
+        }
+        if (nextLevel == 13) {
+            return 3720;
+        }
+
+        double requirement = 3720;
+        for (int level = 14; level <= nextLevel; level++) {
+            requirement *= 1.2;
+        }
+        return (int) Math.round(requirement);
     }
 
     public void addArtifact(Artifact artifact) {

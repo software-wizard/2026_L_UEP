@@ -2,6 +2,7 @@ package pl.psi.gui;
 
 import com.google.common.collect.BiMap;
 import javafx.fxml.FXML;
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
@@ -19,9 +20,11 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class MainBattleController implements PropertyChangeListener {
     private final GameEngine gameEngine;
+    private final Consumer<GameEngine.BattleResult> battleFinishedHandler;
     private final SpellCastingManager spellManager = new SpellCastingManager();
     private SpellUIManager spellUIManager;
 
@@ -33,7 +36,14 @@ public class MainBattleController implements PropertyChangeListener {
     private Button spellButton;
 
     public MainBattleController(final Hero aHero1, final Hero aHero2, final Map<BattlePoint, Creature> bankEnemy, BiMap<BattlePoint, SpecialField> aSpecialField) {
+        this(aHero1, aHero2, bankEnemy, aSpecialField, result -> {});
+    }
+
+    public MainBattleController(final Hero aHero1, final Hero aHero2, final Map<BattlePoint, Creature> bankEnemy,
+                                final BiMap<BattlePoint, SpecialField> aSpecialField,
+                                final Consumer<GameEngine.BattleResult> aBattleFinishedHandler) {
         gameEngine = new GameEngine(aHero1, aHero2, aSpecialField, bankEnemy);
+        battleFinishedHandler = aBattleFinishedHandler;
     }
 
     @FXML
@@ -119,6 +129,9 @@ public class MainBattleController implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         if ("SPELL_CAST".equals(evt.getPropertyName())) {
             spellUIManager.showSpellCastDialog();
+        } else if (GameEngine.BATTLE_FINISHED.equals(evt.getPropertyName())) {
+            handleBattleFinished();
+            return;
         }
         refreshGui();
     }
@@ -126,5 +139,21 @@ public class MainBattleController implements PropertyChangeListener {
     private void pass() {
         gameEngine.pass();
         refreshGui();
+    }
+
+    private void handleBattleFinished() {
+        if (!gameEngine.isBattleOver()) {
+            return;
+        }
+        gameEngine.getBattleResult().ifPresent(battleFinishedHandler);
+        closeBattleWindow();
+    }
+
+    private void closeBattleWindow() {
+        Platform.runLater(() -> {
+            if (gridMap != null && gridMap.getScene() != null && gridMap.getScene().getWindow() != null) {
+                gridMap.getScene().getWindow().hide();
+            }
+        });
     }
 }

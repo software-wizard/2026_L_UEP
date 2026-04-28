@@ -13,6 +13,10 @@ import pl.psi.economy.Point;
 import pl.psi.gui.MainBattleController;
 import pl.psi.hero.EconomyHero;
 import pl.psi.hero.skills.AbstractSkill;
+import pl.psi.converter.rewards.BattleRewardCalculator;
+import pl.psi.converter.rewards.BattleRewardContext;
+import pl.psi.converter.rewards.BattleType;
+import pl.psi.converter.rewards.FixedLearningBonusProvider;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -25,6 +29,8 @@ import static pl.psi.hero.skills.SkillName.ARMORER;
 import static pl.psi.hero.skills.SkillName.OFFENCE;
 
 public class EcoBattleConverter {
+    private static final BattleRewardCalculator REWARD_CALCULATOR =
+            new BattleRewardCalculator(new FixedLearningBonusProvider(0));
 
     public static void startBattle(final EconomyHero aPlayer1, final EconomyHero aPlayer2) {
         try {
@@ -35,7 +41,9 @@ public class EcoBattleConverter {
             specialFields.put(new BattlePoint(2,4), new FieldCanOnlyBeFlown());
             loader.setLocation(EcoBattleConverter.class.getClassLoader()
                     .getResource("fxml/main-battle.fxml"));
-            loader.setController(new MainBattleController(convert(aPlayer1), convert(aPlayer2), new HashMap<>(), specialFields));
+            final BattleRewardContext rewardContext = new BattleRewardContext(BattleType.HERO_VS_HERO, aPlayer1, aPlayer2);
+            loader.setController(new MainBattleController(convert(aPlayer1), convert(aPlayer2), new HashMap<>(), specialFields,
+                    battleResult -> settleBattleExperience(rewardContext, battleResult)));
             Scene scene = new Scene(loader.load());
             final Stage aStage = new Stage();
             aStage.setScene(scene);
@@ -62,7 +70,9 @@ public class EcoBattleConverter {
         try {
             final FXMLLoader loader = new FXMLLoader();
             loader.setLocation(EcoBattleConverter.class.getClassLoader().getResource("fxml/main-battle.fxml"));
-            loader.setController(new MainBattleController(convert(aPlayer1), convert(aPlayer1), bankEnemy1, HashBiMap.create()));
+            final BattleRewardContext rewardContext = new BattleRewardContext(BattleType.BANK_BATTLE, aPlayer1, null);
+            loader.setController(new MainBattleController(convert(aPlayer1), convert(aPlayer1), bankEnemy1, HashBiMap.create(),
+                    battleResult -> settleBattleExperience(rewardContext, battleResult)));
             Scene scene = new Scene(loader.load());
             final Stage aStage = new Stage();
             aStage.setScene(scene);
@@ -120,5 +130,11 @@ public class EcoBattleConverter {
                 .statistic(modifiedStats)
                 .amount(ecoCreature.getAmount())
                 .build();
+    }
+
+    private static void settleBattleExperience(final BattleRewardContext aContext,
+                                               final GameEngine.BattleResult aBattleResult) {
+        REWARD_CALCULATOR.calculate(aContext, aBattleResult)
+                .forEach((hero, exp) -> hero.addExperience(exp));
     }
 }

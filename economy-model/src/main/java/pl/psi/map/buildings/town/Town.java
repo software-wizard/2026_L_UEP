@@ -148,6 +148,7 @@ public class Town implements BuildingIf {
     }
 
     public boolean hasCapability(TownCapability capability) {
+        // Czyli usunąć capabilities i tutaj sprawdzać, jeżeli dostaje argument capability to sprawdzam czy built buildings ma odpowiedni budynek
         return activeCapabilities.contains(capability);
     }
 
