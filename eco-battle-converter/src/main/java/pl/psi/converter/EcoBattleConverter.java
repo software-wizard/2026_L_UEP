@@ -16,7 +16,7 @@ import pl.psi.hero.skills.AbstractSkill;
 import pl.psi.converter.rewards.BattleRewardCalculator;
 import pl.psi.converter.rewards.BattleRewardContext;
 import pl.psi.converter.rewards.BattleType;
-import pl.psi.converter.rewards.FixedLearningBonusProvider;
+import pl.psi.converter.rewards.HeroSkillLearningBonusProvider;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -29,8 +29,6 @@ import static pl.psi.hero.skills.SkillName.ARMORER;
 import static pl.psi.hero.skills.SkillName.OFFENCE;
 
 public class EcoBattleConverter {
-    private static final BattleRewardCalculator REWARD_CALCULATOR =
-            new BattleRewardCalculator(new FixedLearningBonusProvider(0));
 
     public static void startBattle(final EconomyHero aPlayer1, final EconomyHero aPlayer2) {
         try {
@@ -38,12 +36,20 @@ public class EcoBattleConverter {
             BiMap<BattlePoint, SpecialField> specialFields = HashBiMap.create();
             specialFields.put(new BattlePoint(5, 5), new DmgField());
             specialFields.put(new BattlePoint(3, 8), new SpellField());
-            specialFields.put(new BattlePoint(2,4), new FieldCanOnlyBeFlown());
+            specialFields.put(new BattlePoint(2, 4), new FieldCanOnlyBeFlown());
             loader.setLocation(EcoBattleConverter.class.getClassLoader()
                     .getResource("fxml/main-battle.fxml"));
+
             final BattleRewardContext rewardContext = new BattleRewardContext(BattleType.HERO_VS_HERO, aPlayer1, aPlayer2);
-            loader.setController(new MainBattleController(convert(aPlayer1), convert(aPlayer2), new HashMap<>(), specialFields,
-                    battleResult -> settleBattleExperience(rewardContext, battleResult)));
+
+            loader.setController(new MainBattleController(
+                    convert(aPlayer1),
+                    convert(aPlayer2),
+                    new HashMap<>(),
+                    specialFields,
+                    battleResult -> settleBattleExperience(rewardContext, battleResult, new BattleRewardCalculator(new HeroSkillLearningBonusProvider()))
+            ));
+
             Scene scene = new Scene(loader.load());
             final Stage aStage = new Stage();
             aStage.setScene(scene);
@@ -58,10 +64,8 @@ public class EcoBattleConverter {
     public static Hero convert(final EconomyHero aPlayer1) {
         final List<Creature> creatures = new ArrayList<>();
         aPlayer1.getCreatures()
-                .forEach(ecoCreature -> creatures.add(convertCreatureWithEffects(ecoCreature, aPlayer1)//zmienione tutaj
-                        )
-                );
-        return new Hero(creatures, aPlayer1.getSpells().stream().map(s -> new DamageSpell(s.getName(), 1,1)).collect(Collectors.toList()));
+                .forEach(ecoCreature -> creatures.add(convertCreatureWithEffects(ecoCreature, aPlayer1)));
+        return new Hero(creatures, aPlayer1.getSpells().stream().map(s -> new DamageSpell(s.getName(), 1, 1)).collect(Collectors.toList()));
     }
 
     public static void startBankBattle(final EconomyHero aPlayer1, final Map<Point, EconomyCreature> bankEnemy) {
@@ -70,9 +74,20 @@ public class EcoBattleConverter {
         try {
             final FXMLLoader loader = new FXMLLoader();
             loader.setLocation(EcoBattleConverter.class.getClassLoader().getResource("fxml/main-battle.fxml"));
+
             final BattleRewardContext rewardContext = new BattleRewardContext(BattleType.BANK_BATTLE, aPlayer1, null);
-            loader.setController(new MainBattleController(convert(aPlayer1), convert(aPlayer1), bankEnemy1, HashBiMap.create(),
-                    battleResult -> settleBattleExperience(rewardContext, battleResult)));
+
+            // Pusty bohater dla AI, aby gracz nie walczył przeciwko własnym statystykom
+            Hero emptyNeutralHero = new Hero(new ArrayList<>(), new ArrayList<>());
+
+            loader.setController(new MainBattleController(
+                    convert(aPlayer1),
+                    emptyNeutralHero,
+                    bankEnemy1,
+                    HashBiMap.create(),
+                    battleResult -> settleBattleExperience(rewardContext, battleResult, new BattleRewardCalculator(new HeroSkillLearningBonusProvider()))
+            ));
+
             Scene scene = new Scene(loader.load());
             final Stage aStage = new Stage();
             aStage.setScene(scene);
@@ -102,26 +117,27 @@ public class EcoBattleConverter {
     }
 
     public static Creature convertCreatureWithEffects(EconomyCreature ecoCreature, EconomyHero ecoHero) {
-
         CreatureStatistic baseStats = ecoCreature.getStats();
         StatsModifier totalBonus = new StatsModifier(ecoHero.getTotalStatistics().getAttack(), ecoHero.getTotalStatistics().getDefense());
 
         CreatureStatisticIf modifiedStats = new ModifiedCreatureStats(baseStats, totalBonus);
 
         if (!ecoHero.getSkills().isEmpty()) {
-            float reduceDamageFactor=0;
-            float bonusDamageFActor=0;
+            float reduceDamageFactor = 0;
+            float bonusDamageFactor = 0;
             ArrayList<AbstractSkill> skills = new ArrayList<>(ecoHero.getSkills());
+
             for (AbstractSkill skill : skills) {
                 if (skill.getName() == ARMORER) {
-                    reduceDamageFactor= skill.getFactor();
+                    reduceDamageFactor = skill.getFactor();
                 } else if (skill.getName() == OFFENCE) {
-                    bonusDamageFActor = skill.getFactor();
+                    bonusDamageFactor = skill.getFactor();
                 }
             }
+
             return new Creature.Builder()
                     .statistic(modifiedStats)
-                    .calculator(new ReducedDamageCalculator(reduceDamageFactor, bonusDamageFActor))
+                    .calculator(new ReducedDamageCalculator(reduceDamageFactor, bonusDamageFactor))
                     .amount(ecoCreature.getAmount())
                     .build();
         }
@@ -133,8 +149,9 @@ public class EcoBattleConverter {
     }
 
     private static void settleBattleExperience(final BattleRewardContext aContext,
-                                               final GameEngine.BattleResult aBattleResult) {
-        REWARD_CALCULATOR.calculate(aContext, aBattleResult)
-                .forEach((hero, exp) -> hero.addExperience(exp));
+                                               final GameEngine.BattleResult aBattleResult,
+                                               final BattleRewardCalculator calculator) {
+        calculator.calculate(aContext, aBattleResult)
+                .forEach(EconomyHero::addExperience);
     }
 }

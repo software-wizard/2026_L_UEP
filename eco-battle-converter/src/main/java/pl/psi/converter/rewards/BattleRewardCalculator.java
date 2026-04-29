@@ -26,6 +26,7 @@ public class BattleRewardCalculator {
             if (!aBattleResult.isHero1Winner()) {
                 return rewards;
             }
+            // Zmiana matematyki ukryta jest wewnątrz metody withLearningBonus
             final int exp = withLearningBonus(aContext.getHero1(), aBattleResult.getHero1VanquishedEnemyHp());
             if (exp > 0) {
                 rewards.put(aContext.getHero1(), exp);
@@ -38,8 +39,10 @@ public class BattleRewardCalculator {
         if (winner == null) {
             return rewards;
         }
+
         final int baseExp = hero1Won ? aBattleResult.getHero1VanquishedEnemyHp() : aBattleResult.getHero2VanquishedEnemyHp();
         final int exp = withLearningBonus(winner, baseExp + HERO_DEFEAT_BONUS_EXP);
+
         if (exp > 0) {
             rewards.put(winner, exp);
         }
@@ -51,6 +54,8 @@ public class BattleRewardCalculator {
             return 0;
         }
         final int bonusPercent = Math.max(0, learningBonusProvider.getLearningBonusPercent(aHero));
-        return aBaseExp + Math.round(aBaseExp * (bonusPercent / 100.0f));
+        final int bonusExp = (aBaseExp * bonusPercent) / 100;
+
+        return aBaseExp + bonusExp;
     }
 }

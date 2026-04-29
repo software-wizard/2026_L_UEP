@@ -1,7 +1,9 @@
 package pl.psi.converter.rewards;
 
+import lombok.Getter;
 import pl.psi.hero.EconomyHero;
 
+@Getter
 public class BattleRewardContext {
     private final BattleType battleType;
     private final EconomyHero hero1;
@@ -13,15 +15,4 @@ public class BattleRewardContext {
         hero2 = aHero2;
     }
 
-    public BattleType getBattleType() {
-        return battleType;
-    }
-
-    public EconomyHero getHero1() {
-        return hero1;
-    }
-
-    public EconomyHero getHero2() {
-        return hero2;
-    }
 }

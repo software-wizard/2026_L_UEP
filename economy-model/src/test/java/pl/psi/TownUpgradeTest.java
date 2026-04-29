@@ -90,7 +90,9 @@ public class TownUpgradeTest {
     void shouldBuildTownHallThenCityHallThenCapitol() {
 
         town.setOwner(hero);
+        town.resetBuildingOption();
         town.buildAllPrerequisites(TownBuilding.CAPITOL);
+        town.resetBuildingOption();
         town.build(TownBuilding.CAPITOL, hero);
 
         assertTrue(town.hasBuilt(TownBuilding.CAPITOL));
@@ -116,15 +118,24 @@ public class TownUpgradeTest {
 
         // Build chain for Castle
         town.build(TownBuilding.CITADEL, hero);
+        town.resetBuildingOption();
         town.build(TownBuilding.CASTLE, hero);
 
         // Build chain for City Hall (needs Tavern, Marketplace, Blacksmith, Mage Guild)
+        town.resetBuildingOption();
         town.build(TownBuilding.TAVERN, hero);
+        town.resetBuildingOption();
         town.build(TownBuilding.MARKETPLACE, hero);
+        town.resetBuildingOption();
         town.build(TownBuilding.BLACKSMITH, hero);
+        town.resetBuildingOption();
         town.build(TownBuilding.MAGE_GUILD_LVL_1, hero);
+        town.resetBuildingOption();
         town.build(TownBuilding.TOWN_HALL, hero);
+        town.resetBuildingOption();
         town.build(TownBuilding.CITY_HALL, hero);
+
+        town.resetBuildingOption();
 
         assertDoesNotThrow(() -> town.build(TownBuilding.CAPITOL, hero));
     }

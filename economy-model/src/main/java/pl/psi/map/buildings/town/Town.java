@@ -18,7 +18,6 @@ public class Town implements BuildingIf {
     @Setter
     EconomyHero owner;
     private final Set<BuildingType> builtBuildings = new HashSet<>();
-    private final Set<TownCapability> activeCapabilities = new HashSet<>();
     private final Map<BuildingType, Integer> unitPool = new HashMap<>();
     private boolean canBuildBuilding = true;
 
@@ -68,9 +67,6 @@ public class Town implements BuildingIf {
 
         this.builtBuildings.add(building);
 
-        // Update town state
-        this.activeCapabilities.addAll(building.getProvidedCapabilities());
-
         if (!building.isUpgraded() && building instanceof CreatureBuildings) {
             unitPool.put(building, building.getGrowth());
         }
@@ -87,6 +83,7 @@ public class Town implements BuildingIf {
         for (BuildingType prereq : building.getPrerequisites()) {
             if (!this.hasBuilt(prereq)) {
                 buildAllPrerequisites(prereq);
+                resetBuildingOption();
                 this.build(prereq, owner);
             }
         }
@@ -105,9 +102,9 @@ public class Town implements BuildingIf {
     }
 
     private double getGrowthModifier() {
-        if (activeCapabilities.contains(TownCapability.CASTLE_UPGRADE)) {
+        if (hasCapability(TownCapability.CASTLE_UPGRADE)){
             return 2;
-        } else if (activeCapabilities.contains(TownCapability.CITADEL_UPGRADE)) {
+        } else if (hasCapability(TownCapability.CITADEL_UPGRADE)) {
             return 1.5;
         }else{
             return 1;
@@ -149,7 +146,7 @@ public class Town implements BuildingIf {
 
     public boolean hasCapability(TownCapability capability) {
         // Czyli usunąć capabilities i tutaj sprawdzać, jeżeli dostaje argument capability to sprawdzam czy built buildings ma odpowiedni budynek
-        return activeCapabilities.contains(capability);
+        return builtBuildings.stream().anyMatch(building -> building.getProvidedCapabilities().contains(capability));
     }
 
     @Override

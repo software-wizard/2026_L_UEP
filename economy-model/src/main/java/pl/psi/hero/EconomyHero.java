@@ -20,6 +20,8 @@ public class EconomyHero implements PropertyChangeListener
 {
     private static final int MIN_INITIAL_EXPERIENCE = 40;
     private static final int MAX_INITIAL_EXPERIENCE = 90;
+    
+    private static final String LEVEL_UP = "levelUp";
 
     private final Fraction fraction;
     private final List< EconomyCreature > creatureList;
@@ -28,6 +30,7 @@ public class EconomyHero implements PropertyChangeListener
     @Getter
     private final int moveRange = 10;
     private int remainingMoves;
+    @Getter
     private int experience;
     @Getter
     public int level;
@@ -137,13 +140,9 @@ public class EconomyHero implements PropertyChangeListener
         while (this.experience >= getExperienceForNextLevel(this.level + 1)) {
             this.experience -= getExperienceForNextLevel(this.level + 1);
             this.level++;
-            pcs.firePropertyChange("levelUp", oldLevel, this.level);
+            pcs.firePropertyChange(LEVEL_UP, oldLevel, this.level);
             oldLevel = this.level;
         }
-    }
-
-    public int getExperience() {
-        return experience;
     }
 
     private int getExperienceForNextLevel(final int nextLevel) {
