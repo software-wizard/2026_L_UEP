@@ -20,6 +20,7 @@ import pl.psi.map.resources.generators.ResourceGenerator;
 import pl.psi.service.GameStateService;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -36,37 +37,81 @@ public class BoardEconomyController {
         this.gameStateService = gameStateService;
     }
 
-    private Map<Point, MapObjectIf> createInitialMap() {
-        return new HashMap<>(Map.ofEntries(
-                Map.entry(new Point(4, 4), new Artifact(ArtifactType.SWORD_OF_HELLFIRE)),
-                Map.entry(new Point(17, 1), new Town()),
-                Map.entry(new Point(1, 7), new Town()),
-                Map.entry(new Point(3, 2), new ResourceGenerator(ResourceGenType.GEM)),
-                Map.entry(new Point(5, 6), new ResourceGenerator(ResourceGenType.GOLD)),
-                Map.entry(new Point(8, 1), new ResourceGenerator(ResourceGenType.MERCURY)),
-                Map.entry(new Point(10, 4), new ResourceGenerator(ResourceGenType.WOOD)),
-                Map.entry(new Point(13, 7), new ResourceGenerator(ResourceGenType.SULFUR)),
-                Map.entry(new Point(15, 2), new ResourceGenerator(ResourceGenType.CRYSTAL)),
-                Map.entry(new Point(6, 8), new ResourceGenerator(ResourceGenType.ORE)),
-                Map.entry(new Point(9, 3), new Gold(new Resources(1000, 0, 0, 0, 0, 0, 0))),
-                Map.entry(new Point(10, 6), new Gold(new Resources(1000, 0, 0, 0, 0, 0, 0))),
-                Map.entry(new Point(2, 2), new Bank(BankStatistics.CASTLE_1)),
-                Map.entry(new Point(8, 8), new Bank(BankStatistics.CASTLE_2)),
-                Map.entry(new Point(8, 5), new EconomySpell(SPELL_NAME))
-        ));
+    private Map<Point, MapObjectIf> generateMapBlueprint(String mapName) {
+        if ("DefaultMap".equals(mapName)) {
+            return new HashMap<>(Map.ofEntries(
+                    Map.entry(new Point(4,4), new Artifact(ArtifactType.SWORD_OF_HELLFIRE)),
+                    Map.entry(new Point(17,1), new Town()),
+                    Map.entry(new Point(1,7), new Town()),
+                    Map.entry(new Point(3,2), new ResourceGenerator(ResourceGenType.GEM)),
+                    Map.entry(new Point(5,6), new ResourceGenerator(ResourceGenType.GOLD)),
+                    Map.entry(new Point(8,1), new ResourceGenerator(ResourceGenType.MERCURY)),
+                    Map.entry(new Point(10,4), new ResourceGenerator(ResourceGenType.WOOD)),
+                    Map.entry(new Point(13,7), new ResourceGenerator(ResourceGenType.SULFUR)),
+                    Map.entry(new Point(15,2), new ResourceGenerator(ResourceGenType.CRYSTAL)),
+                    Map.entry(new Point(6,8), new ResourceGenerator(ResourceGenType.ORE)),
+                    Map.entry(new Point(9,3), new Gold(new Resources(1000,0,0,0,0,0,0))),
+                    Map.entry(new Point(10,6), new Gold(new Resources(1000,0,0,0,0,0,0))),
+                    Map.entry(new Point(2,2), new Bank(BankStatistics.CASTLE_1)),
+                    Map.entry(new Point(8,8), new Bank(BankStatistics.CASTLE_2)),
+                    Map.entry(new Point(8,5), new EconomySpell("Default"))
+            ));
+        }
+        return new HashMap<>();
+    }
+
+    @GetMapping("/boardState")
+    public ResponseEntity<Map<String, Map<String, Object>>> getBoardState() {
+        Map<String, Map<String, Object>> state = new HashMap<>();
+        for (int x = 0; x < 20; x++) {
+            for (int y = 0; y < 14; y++) {
+                Point p = new Point(x, y);
+                Map<String, Object> tile = new HashMap<>();
+
+                try {
+                    tile.put("isCurrentHero", this.gameStateService.getBoardEconomyEngine().isCurrentHero(p));
+                    tile.put("isHero", this.gameStateService.getBoardEconomyEngine().isHero(p));
+
+                    Optional<MapObjectIf> obj = this.gameStateService.getBoardEconomyEngine().getMapObject(p);
+                    if (obj.isPresent()) {
+                        tile.put("hasMapObject", true);
+                        tile.put("mapObjectPath", obj.get().getPath());
+                    } else {
+                        tile.put("hasMapObject", false);
+                    }
+
+                    tile.put("canMove", this.gameStateService.getBoardEconomyEngine().canMove(p));
+                    tile.put("canAttack", this.gameStateService.getBoardEconomyEngine().canAttack(p));
+                    tile.put("canInteract", this.gameStateService.getBoardEconomyEngine().canInteract(p));
+                    tile.put("canEnter", this.gameStateService.getBoardEconomyEngine().canEnter(p));
+
+                    state.put(x + "," + y, tile);
+                } catch (Exception e) {
+                    tile.put("isCurrentHero", false);
+                    tile.put("isHero", false);
+                    tile.put("hasMapObject", false);
+                    tile.put("canMove", false);
+                    tile.put("canAttack", false);
+                    tile.put("canInteract", false);
+                    tile.put("canEnter", false);
+                    state.put(x + "," + y, tile);
+                }
+            }
+        }
+        return ResponseEntity.ok(state);
     }
 
     @PostMapping("/start")
     public ResponseEntity<String> startBoardEconomy(
-            @RequestParam EconomyHero.Fraction fraction1,
-            @RequestParam EconomyHero.Fraction fraction2) {
+            @RequestBody List<EconomyHero> heroes,
+            @RequestParam(defaultValue = "DefaultMap") String mapName) {
 
-        EconomyHero hero1 = new EconomyHero(fraction1, new Resources(3000, 0, 0, 0, 0, 0, 0), new Statistics(10, 10, 10, 10));
-        EconomyHero hero2 = new EconomyHero(fraction2, new Resources(3000, 0, 0, 0, 0, 0, 0), new Statistics(10, 10, 10, 10));
+        EconomyHero hero1 = heroes.get(0);
+        EconomyHero hero2 = heroes.get(1);
 
-        // Inject the generated map here instead of an empty HashMap
-        this.gameStateService.startBoardEconomy(hero1, hero2, createInitialMap());
+        Map<Point, MapObjectIf> boardMap = generateMapBlueprint(mapName);
 
+        this.gameStateService.startBoardEconomy(hero1, hero2, boardMap);
         return ResponseEntity.ok("Economy Board engine started successfully.");
     }
 

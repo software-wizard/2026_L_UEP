@@ -10,7 +10,9 @@ import pl.psi.Spells.Spell;
 import pl.psi.creatures.Creature;
 import pl.psi.service.GameStateService;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
@@ -24,12 +26,62 @@ public class BattleController {
         this.gameStateService = gameStateService;
     }
 
+    @GetMapping("/boardState")
+    public ResponseEntity<Map<String, Map<String, Object>>> getBoardState() {
+        Map<String, Map<String, Object>> state = new HashMap<>();
+        for (int x = 0; x < 15; x++) {
+            for (int y = 0; y < 10; y++) {
+                BattlePoint p = new BattlePoint(x, y);
+                Map<String, Object> tile = new HashMap<>();
+
+                try {
+                    Optional<Creature> c = this.gameStateService.getGameEngine().getCreature(p);
+                    if (c.isPresent()) {
+                        tile.put("hasCreature", true);
+                        tile.put("name", c.get().getName());
+                        tile.put("amount", c.get().getAmount());
+                    } else {
+                        tile.put("hasCreature", false);
+                    }
+
+                    SpecialField f = this.gameStateService.getGameEngine().getSpecialFields().get(p);
+                    if (f != null) {
+                        tile.put("hasSpecialField", true);
+                        tile.put("fieldName", f.getFieldName().name());
+                        tile.put("fieldColor", f.getColor().name());
+                    } else {
+                        tile.put("hasSpecialField", false);
+                    }
+
+                    tile.put("isCurrentCreature", this.gameStateService.getGameEngine().isCurrentCreature(p));
+                    tile.put("canMove", this.gameStateService.getGameEngine().canMove(p));
+                    tile.put("canAttack", this.gameStateService.getGameEngine().canAttack(p));
+
+                    state.put(x + "," + y, tile);
+                } catch (Exception e) {
+                    // If queue is empty, safely default all flags to false
+                    tile.put("hasCreature", false);
+                    tile.put("hasSpecialField", false);
+                    tile.put("isCurrentCreature", false);
+                    tile.put("canMove", false);
+                    tile.put("canAttack", false);
+                    state.put(x + "," + y, tile);
+                }
+            }
+        }
+        return ResponseEntity.ok(state);
+    }
+
     @PostMapping("/start")
-    public ResponseEntity<String> startBattle() {
-        Hero hero1 = new Hero(List.of(), List.of());
-        Hero hero2 = new Hero(List.of(), List.of());
+    public ResponseEntity<String> startBattle(
+            @RequestBody List<Hero> heroes,
+            @RequestParam(defaultValue = "DefaultBattleMap") String mapName) {
+
+        Hero hero1 = heroes.get(0);
+        Hero hero2 = heroes.get(1);
 
         this.gameStateService.startBattle(hero1, hero2);
+
         return ResponseEntity.ok("Battle engine started successfully.");
     }
 

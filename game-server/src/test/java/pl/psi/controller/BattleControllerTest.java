@@ -6,6 +6,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import pl.psi.Hero;
+
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -18,8 +21,10 @@ public class BattleControllerTest {
 
     @Test
     public void testBattleFlow() {
+        List<Hero> heroes = List.of(new Hero(), new Hero());
+
         ResponseEntity<String> startResponse = restTemplate.postForEntity(
-                "/api/battle/start", null, String.class
+                "/api/battle/start", heroes, String.class
         );
         assertEquals(HttpStatus.OK, startResponse.getStatusCode());
 

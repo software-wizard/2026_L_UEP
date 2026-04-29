@@ -51,6 +51,12 @@ public class EconomyHero implements PropertyChangeListener
         skills = new ArrayList<>();
     }
     public EconomyHero() {
+        this.fraction = Fraction.NECROPOLIS;
+        this.creatureList = new ArrayList<>();
+        this.resources = new Resources(0, 0, 0, 0, 0, 0, 0);
+        this.baseStatistics = new Statistics(0, 0, 0, 0);
+        this.skills = new ArrayList<>();
+        this.remainingMoves = moveRange;
     }
 
     public void resetMoveRange() {

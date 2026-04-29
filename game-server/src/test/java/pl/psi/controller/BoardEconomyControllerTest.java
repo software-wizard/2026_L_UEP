@@ -6,8 +6,13 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import pl.psi.hero.EconomyHero;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class BoardEconomyControllerTest {
@@ -17,8 +22,10 @@ public class BoardEconomyControllerTest {
 
     @Test
     public void testBoardEconomyFlow() {
+        List<EconomyHero> heroes = List.of(new EconomyHero(), new EconomyHero());
+
         ResponseEntity<String> startResponse = restTemplate.postForEntity(
-                "/api/board/start?fraction1=NECROPOLIS&fraction2=NECROPOLIS", null, String.class
+                "/api/board/start", heroes, String.class
         );
         assertEquals(HttpStatus.OK, startResponse.getStatusCode());
 
