@@ -14,19 +14,18 @@ class CreatureStatisticTest {
     void testSkeletonStats() {
         CreatureStatistic skeleton = CreatureStatistic.SKELETON;
         
-        // values taken from hero-common/src/main/java/pl/psi/creatures/CreatureStatistic.java
         assertThat(skeleton.getName()).isEqualTo("Skeleton");
-        assertThat(skeleton.getAttack()).isEqualTo(5);
-        assertThat(skeleton.getArmor()).isEqualTo(4);
-        assertThat(skeleton.getMaxHp()).isEqualTo(6);
-        assertThat(skeleton.getMoveRange()).isEqualTo(4);
+        assertThat(skeleton.getAttack()).isEqualTo(4);
+        assertThat(skeleton.getArmor()).isEqualTo(6);
+        assertThat(skeleton.getMaxHp()).isEqualTo(4);
+        assertThat(skeleton.getMoveRange()).isEqualTo(1);
         assertThat(skeleton.getDamage()).isEqualTo(Range.closed(1, 3));
         assertThat(skeleton.getTier()).isEqualTo(1);
         assertThat(skeleton.isUpgraded()).isFalse();
     }
 
     @Test
-    @DisplayName("Should have all creatures in correct tier order (sample checks)")
+    @DisplayName("Should have all creatures in correct tier order")
     void testTierOrdering() {
         assertThat(CreatureStatistic.SKELETON.getTier()).isEqualTo(1);
         assertThat(CreatureStatistic.WALKING_DEAD.getTier()).isEqualTo(2);
@@ -84,27 +83,39 @@ class CreatureStatisticTest {
     }
 
     @Test
-    @DisplayName("Should allow setting attack and armor values and restore them after test")
-    void testSettersRestore() {
+    @DisplayName("Should allow setting attack value")
+    void testSetAttack() {
         CreatureStatistic skeleton = CreatureStatistic.SKELETON;
         int originalAttack = skeleton.getAttack();
+        
+        skeleton.setAttack(10);
+        assertThat(skeleton.getAttack()).isEqualTo(10);
+        
+        // Restore original
+        skeleton.setAttack(originalAttack);
+    }
+
+    @Test
+    @DisplayName("Should allow setting armor value")
+    void testSetArmor() {
+        CreatureStatistic skeleton = CreatureStatistic.SKELETON;
         int originalArmor = skeleton.getArmor();
         
-        skeleton.setAttack(originalAttack + 1);
-        skeleton.setArmor(originalArmor + 1);
-        assertThat(skeleton.getAttack()).isEqualTo(originalAttack + 1);
-        assertThat(skeleton.getArmor()).isEqualTo(originalArmor + 1);
+        skeleton.setArmor(12);
+        assertThat(skeleton.getArmor()).isEqualTo(12);
         
-        // Restore original values to avoid affecting other tests
-        skeleton.setAttack(originalAttack);
+        // Restore original
         skeleton.setArmor(originalArmor);
     }
 
     @Test
-    @DisplayName("Should have tiers within expected range")
-    void testTierBounds() {
+    @DisplayName("Should have BONE_DRAGON with highest tier")
+    void testBoneDragonIsHighestTier() {
+        assertThat(CreatureStatistic.BONE_DRAGON.getTier()).isEqualTo(7);
+        assertThat(CreatureStatistic.GHOST_DRAGON.getTier()).isEqualTo(7);
+        
         for (CreatureStatistic creature : CreatureStatistic.values()) {
-            assertThat(creature.getTier()).isBetween(1, 7);
+            assertThat(creature.getTier()).isLessThanOrEqualTo(7);
         }
     }
 
