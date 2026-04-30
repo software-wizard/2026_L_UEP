@@ -7,10 +7,8 @@ import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
-import pl.psi.GameEngine;
-import pl.psi.Hero;
-import pl.psi.BattlePoint;
-import pl.psi.SpecialField;
+import pl.psi.*;
+import pl.psi.BattleResults.BattleResult;
 import pl.psi.creatures.Creature;
 import pl.psi.gui.SpellGUI.SpellCastingManager;
 import pl.psi.gui.SpellGUI.SpellUIManager;
@@ -24,7 +22,7 @@ import java.util.function.Consumer;
 
 public class MainBattleController implements PropertyChangeListener {
     private final GameEngine gameEngine;
-    private final Consumer<GameEngine.BattleResult> battleFinishedHandler;
+    private final Consumer<BattleResult> battleFinishedHandler;
     private final SpellCastingManager spellManager = new SpellCastingManager();
     private SpellUIManager spellUIManager;
 
@@ -41,7 +39,7 @@ public class MainBattleController implements PropertyChangeListener {
 
     public MainBattleController(final Hero aHero1, final Hero aHero2, final Map<BattlePoint, Creature> bankEnemy,
                                 final BiMap<BattlePoint, SpecialField> aSpecialField,
-                                final Consumer<GameEngine.BattleResult> aBattleFinishedHandler) {
+                                final Consumer<BattleResult> aBattleFinishedHandler) {
         gameEngine = new GameEngine(aHero1, aHero2, aSpecialField, bankEnemy);
         battleFinishedHandler = aBattleFinishedHandler;
     }

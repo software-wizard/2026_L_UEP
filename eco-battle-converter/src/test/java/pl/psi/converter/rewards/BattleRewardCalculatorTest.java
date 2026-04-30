@@ -1,59 +1,58 @@
 package pl.psi.converter.rewards;
 
 import org.junit.jupiter.api.Test;
-import pl.psi.GameEngine;
-import pl.psi.hero.EconomyHero;
-import pl.psi.hero.Statistics;
-import pl.psi.map.resources.Resources;
+import pl.psi.BattleResults.BattleResult;
+import pl.psi.BattleResults.OutcomeType;
+import pl.psi.Hero;
 
-import java.util.Map;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class BattleRewardCalculatorTest {
 
-    private final Statistics stats = new Statistics(1, 1, 1, 1);
+    private final BattleRewardCalculator calculator = new BattleRewardCalculator();
+    private final Hero dummyWinner = new Hero(List.of(), List.of()); // Pusty bohater używany w konstruktorze BattleResult
 
     @Test
-    void shouldGrantHeroBattleExpWithDefeatBonus() {
-        EconomyHero hero1 = new EconomyHero(EconomyHero.Fraction.NECROPOLIS, new Resources(1000, 0, 0, 0, 0, 0, 0), stats);
-        EconomyHero hero2 = new EconomyHero(EconomyHero.Fraction.NECROPOLIS, new Resources(1000, 0, 0, 0, 0, 0, 0), stats);
-        BattleRewardContext context = new BattleRewardContext(BattleType.HERO_VS_HERO, hero1, hero2);
-        BattleRewardCalculator calculator = new BattleRewardCalculator(new FixedLearningBonusProvider(0));
+    void shouldReturnBaseExpWithDefeatBonusForHeroVsHero() {
+        // Arrange
+        // Wynik bitwy: wygrana, przeciwnik stracił 120 HP
+        BattleResult result = new BattleResult(dummyWinner, OutcomeType.DEFEAT, 120);
 
-        GameEngine.BattleResult result = new GameEngine.BattleResult(null, null, GameEngine.WinnerSide.HERO1,
-                GameEngine.OutcomeType.DEFEAT, 120, 40);
+        // Act
+        int baseExp = calculator.calculateBaseExperience(BattleType.HERO_VS_HERO, result);
 
-        Map<EconomyHero, Integer> rewards = calculator.calculate(context, result);
-        assertEquals(1, rewards.size());
-        assertEquals(620, rewards.get(hero1));
+        // Assert
+        // 120 (HP) + 500 (Bonus za pokonanie bohatera) = 620
+        assertEquals(620, baseExp);
     }
 
     @Test
-    void shouldGrantOnlyHero1ForBankBattleWhenHero1Wins() {
-        EconomyHero hero1 = new EconomyHero(EconomyHero.Fraction.NECROPOLIS, new Resources(1000, 0, 0, 0, 0, 0, 0), stats);
-        BattleRewardContext context = new BattleRewardContext(BattleType.BANK_BATTLE, hero1, null);
-        BattleRewardCalculator calculator = new BattleRewardCalculator(new FixedLearningBonusProvider(0));
+    void shouldReturnOnlyVanquishedHpForBankBattle() {
+        // Arrange
+        // Wynik bitwy: wygrana w banku, potwory straciły 200 HP
+        BattleResult result = new BattleResult(dummyWinner, OutcomeType.DEFEAT, 200);
 
-        GameEngine.BattleResult result = new GameEngine.BattleResult(null, null, GameEngine.WinnerSide.HERO1,
-                GameEngine.OutcomeType.DEFEAT, 200, 0);
+        // Act
+        int baseExp = calculator.calculateBaseExperience(BattleType.BANK_BATTLE, result);
 
-        Map<EconomyHero, Integer> rewards = calculator.calculate(context, result);
-        assertEquals(1, rewards.size());
-        assertEquals(200, rewards.get(hero1));
+        // Assert
+        // W banku nie ma bonusu za bohatera, więc exp to tylko HP zabitych potworów
+        assertEquals(200, baseExp);
     }
 
     @Test
     void shouldReturnNoRewardsForEscapeOrSurrender() {
-        EconomyHero hero1 = new EconomyHero(EconomyHero.Fraction.NECROPOLIS, new Resources(1000, 0, 0, 0, 0, 0, 0), stats);
-        EconomyHero hero2 = new EconomyHero(EconomyHero.Fraction.NECROPOLIS, new Resources(1000, 0, 0, 0, 0, 0, 0), stats);
-        BattleRewardContext context = new BattleRewardContext(BattleType.HERO_VS_HERO, hero1, hero2);
-        BattleRewardCalculator calculator = new BattleRewardCalculator(new FixedLearningBonusProvider(0));
+        // Arrange
+        // Wynik bitwy: przeciwnik uciekł, stracił 100 HP przed ucieczką
+        BattleResult escaped = new BattleResult(dummyWinner, OutcomeType.ESCAPE, 100);
 
-        GameEngine.BattleResult escaped = new GameEngine.BattleResult(null, null, GameEngine.WinnerSide.HERO1,
-                GameEngine.OutcomeType.ESCAPE, 100, 0);
-        Map<EconomyHero, Integer> rewards = calculator.calculate(context, escaped);
-        assertTrue(rewards.isEmpty());
+        // Act
+        int baseExp = calculator.calculateBaseExperience(BattleType.HERO_VS_HERO, escaped);
+
+        // Assert
+        // Zgodnie z OutcomeType.ESCAPE nie powinniśmy przyznawać exp za walkę
+        assertEquals(0, baseExp);
     }
 }

@@ -42,6 +42,7 @@ public class EconomyHero implements PropertyChangeListener
     private final List<Artifact> artifacts = new ArrayList<>();
     @Getter
     private final List<EconomySpell> spells = new ArrayList<>();
+    protected List<ExpModifierIf> expModifiers = new ArrayList<>();
 
     public EconomyHero( final Fraction aFraction, final Resources aResources, final Statistics aStats)
     {
@@ -130,13 +131,35 @@ public class EconomyHero implements PropertyChangeListener
         NECROPOLIS
     }
 
-    public void addExperience(final int experienceToAdd) {
-        if (experienceToAdd <= 0) {
+    protected void addExpModifier(ExpModifierIf modifier){
+        expModifiers.add(modifier);
+    }
+
+    protected void removeExpModifier(ExpModifierIf modifier){
+        expModifiers.remove(modifier);
+    }
+
+    public void addExperience(final int baseExperienceToAdd) {
+        if (baseExperienceToAdd <= 0) {
             return;
         }
-        int oldLevel = this.level;
-        this.experience += experienceToAdd;
 
+        double totalMultiplier = expModifiers.stream()
+                .map(ExpModifierIf::getExpMultiplier)
+                .reduce(1.0, (a, b) -> a * b);
+
+        // Alternatywa: Jeśli wolisz dodawać bonusy (np. +5% i +10% daje +15%, a nie 1.05 * 1.10):
+        // double totalMultiplier = 1.0 + expModifiers.stream()
+        //         .mapToDouble(m -> m.getExpMultiplier() - 1.0)
+        //         .sum();
+
+        // 2. Aplikowanie zmian i zaokrąglanie
+        int actualExperienceToAdd = (int) Math.round(baseExperienceToAdd * totalMultiplier);
+
+        int oldLevel = this.level;
+        this.experience += actualExperienceToAdd;
+
+        // 3. Sprawdzanie awansu na nowy poziom
         while (this.experience >= getExperienceForNextLevel(this.level + 1)) {
             this.experience -= getExperienceForNextLevel(this.level + 1);
             this.level++;

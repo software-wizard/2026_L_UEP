@@ -6,17 +6,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import pl.psi.*;
+import pl.psi.BattleResults.BattleResult;
 import pl.psi.Spells.DamageSpell;
-import pl.psi.Spells.Spell;
+import pl.psi.converter.rewards.BattleRewardService;
 import pl.psi.creatures.*;
 import pl.psi.economy.Point;
 import pl.psi.gui.MainBattleController;
 import pl.psi.hero.EconomyHero;
 import pl.psi.hero.skills.AbstractSkill;
 import pl.psi.converter.rewards.BattleRewardCalculator;
-import pl.psi.converter.rewards.BattleRewardContext;
 import pl.psi.converter.rewards.BattleType;
-import pl.psi.converter.rewards.HeroSkillLearningBonusProvider;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -40,14 +39,15 @@ public class EcoBattleConverter {
             loader.setLocation(EcoBattleConverter.class.getClassLoader()
                     .getResource("fxml/main-battle.fxml"));
 
-            final BattleRewardContext rewardContext = new BattleRewardContext(BattleType.HERO_VS_HERO, aPlayer1, aPlayer2);
+            Hero convertedHero1 = convert(aPlayer1);
+            Hero convertedHero2 = convert(aPlayer2);
 
             loader.setController(new MainBattleController(
-                    convert(aPlayer1),
-                    convert(aPlayer2),
+                    convertedHero1,
+                    convertedHero2,
                     new HashMap<>(),
                     specialFields,
-                    battleResult -> settleBattleExperience(rewardContext, battleResult, new BattleRewardCalculator(new HeroSkillLearningBonusProvider()))
+                    battleResult -> settleBattleExperience(BattleType.HERO_VS_HERO, battleResult, aPlayer1, aPlayer2, convertedHero1, convertedHero2)
             ));
 
             Scene scene = new Scene(loader.load());
@@ -75,17 +75,16 @@ public class EcoBattleConverter {
             final FXMLLoader loader = new FXMLLoader();
             loader.setLocation(EcoBattleConverter.class.getClassLoader().getResource("fxml/main-battle.fxml"));
 
-            final BattleRewardContext rewardContext = new BattleRewardContext(BattleType.BANK_BATTLE, aPlayer1, null);
-
+            Hero convertedHero1 = convert(aPlayer1);
             // Pusty bohater dla AI, aby gracz nie walczył przeciwko własnym statystykom
             Hero emptyNeutralHero = new Hero(new ArrayList<>(), new ArrayList<>());
 
             loader.setController(new MainBattleController(
-                    convert(aPlayer1),
+                    convertedHero1,
                     emptyNeutralHero,
                     bankEnemy1,
                     HashBiMap.create(),
-                    battleResult -> settleBattleExperience(rewardContext, battleResult, new BattleRewardCalculator(new HeroSkillLearningBonusProvider()))
+                    battleResult -> settleBattleExperience(BattleType.BANK_BATTLE, battleResult, aPlayer1, null, convertedHero1, emptyNeutralHero)
             ));
 
             Scene scene = new Scene(loader.load());
@@ -148,10 +147,13 @@ public class EcoBattleConverter {
                 .build();
     }
 
-    private static void settleBattleExperience(final BattleRewardContext aContext,
-                                               final GameEngine.BattleResult aBattleResult,
-                                               final BattleRewardCalculator calculator) {
-        calculator.calculate(aContext, aBattleResult)
-                .forEach(EconomyHero::addExperience);
-    }
+    private static void settleBattleExperience(final BattleType battleType,
+                                               final BattleResult battleResult,
+                                               final EconomyHero ecoPlayer1,
+                                               final EconomyHero ecoPlayer2,
+                                               final Hero convertedHero1,
+                                               final Hero convertedHero2) {
+
+        BattleRewardService rewardService = new BattleRewardService();
+        rewardService.settleExperience(battleType, battleResult, ecoPlayer1, ecoPlayer2, convertedHero1, convertedHero2);
 }

@@ -1,6 +1,9 @@
 package pl.psi;
 
 import com.google.common.collect.BiMap;
+import pl.psi.BattleResults.BattleResult;
+import pl.psi.BattleResults.OutcomeType;
+import pl.psi.BattleResults.WinnerSide;
 import pl.psi.Spells.Spell;
 import pl.psi.creatures.Creature;
 
@@ -132,11 +135,11 @@ public class GameEngine {
         }
 
         if (hero1Defeated && hero2Defeated) {
-            battleResult = new BattleResult(null, null, WinnerSide.NONE, OutcomeType.MUTUAL_DEFEAT, hero1VanquishedEnemyHp, hero2VanquishedEnemyHp);
-        } else if (hero2Defeated) {
-            battleResult = new BattleResult(hero1, hero2, WinnerSide.HERO1, OutcomeType.DEFEAT, hero1VanquishedEnemyHp, hero2VanquishedEnemyHp);
-        } else {
-            battleResult = new BattleResult(hero2, hero1, WinnerSide.HERO2, OutcomeType.DEFEAT, hero1VanquishedEnemyHp, hero2VanquishedEnemyHp);
+            battleResult = new BattleResult(null, OutcomeType.MUTUAL_DEFEAT, 0);
+        } else if (hero1Defeated){
+            battleResult = new BattleResult(hero2, OutcomeType.DEFEAT, hero2VanquishedEnemyHp);
+        }else {
+            battleResult = new BattleResult(hero1, OutcomeType.DEFEAT, hero1VanquishedEnemyHp);
         }
 
         observerSupport.firePropertyChange(BATTLE_FINISHED, null, battleResult);
@@ -238,69 +241,5 @@ public class GameEngine {
     }
 
     public static class BuffField {
-    }
-
-    public enum OutcomeType {
-        DEFEAT,
-        SURRENDER,
-        ESCAPE,
-        MUTUAL_DEFEAT
-    }
-
-    public enum WinnerSide {
-        HERO1,
-        HERO2,
-        NONE
-    }
-
-    public static class BattleResult {
-        private final Hero winner;
-        private final Hero loser;
-        private final WinnerSide winnerSide;
-        private final OutcomeType outcomeType;
-        private final int hero1VanquishedEnemyHp;
-        private final int hero2VanquishedEnemyHp;
-
-        public BattleResult(final Hero aWinner, final Hero aLoser, final WinnerSide aWinnerSide, final OutcomeType aOutcomeType,
-                            final int aHero1VanquishedEnemyHp, final int aHero2VanquishedEnemyHp) {
-            winner = aWinner;
-            loser = aLoser;
-            winnerSide = aWinnerSide;
-            outcomeType = aOutcomeType;
-            hero1VanquishedEnemyHp = aHero1VanquishedEnemyHp;
-            hero2VanquishedEnemyHp = aHero2VanquishedEnemyHp;
-        }
-
-        public Hero getWinner() {
-            return winner;
-        }
-
-        public Hero getLoser() {
-            return loser;
-        }
-
-        public OutcomeType getOutcomeType() {
-            return outcomeType;
-        }
-
-        public WinnerSide getWinnerSide() {
-            return winnerSide;
-        }
-
-        public int getHero1VanquishedEnemyHp() {
-            return hero1VanquishedEnemyHp;
-        }
-
-        public int getHero2VanquishedEnemyHp() {
-            return hero2VanquishedEnemyHp;
-        }
-
-        public boolean isHero1Winner() {
-            return winnerSide == WinnerSide.HERO1;
-        }
-
-        public boolean isHero2Winner() {
-            return winnerSide == WinnerSide.HERO2;
-        }
     }
 }
