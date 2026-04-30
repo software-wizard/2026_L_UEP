@@ -30,6 +30,8 @@ public class BattleRewardService {
         // Przypisujemy punkty doświadczenia (wraz z wewnętrznymi modyfikatorami bohatera)
         if (winnerEcoHero != null) {
             winnerEcoHero.addExperience(baseExperience);
+            System.out.println("Winner is " + winnerEcoHero);
+            System.out.println("He gained:" + baseExperience);
         }
     }
 }

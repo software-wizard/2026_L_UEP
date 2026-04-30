@@ -1,5 +1,5 @@
 package pl.psi.hero;
 
-public class ExpModifierIf {
+public interface ExpModifierIf {
     double getExpMultiplier();
 }

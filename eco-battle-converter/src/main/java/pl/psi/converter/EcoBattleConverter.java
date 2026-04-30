@@ -156,4 +156,4 @@ public class EcoBattleConverter {
 
         BattleRewardService rewardService = new BattleRewardService();
         rewardService.settleExperience(battleType, battleResult, ecoPlayer1, ecoPlayer2, convertedHero1, convertedHero2);
-}
+}}
