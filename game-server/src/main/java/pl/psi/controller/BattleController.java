@@ -59,7 +59,6 @@ public class BattleController {
 
                     state.put(x + "," + y, tile);
                 } catch (Exception e) {
-                    // If queue is empty, safely default all flags to false
                     tile.put("hasCreature", false);
                     tile.put("hasSpecialField", false);
                     tile.put("isCurrentCreature", false);
@@ -189,6 +188,14 @@ public class BattleController {
             return ResponseEntity.badRequest().body("No target.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @GetMapping("/currentHero")
+    public ResponseEntity<Hero> getCurrentHero() {
+        try {
+            return ResponseEntity.ok(this.gameStateService.getGameEngine().getCurrentHero());
+        } catch (Exception e) {
+            return ResponseEntity.noContent().build();
         }
     }
 }
