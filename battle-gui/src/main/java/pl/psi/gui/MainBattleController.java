@@ -8,13 +8,12 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import pl.psi.GameEngine;
 import pl.psi.Hero;
-import pl.psi.gui.proxy.GameEngineProxy;
 import pl.psi.BattlePoint;
 import pl.psi.SpecialField;
 import pl.psi.creatures.Creature;
 import pl.psi.gui.SpellGUI.SpellCastingManager;
 import pl.psi.gui.SpellGUI.SpellUIManager;
-
+import pl.psi.gui.proxy.GameEngineProxy;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
