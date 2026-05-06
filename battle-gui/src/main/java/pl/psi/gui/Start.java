@@ -42,7 +42,7 @@ public class Start extends Application
             final FXMLLoader loader = new FXMLLoader();
             loader.setLocation( Start.class.getClassLoader()
                 .getResource( "fxml/main-battle.fxml" ) );
-            loader.setController( new MainBattleController( createP1(), createP2(), new HashMap<>(), createSpecialFields() ) );
+            loader.setController( new MainBattleController( createP1(), createP2(), new HashMap<>(), createSpecialFields(), null ) );
             scene = new Scene( loader.load() );
             primaryStage.setScene( scene );
             primaryStage.setX( 5 );
@@ -57,7 +57,7 @@ public class Start extends Application
 
     private Hero createP2()
     {
-        CreatureStats statBuff = CreatureStats.builder()
+        pl.psi.creatures.CreatureStats statBuff = pl.psi.creatures.CreatureStats.builder()
                 .attack(5)
                 .armor(0)
                 .maxHp(0)
@@ -68,9 +68,11 @@ public class Start extends Application
                 .damage(Range.closed(0, 0))
                 .isUpgraded(false)
                 .build();
-        List<Spell> spells = List.of(
-            new DamageSpell("Damage", 1, 1),
-            new BuffSpell("Buff", 1, 3, statBuff)
+        List<Spell> spells = List.<Spell>of(
+            new DamageSpell("Magic Arrow", 1, 1),
+            new BuffSpell("Bless", 1, 3, statBuff),
+            new DamageSpell("Fireball", 2, 1, new pl.psi.Spells.RadiusArea(1.5)),
+            new pl.psi.Spells.DebuffSpell("Curse", 1, 3, statBuff)
         );
 
         final Hero ret = new Hero( List.of( new NecropolisFactory().create( true, 1, 5 ) ),spells );
@@ -79,7 +81,7 @@ public class Start extends Application
 
     private Hero createP1()
     {
-        CreatureStats statBuff = CreatureStats.builder()
+        pl.psi.creatures.CreatureStats statBuff = pl.psi.creatures.CreatureStats.builder()
                 .attack(5)
                 .armor(0)
                 .maxHp(0)
@@ -90,9 +92,11 @@ public class Start extends Application
                 .damage(Range.closed(0, 0))
                 .isUpgraded(false)
                 .build();
-        List<Spell> spells = List.of(
-                new DamageSpell("Damage", 1, 1),
-                new BuffSpell("Buff", 1, 3, statBuff)
+        List<Spell> spells = List.<Spell>of(
+                new DamageSpell("Magic Arrow", 1, 1),
+                new BuffSpell("Bless", 1, 3, statBuff),
+                new DamageSpell("Fireball", 2, 1, new pl.psi.Spells.RadiusArea(1.5)),
+                new pl.psi.Spells.DebuffSpell("Curse", 1, 3, statBuff)
         );
 
 

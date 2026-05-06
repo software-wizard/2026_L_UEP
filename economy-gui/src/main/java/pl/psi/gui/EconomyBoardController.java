@@ -16,6 +16,7 @@ import pl.psi.map.buildings.bank.Bank;
 import pl.psi.map.buildings.town.Town;
 import pl.psi.map.resources.Resources;
 import pl.psi.economy.Point;
+import pl.psi.gui.proxy.BoardEconomyEngineProxy;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -25,13 +26,12 @@ public class EconomyBoardController implements PropertyChangeListener {
     private final BoardEconomyEngine gameEngine;
     @FXML private GridPane gridMap;
     @FXML private Button passButton, equipmentButton, heroWindowButton, testExpButton;
-    @FXML private Label goldLabel, woodLabel, oreLabel, mercuryLabel, sulphurLabel, crystalLabel, gemsLabel,attackLabel,defenceLabel,powerLabel,knowledgeLabel;
-
+    @FXML private Label expLabel, lvlLabel, goldLabel, woodLabel, oreLabel, mercuryLabel, sulphurLabel, crystalLabel, gemsLabel, attackLabel, defenceLabel, powerLabel, knowledgeLabel;
     private final EconomyHero battleHero1;
     private final EconomyHero battleHero2;
 
     public EconomyBoardController(final EconomyHero hero1, final EconomyHero hero2, Map<Point, MapObjectIf> map) {
-        this.gameEngine = new BoardEconomyEngine(hero1, hero2, map);
+        this.gameEngine = new BoardEconomyEngineProxy(hero1, hero2, map);
         this.battleHero1 = hero1;
         this.battleHero2 = hero2;
     }
@@ -122,6 +122,7 @@ public class EconomyBoardController implements PropertyChangeListener {
     private void updateDisplay(){
         updateResourceDisplay();
         updateStatsDisplay();
+        updateExpDisplay();
     }
 
     private void updateResourceDisplay() {
@@ -141,6 +142,13 @@ public class EconomyBoardController implements PropertyChangeListener {
         defenceLabel.setText("Defense: " + stats.getDefense());
         powerLabel.setText("Power: " + stats.getPower());
         knowledgeLabel.setText("Knowledge: " + stats.getKnowledge());
+    }
+
+    private void updateExpDisplay() {
+        int lvl = gameEngine.getCurrentHero().getLevel();
+        int exp = gameEngine.getCurrentHero().getExperience();
+        lvlLabel.setText("Level: " + lvl);
+        expLabel.setText("Exp: " + exp);
     }
 
 

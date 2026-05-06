@@ -9,11 +9,13 @@ import pl.psi.map.resources.Resources;
 
 public class Artifact implements InteractableIf {
     @Getter
-    private final ArtifactType type;
+    private ArtifactType type = null;
 
     public Artifact(ArtifactType type) {
         this.type = type;
     }
+    
+    public Artifact(){};
 
     public Statistics getStats(){
         return type.getStatistics();
@@ -38,12 +40,12 @@ public class Artifact implements InteractableIf {
     }
 
     @Override
-    public void enter(EconomyHero hero) {
+    public void generateResource() {
 
     }
 
     @Override
-    public void generateResource() {
+    public void generateUnits() {
 
     }
 
@@ -63,12 +65,17 @@ public class Artifact implements InteractableIf {
     }
 
     @Override
-    public EnterAction onEnter() {
+    public EnterAction firstInteraction() {
         return null;
     }
 
     @Override
     public EnterAction secondInteraction() {
         return null;
+    }
+
+    @Override
+    public void resetBuildingOption() {
+
     }
 }

@@ -17,8 +17,16 @@ public class BuffSpell extends Spell {
         this.buffStats = buffStats;
     }
 
+    public BuffSpell(String name, int spellLevel, int duration, CreatureStats buffStats, SpellAreaIf areaStrategy) {
+        super(name, spellLevel, duration, areaStrategy);
+        this.buffStats = buffStats;
+    }
+
     @Override
-    public void cast(Creature targetCreature) {targetCreature.applyTemporaryBuff(this);
+    public void cast(Creature targetCreature, int spellPower) {
+        // In Heroes 3, spell power extends buff duration
+        int effectiveDuration = this.getDuration() + spellPower;
+        targetCreature.applySpellEffect(this, effectiveDuration);
     }
 
     @Override

@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import pl.psi.Spells.FireWallSpell;
 import pl.psi.creatures.Creature;
 import pl.psi.creatures.CreatureStats;
+import pl.psi.creatures.CreatureStatisticIf;
 
 @Disabled
 class FireWallSpellTest {

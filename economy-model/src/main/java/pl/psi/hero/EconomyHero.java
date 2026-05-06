@@ -6,8 +6,12 @@ import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import java.util.concurrent.ThreadLocalRandom;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
+import lombok.Setter;
 import pl.psi.creatures.EconomyCreature;
 import pl.psi.hero.artifacts.Artifact;
 import pl.psi.hero.artifacts.EconomySpell;
@@ -17,27 +21,29 @@ import pl.psi.hero.skills.OffenceSkill;
 import pl.psi.hero.skills.LearningSkill;
 import pl.psi.map.resources.Resources;
 
+@Getter
+@Setter
 public class EconomyHero implements PropertyChangeListener
 {
+    private static final int MIN_INITIAL_EXPERIENCE = 40;
+    private static final int MAX_INITIAL_EXPERIENCE = 90;
+    private static final String LEVEL_UP = "levelUp";
+
     private final Fraction fraction;
     private final List< EconomyCreature > creatureList;
-    @Getter
     private Resources resources;
-    @Getter
     private final int moveRange = 10;
     private int remainingMoves;
     @Getter
     private int experience;
-    @Getter
     public int level;
+    @JsonIgnore
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-    @Getter
     private List<AbstractSkill> skills;
-
     private final Statistics baseStatistics;
     private final List<Artifact> artifacts = new ArrayList<>();
-    @Getter
     private final List<EconomySpell> spells = new ArrayList<>();
+    protected List<ExpModifierIf> expModifiers = new ArrayList<>();
 
     public EconomyHero( final Fraction aFraction, final Resources aResources, final Statistics aStats)
     {
@@ -47,6 +53,15 @@ public class EconomyHero implements PropertyChangeListener
         resources = aResources;
         baseStatistics = aStats;
         skills = new ArrayList<>();
+        experience = ThreadLocalRandom.current().nextInt(MIN_INITIAL_EXPERIENCE, MAX_INITIAL_EXPERIENCE + 1);
+    }
+    public EconomyHero() {
+        this.fraction = Fraction.NECROPOLIS;
+        this.creatureList = new ArrayList<>();
+        this.resources = new Resources(0, 0, 0, 0, 0, 0, 0);
+        this.baseStatistics = new Statistics(0, 0, 0, 0);
+        this.skills = new ArrayList<>();
+        this.remainingMoves = moveRange;
     }
 
     public void resetMoveRange() {
@@ -102,6 +117,7 @@ public class EconomyHero implements PropertyChangeListener
         this.resources = this.resources.change(new Resources(-cost,0,0,0,0,0,0));
     }
 
+    @JsonIgnore
     public List< EconomyCreature > getCreatures()
     {
         return List.copyOf( creatureList );
@@ -148,40 +164,101 @@ public class EconomyHero implements PropertyChangeListener
         NECROPOLIS
     }
 
-    public void addExperience(final int experienceToAdd) {
-        float bonus = 1.0f;
-        Optional<AbstractSkill> learning = skills.stream()
-                .filter(s -> s.getName() == pl.psi.hero.skills.SkillName.LEARNING)
-                .findFirst();
-        if (learning.isPresent()) {
-            bonus += learning.get().getFactor();
+    protected void addExpModifier(ExpModifierIf modifier){
+        expModifiers.add(modifier);
+    }
+
+    protected void removeExpModifier(ExpModifierIf modifier){
+        expModifiers.remove(modifier);
+    }
+
+    public void addExperience(final int baseExperienceToAdd) {
+        if (baseExperienceToAdd <= 0) {
+            return;
         }
 
-        int finalExperience = Math.round(experienceToAdd * bonus);
-        int oldLevel = this.level;
-        this.experience += finalExperience;
+        double totalMultiplier = expModifiers.stream()
+                .map(ExpModifierIf::getExpMultiplier)
+                .reduce(1.0, (a, b) -> a * b);
 
-        while (this.experience >= getExperienceForNextLevel(this.level)) {
-            this.experience -= getExperienceForNextLevel(this.level);
+        // Alternatywa: Jeśli wolisz dodawać bonusy (np. +5% i +10% daje +15%, a nie 1.05 * 1.10):
+        // double totalMultiplier = 1.0 + expModifiers.stream()
+        //         .mapToDouble(m -> m.getExpMultiplier() - 1.0)
+        //         .sum();
+
+        // 2. Aplikowanie zmian i zaokrąglanie
+        int actualExperienceToAdd = (int) Math.round(baseExperienceToAdd * totalMultiplier);
+
+        int oldLevel = this.level;
+        this.experience += actualExperienceToAdd;
+
+        // 3. Sprawdzanie awansu na nowy poziom
+        while (this.experience >= getExperienceForNextLevel(this.level + 1)) {
+            this.experience -= getExperienceForNextLevel(this.level + 1);
             this.level++;
-            pcs.firePropertyChange("levelUp", oldLevel, this.level);
-            pcs.firePropertyChange("levelUp_hero", null, this);
+            pcs.firePropertyChange(LEVEL_UP, oldLevel, this.level);
             oldLevel = this.level;
         }
     }
 
-    private int getExperienceForNextLevel(int currentLevel) {
-        return 100 + (currentLevel * 50);
+    private int getExperienceForNextLevel(final int nextLevel) {
+        if (nextLevel <= 1) {
+            return 0;
+        }
+        if (nextLevel == 2) {
+            return 1000;
+        }
+        if (nextLevel == 3) {
+            return 1000;
+        }
+        if (nextLevel == 4) {
+            return 1200;
+        }
+        if (nextLevel == 5) {
+            return 1400;
+        }
+        if (nextLevel == 6) {
+            return 1600;
+        }
+        if (nextLevel == 7) {
+            return 1800;
+        }
+        if (nextLevel == 8) {
+            return 2000;
+        }
+        if (nextLevel == 9) {
+            return 2200;
+        }
+        if (nextLevel == 10) {
+            return 2500;
+        }
+        if (nextLevel == 11) {
+            return 2800;
+        }
+        if (nextLevel == 12) {
+            return 3100;
+        }
+        if (nextLevel == 13) {
+            return 3720;
+        }
+
+        double requirement = 3720;
+        for (int level = 14; level <= nextLevel; level++) {
+            requirement *= 1.2;
+        }
+        return (int) Math.round(requirement);
     }
 
     public void addArtifact(Artifact artifact) {
         artifacts.add(artifact);
     }
 
+    @JsonIgnore
     public List<Artifact> getArtifacts() {
         return List.copyOf(artifacts);
     }
 
+    @JsonIgnore
     public Statistics getTotalStatistics() {
         Statistics total = new Statistics(
                 baseStatistics.getAttack(),
