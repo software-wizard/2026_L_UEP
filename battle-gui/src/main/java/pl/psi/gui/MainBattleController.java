@@ -8,6 +8,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import pl.psi.GameEngine;
 import pl.psi.Hero;
+import pl.psi.gui.proxy.GameEngineProxy;
 import pl.psi.BattlePoint;
 import pl.psi.SpecialField;
 import pl.psi.creatures.Creature;
@@ -33,7 +34,7 @@ public class MainBattleController implements PropertyChangeListener {
     private Button spellButton;
 
     public MainBattleController(final Hero aHero1, final Hero aHero2, final Map<BattlePoint, Creature> bankEnemy, BiMap<BattlePoint, SpecialField> aSpecialField) {
-        gameEngine = new GameEngine(aHero1, aHero2, aSpecialField, bankEnemy);
+        gameEngine = new GameEngineProxy(aHero1, aHero2, aSpecialField, bankEnemy);
     }
 
     @FXML
@@ -112,7 +113,7 @@ public class MainBattleController implements PropertyChangeListener {
     }
 
     private SpecialField.FieldName getFieldName(SpecialField specialField) {
-       return specialField.getFieldName();
+        return specialField.getFieldName();
     }
 
     @Override

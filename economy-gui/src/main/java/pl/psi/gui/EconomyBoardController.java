@@ -16,6 +16,7 @@ import pl.psi.map.buildings.bank.Bank;
 import pl.psi.map.buildings.town.Town;
 import pl.psi.map.resources.Resources;
 import pl.psi.economy.Point;
+import pl.psi.gui.proxy.BoardEconomyEngineProxy;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -31,7 +32,7 @@ public class EconomyBoardController implements PropertyChangeListener {
     private final EconomyHero battleHero2;
 
     public EconomyBoardController(final EconomyHero hero1, final EconomyHero hero2, Map<Point, MapObjectIf> map) {
-        this.gameEngine = new BoardEconomyEngine(hero1, hero2, map);
+        this.gameEngine = new BoardEconomyEngineProxy(hero1, hero2, map);
         this.battleHero1 = hero1;
         this.battleHero2 = hero2;
     }

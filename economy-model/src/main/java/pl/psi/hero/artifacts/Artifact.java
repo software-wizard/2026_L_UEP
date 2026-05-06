@@ -9,11 +9,13 @@ import pl.psi.map.resources.Resources;
 
 public class Artifact implements InteractableIf {
     @Getter
-    private final ArtifactType type;
+    private ArtifactType type = null;
 
     public Artifact(ArtifactType type) {
         this.type = type;
     }
+    
+    public Artifact(){};
 
     public Statistics getStats(){
         return type.getStatistics();

@@ -3,7 +3,6 @@ package pl.psi;
 import com.google.common.collect.BiMap;
 import pl.psi.Spells.Spell;
 import pl.psi.creatures.Creature;
-
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Map;

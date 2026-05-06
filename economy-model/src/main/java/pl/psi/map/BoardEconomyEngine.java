@@ -4,7 +4,6 @@ import pl.psi.hero.EconomyHero;
 import pl.psi.map.buildings.enterAction.EnterAction;
 import pl.psi.map.buildings.BuildingIf;
 import pl.psi.economy.Point;
-
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Map;
@@ -130,7 +129,6 @@ public class BoardEconomyEngine {
             interactable.generateResource();
             }
         }
-
 
     public void addObserver(final PropertyChangeListener aObserver) {
         observerSupport.addPropertyChangeListener(aObserver);
