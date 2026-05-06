@@ -24,7 +24,7 @@ import java.util.Map;
 public class EconomyBoardController implements PropertyChangeListener {
     private final BoardEconomyEngine gameEngine;
     @FXML private GridPane gridMap;
-    @FXML private Button passButton,equipmentButton;
+    @FXML private Button passButton, equipmentButton, heroWindowButton, testExpButton;
     @FXML private Label goldLabel, woodLabel, oreLabel, mercuryLabel, sulphurLabel, crystalLabel, gemsLabel,attackLabel,defenceLabel,powerLabel,knowledgeLabel;
 
     private final EconomyHero battleHero1;
@@ -43,6 +43,10 @@ public class EconomyBoardController implements PropertyChangeListener {
         gameEngine.addObserver(this);
         passButton.setOnMouseClicked(e -> gameEngine.pass());
         equipmentButton.setOnMouseClicked(e -> showEquipment());
+        heroWindowButton.setOnMouseClicked(e -> showHeroWindow());
+        testExpButton.setOnMouseClicked(e -> gameEngine.getCurrentHero().addExperience(200));
+        battleHero1.addObserver(this);
+        battleHero2.addObserver(this);
     }
 
     private void refreshGui() {
@@ -144,6 +148,7 @@ public class EconomyBoardController implements PropertyChangeListener {
         WindowManager.openEquipment(gameEngine.getCurrentHero());
     }
 
+    private void showHeroWindow() { WindowManager.openHeroWindow(gameEngine.getCurrentHero()); }
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         refreshGui();
@@ -168,6 +173,11 @@ public class EconomyBoardController implements PropertyChangeListener {
                 Bank bank = (Bank) data2[1];
                 Map<Point, EconomyCreature> enemies = bank.getEnemies();
                 EcoBattleConverter.startBankBattle(hero2, enemies);
+                break;
+
+            case "levelUp_hero":
+                EconomyHero levelHero = (EconomyHero) evt.getNewValue();
+                javafx.application.Platform.runLater(() -> WindowManager.openSkillChoice(levelHero));
                 break;
         }
     }

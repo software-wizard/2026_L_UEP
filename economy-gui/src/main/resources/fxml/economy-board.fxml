@@ -50,6 +50,8 @@
             </VBox>
 
             <Button fx:id="equipmentButton" text="Show Equipment" />
+            <Button fx:id="heroWindowButton" text="Show Hero" />
+            <Button fx:id="testExpButton" text="Add 1000 EXP (Test)" />
         </VBox>
     </left>
 

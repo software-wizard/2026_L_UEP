@@ -5,6 +5,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 import pl.psi.gui.Upgrades.UpgradeController;
+import pl.psi.gui.hero.HeroWindowController;
 import pl.psi.gui.shops.*;
 import pl.psi.hero.EconomyHero;
 import pl.psi.map.buildings.town.Town;
@@ -130,6 +131,39 @@ public class WindowManager {
 
         } catch (final IOException aE) {
             aE.printStackTrace();
+        }
+    }
+    public static void openHeroWindow(EconomyHero hero) {
+        try {
+            FXMLLoader loader = new FXMLLoader(WindowManager.class.getResource("/fxml/hero_window.fxml"));
+
+            Parent root = loader.load();
+
+            HeroWindowController controller = loader.getController();
+            controller.setHero(hero);
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Hero Window");
+            stage.show();
+
+        } catch (final IOException aE) {
+            aE.printStackTrace();
+        }
+    }
+    public static void openSkillChoice(EconomyHero hero) {
+        try {
+            FXMLLoader loader = new FXMLLoader(WindowManager.class.getResource("/fxml/skill_choice.fxml"));
+            Parent root = loader.load();
+            pl.psi.gui.hero.SkillChoiceController controller = loader.getController();
+            controller.init(hero);
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.setTitle("Level Up!");
+            stage.show();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }

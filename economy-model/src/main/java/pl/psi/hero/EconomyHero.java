@@ -5,6 +5,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import lombok.Getter;
 import pl.psi.creatures.EconomyCreature;
@@ -13,6 +14,7 @@ import pl.psi.hero.artifacts.EconomySpell;
 import pl.psi.hero.skills.AbstractSkill;
 import pl.psi.hero.skills.ArmorerSkill;
 import pl.psi.hero.skills.OffenceSkill;
+import pl.psi.hero.skills.LearningSkill;
 import pl.psi.map.resources.Resources;
 
 public class EconomyHero implements PropertyChangeListener
@@ -24,6 +26,7 @@ public class EconomyHero implements PropertyChangeListener
     @Getter
     private final int moveRange = 10;
     private int remainingMoves;
+    @Getter
     private int experience;
     @Getter
     public int level;
@@ -109,7 +112,30 @@ public class EconomyHero implements PropertyChangeListener
     }
 
     public void upgradeSkill(AbstractSkill aSelectedSkill) {
-        skills.add(aSelectedSkill);
+        Optional<AbstractSkill> existing = skills.stream()
+                .filter(s -> s.getName().equals(aSelectedSkill.getName()))
+                .findFirst();
+        if (existing.isPresent()) {
+            existing.get().upgrade();
+        } else {
+            skills.add(aSelectedSkill);
+        }
+    }
+
+    public List<AbstractSkill> getPossibleSkills() {
+        List<AbstractSkill> possible = new ArrayList<>();
+        // Simple logic for now: only Offence and Armorer
+        addIfPossible(possible, pl.psi.hero.skills.SkillName.OFFENCE, new pl.psi.hero.skills.OffenceSkill());
+        addIfPossible(possible, pl.psi.hero.skills.SkillName.ARMORER, new pl.psi.hero.skills.ArmorerSkill());
+        addIfPossible(possible, pl.psi.hero.skills.SkillName.LEARNING, new pl.psi.hero.skills.LearningSkill());
+        return possible;
+    }
+
+    private void addIfPossible(List<AbstractSkill> list, pl.psi.hero.skills.SkillName name, AbstractSkill skillTemplate) {
+        Optional<AbstractSkill> existing = skills.stream().filter(s -> s.getName() == name).findFirst();
+        if (existing.isEmpty() || existing.get().getLevel() != pl.psi.hero.skills.SkillLevel.EXPERT) {
+            list.add(skillTemplate);
+        }
     }
 
     public void addSpell(EconomySpell aPickableSpell) {
@@ -123,13 +149,23 @@ public class EconomyHero implements PropertyChangeListener
     }
 
     public void addExperience(final int experienceToAdd) {
+        float bonus = 1.0f;
+        Optional<AbstractSkill> learning = skills.stream()
+                .filter(s -> s.getName() == pl.psi.hero.skills.SkillName.LEARNING)
+                .findFirst();
+        if (learning.isPresent()) {
+            bonus += learning.get().getFactor();
+        }
+
+        int finalExperience = Math.round(experienceToAdd * bonus);
         int oldLevel = this.level;
-        this.experience += experienceToAdd;
+        this.experience += finalExperience;
 
         while (this.experience >= getExperienceForNextLevel(this.level)) {
             this.experience -= getExperienceForNextLevel(this.level);
             this.level++;
             pcs.firePropertyChange("levelUp", oldLevel, this.level);
+            pcs.firePropertyChange("levelUp_hero", null, this);
             oldLevel = this.level;
         }
     }
@@ -190,5 +226,8 @@ public class EconomyHero implements PropertyChangeListener
             skills = new ArrayList<>();
         }
         skills.add( aSkill );
+    }
+    public void addObserver(PropertyChangeListener observer) {
+        pcs.addPropertyChangeListener(observer);
     }
 }
