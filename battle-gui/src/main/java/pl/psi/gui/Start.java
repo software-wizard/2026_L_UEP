@@ -42,7 +42,7 @@ public class Start extends Application
             final FXMLLoader loader = new FXMLLoader();
             loader.setLocation( Start.class.getClassLoader()
                 .getResource( "fxml/main-battle.fxml" ) );
-            loader.setController( new MainBattleController( createP1(), createP2(), new HashMap<>(), createSpecialFields() ) );
+            loader.setController( new MainBattleController( createP1(), createP2(), new HashMap<>(), createSpecialFields(), null ) );
             scene = new Scene( loader.load() );
             primaryStage.setScene( scene );
             primaryStage.setX( 5 );

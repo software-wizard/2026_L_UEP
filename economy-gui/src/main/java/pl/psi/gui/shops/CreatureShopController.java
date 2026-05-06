@@ -3,7 +3,6 @@ package pl.psi.gui.shops;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
@@ -11,6 +10,7 @@ import pl.psi.EconomyEngine;
 import pl.psi.creatures.EconomyCreature;
 import pl.psi.creatures.EconomyNecropolisFactory;
 import pl.psi.gui.CreatureButton;
+import pl.psi.gui.proxy.EconomyEngineProxy;
 import pl.psi.hero.EconomyHero;
 import pl.psi.map.buildings.town.CreatureBuildings;
 import pl.psi.map.buildings.town.Town;
@@ -25,14 +25,14 @@ public class CreatureShopController implements PropertyChangeListener {
     @FXML Label currentGoldLabel;
 
     public CreatureShopController(final EconomyHero aHero1, final Town town) {
-        this.economyEngine = new EconomyEngine(aHero1);
+        this.economyEngine = new EconomyEngineProxy(aHero1);
         this.town = town;
     }
 
     @FXML
     void initialize() {
         refreshGui();
-        economyEngine.addObserver(EconomyEngine.HERO_BOUGHT_CREATURE, this);
+//        economyEngine.addObserver(EconomyEngine.HERO_BOUGHT_CREATURE, this);
     }
 
     public void refreshGui() {
@@ -69,10 +69,10 @@ public class CreatureShopController implements PropertyChangeListener {
     public void buy(final EconomyCreature aCreature) {
         CreatureBuildings.getBuildingForCreature(aCreature.getStats()).ifPresent(building -> {
             int amountToBuy = aCreature.getAmount();
-            // Sprawdzamy dostępność w puli miasta
             if (town.getAvailableUnits(building) >= amountToBuy) {
+//              economyEngine.buy(aCreature); -> powinno robić wszystko !!
                 economyEngine.buy(aCreature);
-                town.buyUnits(building, amountToBuy); // Odejmujemy wybraną ilość
+                town.buyUnits(building, amountToBuy);
                 refreshGui();
             }
         });

@@ -5,7 +5,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import pl.psi.economy.Point;
 import pl.psi.hero.EconomyHero;
-import pl.psi.hero.Statistics;
 import pl.psi.hero.artifacts.Artifact;
 import pl.psi.hero.artifacts.ArtifactType;
 import pl.psi.hero.artifacts.EconomySpell;
@@ -17,6 +16,12 @@ import pl.psi.map.resources.Gold;
 import pl.psi.map.resources.Resources;
 import pl.psi.map.resources.generators.ResourceGenType;
 import pl.psi.map.resources.generators.ResourceGenerator;
+import pl.psi.dto.BuyCreatureRequest;
+import pl.psi.EconomyEngine;
+import pl.psi.creatures.CreatureStatistic;
+import pl.psi.creatures.EconomyCreature;
+import pl.psi.map.BoardEconomyEngine;
+import pl.psi.map.buildings.town.CreatureBuildings;
 import pl.psi.service.GameStateService;
 
 import java.util.HashMap;
@@ -37,12 +42,12 @@ public class BoardEconomyController {
         this.gameStateService = gameStateService;
     }
 
-    private Map<Point, MapObjectIf> generateMapBlueprint(String mapName) {
+    private Map<Point, MapObjectIf> generateMapBlueprint(String mapName, EconomyHero aHero1, EconomyHero aHero2) {
         if ("DefaultMap".equals(mapName)) {
             return new HashMap<>(Map.ofEntries(
                     Map.entry(new Point(4,4), new Artifact(ArtifactType.SWORD_OF_HELLFIRE)),
-                    Map.entry(new Point(17,1), new Town()),
-                    Map.entry(new Point(1,7), new Town()),
+                    Map.entry(new Point(17,1), new Town(aHero1)),
+                    Map.entry(new Point(1,7), new Town(aHero2)),
                     Map.entry(new Point(3,2), new ResourceGenerator(ResourceGenType.GEM)),
                     Map.entry(new Point(5,6), new ResourceGenerator(ResourceGenType.GOLD)),
                     Map.entry(new Point(8,1), new ResourceGenerator(ResourceGenType.MERCURY)),
@@ -109,7 +114,7 @@ public class BoardEconomyController {
         EconomyHero hero1 = heroes.get(0);
         EconomyHero hero2 = heroes.get(1);
 
-        Map<Point, MapObjectIf> boardMap = generateMapBlueprint(mapName);
+        Map<Point, MapObjectIf> boardMap = generateMapBlueprint(mapName, hero1, hero2);
 
         this.gameStateService.startBoardEconomy(hero1, hero2, boardMap);
         return ResponseEntity.ok("Economy Board engine started successfully.");
@@ -233,6 +238,46 @@ public class BoardEconomyController {
         try {
             this.gameStateService.getBoardEconomyEngine().secondInteraction(new Point(x, y));
             return ResponseEntity.ok("Hero performed second interaction.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/buyCreature")
+    public ResponseEntity<String> buyCreature(@RequestBody BuyCreatureRequest req) {
+        try {
+            BoardEconomyEngine engine = this.gameStateService.getBoardEconomyEngine();
+            if (engine == null) {
+                return ResponseEntity.badRequest().body("Board economy not started");
+            }
+            Optional<Town> townOpt = engine.getTownUnderHero(engine.getCurrentHero());
+            if (townOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Current hero is not on a town tile");
+            }
+            Town town = townOpt.get();
+            CreatureStatistic stat = CreatureStatistic.valueOf(req.getStats());
+            EconomyCreature creature = EconomyCreature.builder()
+                    .stats(stat)
+                    .amount(req.getAmount())
+                    .goldCost(req.getGoldCost())
+                    .build();
+            Optional<CreatureBuildings> buildingOpt = CreatureBuildings.getBuildingForCreature(creature.getStats());
+            if (buildingOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Unknown creature type");
+            }
+            CreatureBuildings building = buildingOpt.get();
+            int amountToBuy = creature.getAmount();
+            if (town.getAvailableUnits(building) < amountToBuy) {
+                return ResponseEntity.badRequest().body("Not enough units in town pool");
+            }
+            EconomyEngine economyEngine = new EconomyEngine(engine.getCurrentHero());
+            economyEngine.buy(creature);
+            town.buyUnits(building, amountToBuy);
+            return ResponseEntity.ok("Creature purchased.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid creature stats: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

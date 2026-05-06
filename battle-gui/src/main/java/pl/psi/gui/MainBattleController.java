@@ -37,10 +37,6 @@ public class MainBattleController implements PropertyChangeListener {
     @FXML
     private Button spellButton;
 
-    public MainBattleController(final Hero aHero1, final Hero aHero2, final Map<BattlePoint, Creature> bankEnemy, BiMap<BattlePoint, SpecialField> aSpecialField) {
-        gameEngine = new GameEngineProxy(aHero1, aHero2, aSpecialField, bankEnemy);
-    }
-
     public MainBattleController(final Hero aHero1, final Hero aHero2, final Map<BattlePoint, Creature> bankEnemy,
                                 final BiMap<BattlePoint, SpecialField> aSpecialField,
                                 final Consumer<BattleResult> aBattleFinishedHandler) {

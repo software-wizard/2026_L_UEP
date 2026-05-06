@@ -49,7 +49,7 @@ public class GameEngineTest
 
         assertTrue(gameEngine.isBattleOver());
         assertTrue(gameEngine.getBattleResult().isPresent());
-        assertTrue(gameEngine.getBattleResult().get().isHero1Winner());
-        assertTrue(gameEngine.getBattleResult().get().getHero1VanquishedEnemyHp() > 0);
+        assertTrue(gameEngine.isHero1Winner());
+        assertTrue(gameEngine.getBattleResult().get().getLoserVanquishedHp() > 0);
     }
 }

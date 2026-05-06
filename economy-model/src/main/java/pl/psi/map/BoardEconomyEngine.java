@@ -4,6 +4,8 @@ import pl.psi.hero.EconomyHero;
 import pl.psi.map.buildings.enterAction.EnterAction;
 import pl.psi.map.buildings.BuildingIf;
 import pl.psi.economy.Point;
+import pl.psi.map.buildings.town.Town;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Map;
@@ -189,6 +191,13 @@ public class BoardEconomyEngine {
 
     public void enterBank(BuildingIf building){
         observerSupport.firePropertyChange("ENTER_BANK", null, new Object[]{getCurrentHero(), building});
+    }
+
+    public Optional<Town> getTownUnderHero(EconomyHero aCurrentHero) {
+        Point pos = board.getPosition(aCurrentHero);
+        return board.getBuildingAt(pos)
+                .filter(Town.class::isInstance)
+                .map(Town.class::cast);
     }
 }
 

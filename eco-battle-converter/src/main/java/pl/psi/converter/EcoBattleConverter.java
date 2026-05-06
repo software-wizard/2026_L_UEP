@@ -14,7 +14,6 @@ import pl.psi.economy.Point;
 import pl.psi.gui.MainBattleController;
 import pl.psi.hero.EconomyHero;
 import pl.psi.hero.skills.AbstractSkill;
-import pl.psi.converter.rewards.BattleRewardCalculator;
 import pl.psi.converter.rewards.BattleType;
 
 import java.io.IOException;
