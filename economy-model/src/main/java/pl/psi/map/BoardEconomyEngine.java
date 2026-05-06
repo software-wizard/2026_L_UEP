@@ -1,5 +1,6 @@
 package pl.psi.map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import pl.psi.hero.EconomyHero;
 import pl.psi.map.buildings.enterAction.EnterAction;
 import pl.psi.map.buildings.BuildingIf;
@@ -16,6 +17,7 @@ public class BoardEconomyEngine {
     public static final String HERO_MOVED = "HERO_MOVED";
     private final TurnQueueEconomy turnQueue;
     private final BoardEconomy board;
+    @JsonIgnore
     private final PropertyChangeSupport observerSupport = new PropertyChangeSupport(this);
     Map<Point, MapObjectIf> interactables;
     private int turnCounter;
@@ -200,5 +202,4 @@ public class BoardEconomyEngine {
                 .map(Town.class::cast);
     }
 }
-
 

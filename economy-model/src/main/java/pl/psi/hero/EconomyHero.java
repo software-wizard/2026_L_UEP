@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import pl.psi.creatures.EconomyCreature;
@@ -32,6 +33,7 @@ public class EconomyHero implements PropertyChangeListener
     private int remainingMoves;
     private int experience;
     public int level;
+    @JsonIgnore
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private List<AbstractSkill> skills;
     private final Statistics baseStatistics;

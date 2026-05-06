@@ -1,5 +1,6 @@
 package pl.psi;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.google.common.collect.BiMap;
 import pl.psi.BattleResults.BattleResult;
 import pl.psi.BattleResults.OutcomeType;
@@ -22,6 +23,7 @@ public class GameEngine {
     private static final String SPELL_CAST = "SPELL_CAST";
     private final TurnQueue turnQueue;
     private Board board;
+    @JsonIgnore
     private final PropertyChangeSupport observerSupport = new PropertyChangeSupport(this);
     private final Hero hero1;
     private final Hero hero2;
