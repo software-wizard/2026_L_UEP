@@ -26,7 +26,7 @@ public class EconomyBoardController implements PropertyChangeListener {
     private final BoardEconomyEngine gameEngine;
     @FXML private GridPane gridMap;
     @FXML private Button passButton,equipmentButton;
-    @FXML private Label goldLabel, woodLabel, oreLabel, mercuryLabel, sulphurLabel, crystalLabel, gemsLabel,attackLabel,defenceLabel,powerLabel,knowledgeLabel;
+    @FXML private Label expLabel,lvlLabel, goldLabel, woodLabel, oreLabel, mercuryLabel, sulphurLabel, crystalLabel, gemsLabel,attackLabel,defenceLabel,powerLabel,knowledgeLabel;
 
     private final EconomyHero battleHero1;
     private final EconomyHero battleHero2;
@@ -119,6 +119,7 @@ public class EconomyBoardController implements PropertyChangeListener {
     private void updateDisplay(){
         updateResourceDisplay();
         updateStatsDisplay();
+        updateExpDisplay();
     }
 
     private void updateResourceDisplay() {
@@ -138,6 +139,13 @@ public class EconomyBoardController implements PropertyChangeListener {
         defenceLabel.setText("Defense: " + stats.getDefense());
         powerLabel.setText("Power: " + stats.getPower());
         knowledgeLabel.setText("Knowledge: " + stats.getKnowledge());
+    }
+
+    private void updateExpDisplay() {
+        int lvl = gameEngine.getCurrentHero().getLevel();
+        int exp = gameEngine.getCurrentHero().getExperience();
+        lvlLabel.setText("Level: " + lvl);
+        expLabel.setText("Exp: " + exp);
     }
 
 

@@ -30,12 +30,11 @@ public class Bank implements BuildingIf {
     public void endOfTurn() {}
 
     @Override
-    public void enter(EconomyHero hero) {
-
+    public void generateResource() {
     }
 
     @Override
-    public void generateResource() {
+    public void generateUnits() {
 
     }
 
@@ -55,12 +54,17 @@ public class Bank implements BuildingIf {
     }
 
     @Override
-    public EnterAction onEnter() {
+    public EnterAction firstInteraction() {
         return new EnterAction(EnterActionType.ENTER_BANK, this);
     }
 
     @Override
     public EnterAction secondInteraction() {
         return null;
+    }
+
+    @Override
+    public void resetBuildingOption() {
+
     }
 }

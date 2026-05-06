@@ -49,6 +49,15 @@
                 <Label fx:id="knowledgeLabel" text="Knowledge: 0"/>
             </VBox>
 
+            <VBox spacing="8">
+                <padding>
+                    <Insets top="10" right="10" bottom="10" left="10"/>
+                </padding>
+                <Label text="Exp" style="-fx-font-weight: bold; -fx-underline: true;"/>
+                <Label fx:id="lvlLabel" text="Level: 0" />
+                <Label fx:id="expLabel" text="Exp: 0"/>
+            </VBox>
+
             <Button fx:id="equipmentButton" text="Show Equipment" />
         </VBox>
     </left>

@@ -5,6 +5,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ThreadLocalRandom;
 
 import lombok.Getter;
 import lombok.Setter;
@@ -16,30 +17,27 @@ import pl.psi.hero.skills.ArmorerSkill;
 import pl.psi.hero.skills.OffenceSkill;
 import pl.psi.map.resources.Resources;
 
+@Getter
+@Setter
 public class EconomyHero implements PropertyChangeListener
 {
-    @Getter @Setter
-    private Fraction fraction = null;
-    @Getter @Setter
-    private List< EconomyCreature > creatureList = List.of();
-    @Getter @Setter
+    private static final int MIN_INITIAL_EXPERIENCE = 40;
+    private static final int MAX_INITIAL_EXPERIENCE = 90;
+    private static final String LEVEL_UP = "levelUp";
+
+    private final Fraction fraction;
+    private final List< EconomyCreature > creatureList;
     private Resources resources;
-    @Getter
     private final int moveRange = 10;
-    @Getter @Setter
     private int remainingMoves;
-    @Getter @Setter
     private int experience;
-    @Getter @Setter
     public int level;
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
-    @Getter @Setter
     private List<AbstractSkill> skills;
-    @Getter @Setter
-    private Statistics baseStatistics = null;
+    private final Statistics baseStatistics;
     private final List<Artifact> artifacts = new ArrayList<>();
-    @Getter
     private final List<EconomySpell> spells = new ArrayList<>();
+    protected List<ExpModifierIf> expModifiers = new ArrayList<>();
 
     public EconomyHero( final Fraction aFraction, final Resources aResources, final Statistics aStats)
     {
@@ -49,6 +47,7 @@ public class EconomyHero implements PropertyChangeListener
         resources = aResources;
         baseStatistics = aStats;
         skills = new ArrayList<>();
+        experience = ThreadLocalRandom.current().nextInt(MIN_INITIAL_EXPERIENCE, MAX_INITIAL_EXPERIENCE + 1);
     }
     public EconomyHero() {
         this.fraction = Fraction.NECROPOLIS;
@@ -135,20 +134,89 @@ public class EconomyHero implements PropertyChangeListener
         NECROPOLIS
     }
 
-    public void addExperience(final int experienceToAdd) {
-        int oldLevel = this.level;
-        this.experience += experienceToAdd;
+    protected void addExpModifier(ExpModifierIf modifier){
+        expModifiers.add(modifier);
+    }
 
-        while (this.experience >= getExperienceForNextLevel(this.level)) {
-            this.experience -= getExperienceForNextLevel(this.level);
+    protected void removeExpModifier(ExpModifierIf modifier){
+        expModifiers.remove(modifier);
+    }
+
+    public void addExperience(final int baseExperienceToAdd) {
+        if (baseExperienceToAdd <= 0) {
+            return;
+        }
+
+        double totalMultiplier = expModifiers.stream()
+                .map(ExpModifierIf::getExpMultiplier)
+                .reduce(1.0, (a, b) -> a * b);
+
+        // Alternatywa: Jeśli wolisz dodawać bonusy (np. +5% i +10% daje +15%, a nie 1.05 * 1.10):
+        // double totalMultiplier = 1.0 + expModifiers.stream()
+        //         .mapToDouble(m -> m.getExpMultiplier() - 1.0)
+        //         .sum();
+
+        // 2. Aplikowanie zmian i zaokrąglanie
+        int actualExperienceToAdd = (int) Math.round(baseExperienceToAdd * totalMultiplier);
+
+        int oldLevel = this.level;
+        this.experience += actualExperienceToAdd;
+
+        // 3. Sprawdzanie awansu na nowy poziom
+        while (this.experience >= getExperienceForNextLevel(this.level + 1)) {
+            this.experience -= getExperienceForNextLevel(this.level + 1);
             this.level++;
-            pcs.firePropertyChange("levelUp", oldLevel, this.level);
+            pcs.firePropertyChange(LEVEL_UP, oldLevel, this.level);
             oldLevel = this.level;
         }
     }
 
-    private int getExperienceForNextLevel(int currentLevel) {
-        return 100 + (currentLevel * 50);
+    private int getExperienceForNextLevel(final int nextLevel) {
+        if (nextLevel <= 1) {
+            return 0;
+        }
+        if (nextLevel == 2) {
+            return 1000;
+        }
+        if (nextLevel == 3) {
+            return 1000;
+        }
+        if (nextLevel == 4) {
+            return 1200;
+        }
+        if (nextLevel == 5) {
+            return 1400;
+        }
+        if (nextLevel == 6) {
+            return 1600;
+        }
+        if (nextLevel == 7) {
+            return 1800;
+        }
+        if (nextLevel == 8) {
+            return 2000;
+        }
+        if (nextLevel == 9) {
+            return 2200;
+        }
+        if (nextLevel == 10) {
+            return 2500;
+        }
+        if (nextLevel == 11) {
+            return 2800;
+        }
+        if (nextLevel == 12) {
+            return 3100;
+        }
+        if (nextLevel == 13) {
+            return 3720;
+        }
+
+        double requirement = 3720;
+        for (int level = 14; level <= nextLevel; level++) {
+            requirement *= 1.2;
+        }
+        return (int) Math.round(requirement);
     }
 
     public void addArtifact(Artifact artifact) {
