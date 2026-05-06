@@ -26,6 +26,8 @@ public class GameEngine {
         this.hero2 = aHero2;
         turnQueue = new TurnQueue(aHero1.getCreatures(), aHero2.getCreatures());
         board = new Board(aHero1.getCreatures(), aHero2.getCreatures());
+        turnQueue.addObserver(hero1);
+        turnQueue.addObserver(hero2);
     }
 
     public GameEngine(final Hero aHero1, final Hero aHero2, final BiMap<BattlePoint, SpecialField> specialFields, Map<BattlePoint, Creature> aBankEnemy) {
@@ -122,7 +124,16 @@ public class GameEngine {
     }
 
     public void castSpell(Spell spell, Creature targetCreature) {
-        getCurrentHero().apply(spell, targetCreature);
+        getCurrentHero().castSpell(spell, targetCreature);
+        notifySpellCast(spell);
+    }
+
+    public void castSpell(Spell spell, BattlePoint targetPoint) {
+        java.util.List<BattlePoint> areaPoints = spell.getAreaStrategy().getArea(targetPoint);
+        java.util.List<Creature> affectedCreatures = board.getCreaturesFromPoints(areaPoints);
+        
+        getCurrentHero().castSpell(spell, affectedCreatures);
+        
         notifySpellCast(spell);
     }
 

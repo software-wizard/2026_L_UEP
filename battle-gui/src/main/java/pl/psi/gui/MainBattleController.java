@@ -63,6 +63,9 @@ public class MainBattleController implements PropertyChangeListener {
                 if (gameEngine.isCurrentCreature(currentBattlePoint)) {
                     mapTile.setBackground(Color.GREENYELLOW);
                 }
+                if (spellManager.isActive()) {
+                    SpellTargetingUI.attachTargeting(mapTile, currentBattlePoint, spellManager, spellUIManager, gridMap);
+                }
                 if (gameEngine.canMove(currentBattlePoint)) {
                     mapTile.setBackground(Color.GREY);
                     mapTile.addEventHandler(MouseEvent.MOUSE_CLICKED,
@@ -86,10 +89,8 @@ public class MainBattleController implements PropertyChangeListener {
                     });
                 }
 
-                if (spellManager.isActive() && creature.isPresent()) {
-                    mapTile.setBackground(Color.DEEPSKYBLUE);
-                    mapTile.addEventHandler(MouseEvent.MOUSE_CLICKED,
-                            e -> spellUIManager.confirmSpellCast(creature.get(), currentBattlePoint));
+                if (spellManager.isActive()) {
+                    SpellTargetingUI.attachTargeting(mapTile, currentBattlePoint, spellManager, spellUIManager, gridMap);
                 }
 
                 gridMap.add(mapTile, x, y);
