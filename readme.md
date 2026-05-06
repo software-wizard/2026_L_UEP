@@ -1,3 +1,8 @@
+#How to run?
+1. Install docker and docker-compose
+2. Run in command line `docker-compose down -v && docker-compose up --build`
+3. Run client from LaunchBoardEconomy
+
 https://www.spriters-resource.com/pc_computer/heroes3/ - ikonki z
 gry http://www.heroesofmightandmagic.com/heroes3/creaturescastle.shtml - opis jednostek, czarów
 itd. http://www.heroesofmightandmagic.com/heroes3/democheat.shtml - demo do ściągnięcia.
