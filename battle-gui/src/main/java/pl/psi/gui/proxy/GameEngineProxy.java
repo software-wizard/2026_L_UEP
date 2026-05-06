@@ -95,39 +95,17 @@ public class GameEngineProxy extends GameEngine {
     }
 
     @Override
+    public Hero getCurrentHero() {
+        return super.getCurrentHero();
+    }
+
+    @Override
     public Optional<Creature> getCreature(BattlePoint p) {
         Map<String, Object> tile = getTileState(p.getX(), p.getY());
         if (Boolean.TRUE.equals(tile.get("hasCreature"))) {
-            try {
-                HttpRequest req = HttpRequest.newBuilder().uri(URI.create(BASE_URL + "/creature?x=" + p.getX() + "&y=" + p.getY())).GET().build();
-                HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-                if (res.statusCode() == 200 && res.body() != null) {
-                    return Optional.of(objectMapper.readValue(res.body(), Creature.class));
-                }
-            } catch (Exception e) { e.printStackTrace(); }
+            return super.getCreature(p);
         }
         return Optional.empty();
-    }
-
-    private void postAction(String endpoint, int x, int y) {
-        try {
-            String url = x >= 0 ? BASE_URL + endpoint + "?x=" + x + "&y=" + y : BASE_URL + endpoint;
-            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).POST(HttpRequest.BodyPublishers.noBody()).build();
-            httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) { e.printStackTrace(); }
-    }
-    @Override
-    public Hero getCurrentHero() {
-        try {
-            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(BASE_URL + "/currentHero")).GET().build();
-            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-            if (res.statusCode() == 200 && res.body() != null && !res.body().isEmpty()) {
-                return objectMapper.readValue(res.body(), Hero.class);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-        return super.getCurrentHero();
     }
 
     @Override
@@ -160,4 +138,11 @@ public class GameEngineProxy extends GameEngine {
         super.castSpell(spell, targetCreature);
     }
 
+    private void postAction(String endpoint, int x, int y) {
+        try {
+            String url = x >= 0 ? BASE_URL + endpoint + "?x=" + x + "&y=" + y : BASE_URL + endpoint;
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).POST(HttpRequest.BodyPublishers.noBody()).build();
+            httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) { e.printStackTrace(); }
+    }
 }

@@ -24,13 +24,16 @@ public class EconomyTile extends StackPane
     }
 
     public void setImage(String imagePath) {
-        Image image = new Image(getClass().getResourceAsStream(imagePath));
-        ImageView imageView = new ImageView(image);
-        imageView.setFitWidth(59); // resize to fit tile
-        imageView.setFitHeight(59);
-        getChildren().add(imageView); // stack it on the tile
+        try {
+            Image image = new Image(getClass().getResourceAsStream(imagePath));
+            ImageView imageView = new ImageView(image);
+            imageView.setFitWidth(59);
+            imageView.setFitHeight(59);
+            getChildren().add(imageView);
+        } catch (Exception e) {
+            setName("Obj");
+        }
     }
-
 
     void setName( final String aName )
     {
@@ -42,4 +45,3 @@ public class EconomyTile extends StackPane
         rect.setFill( aColor );
     }
 }
-

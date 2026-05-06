@@ -5,6 +5,7 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -113,6 +114,7 @@ public class EconomyHero implements PropertyChangeListener
         this.resources = this.resources.change(new Resources(-cost,0,0,0,0,0,0));
     }
 
+    @JsonIgnore
     public List< EconomyCreature > getCreatures()
     {
         return List.copyOf( creatureList );
@@ -225,10 +227,12 @@ public class EconomyHero implements PropertyChangeListener
         artifacts.add(artifact);
     }
 
+    @JsonIgnore
     public List<Artifact> getArtifacts() {
         return List.copyOf(artifacts);
     }
 
+    @JsonIgnore
     public Statistics getTotalStatistics() {
         Statistics total = new Statistics(
                 baseStatistics.getAttack(),

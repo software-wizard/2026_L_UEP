@@ -6,6 +6,7 @@ import pl.psi.economy.Point;
 import pl.psi.hero.EconomyHero;
 import pl.psi.map.BoardEconomyEngine;
 import pl.psi.map.MapObjectIf;
+import pl.psi.map.buildings.enterAction.EnterAction;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -109,14 +110,14 @@ public class BoardEconomyEngineProxy extends BoardEconomyEngine {
     }
 
     @Override
+    public void secondInteraction(Point point) {
+        postAction("/secondInteraction", point.getX(), point.getY());
+        invalidateCache();
+        super.secondInteraction(point);
+    }
+
+    @Override
     public EconomyHero getCurrentHero() {
-        try {
-            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(BASE_URL + "/currentHero")).GET().build();
-            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-            if (res.statusCode() == 200 && res.body() != null) {
-                return objectMapper.readValue(res.body(), EconomyHero.class);
-            }
-        } catch (Exception e) { e.printStackTrace(); }
         return super.getCurrentHero();
     }
 
@@ -124,13 +125,35 @@ public class BoardEconomyEngineProxy extends BoardEconomyEngine {
     public Optional<MapObjectIf> getMapObject(Point point) {
         Map<String, Object> tile = getTileState(point.getX(), point.getY());
         if (Boolean.TRUE.equals(tile.get("hasMapObject"))) {
-            try {
-                HttpRequest req = HttpRequest.newBuilder().uri(URI.create(BASE_URL + "/mapObject?x=" + point.getX() + "&y=" + point.getY())).GET().build();
-                HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-                if (res.statusCode() == 200 && res.body() != null) {
-                    return Optional.of(objectMapper.readValue(res.body(), MapObjectIf.class));
+            Optional<MapObjectIf> localObj = super.getMapObject(point);
+            if (localObj.isPresent()) {
+                return localObj;
+            }
+            return Optional.of(new MapObjectIf() {
+                @Override
+                public String getPath() {
+                    String path = (String) tile.get("mapObjectPath");
+                    return (path != null && !path.startsWith("/")) ? "/" + path : path;
                 }
-            } catch (Exception e) { e.printStackTrace(); }
+                @Override public void endOfTurn() {}
+                @Override public void generateResource() {}
+                @Override public void generateUnits() { }
+                @Override public void interact(EconomyHero hero) {}
+                @Override public typeOfObject getTypeOfObject() { return null; }
+                @Override public EconomyHero getOwner() { return null; }
+
+                @Override
+                public EnterAction firstInteraction() {
+                    return null;
+                }
+
+                @Override public EnterAction secondInteraction() { return null; }
+
+                @Override
+                public void resetBuildingOption() {
+
+                }
+            });
         }
         return Optional.empty();
     }
