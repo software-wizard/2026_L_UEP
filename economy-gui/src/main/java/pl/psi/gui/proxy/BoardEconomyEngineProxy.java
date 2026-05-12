@@ -4,10 +4,13 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import pl.psi.economy.Point;
 import pl.psi.hero.EconomyHero;
-import pl.psi.map.BoardEconomyEngine;
+import pl.psi.gui.BoardEconomyEngineIf;
 import pl.psi.map.MapObjectIf;
-import pl.psi.map.buildings.enterAction.EnterAction;
+import pl.psi.map.buildings.BuildingIf;
+import pl.psi.map.buildings.town.Town;
 
+import java.beans.PropertyChangeSupport;
+import java.beans.PropertyChangeListener;
 import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
@@ -16,15 +19,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-public class BoardEconomyEngineProxy extends BoardEconomyEngine {
+public class BoardEconomyEngineProxy implements BoardEconomyEngineIf {
     private static final String BASE_URL = "http://localhost:8080/api/board";
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private final PropertyChangeSupport observerSupport = new PropertyChangeSupport(this);
 
     private Map<String, Map<String, Object>> cachedBoardState = null;
 
     public BoardEconomyEngineProxy(EconomyHero hero1, EconomyHero hero2, Map<Point, MapObjectIf> map) {
-        super(hero1, hero2, map);
         try {
             String jsonBody = objectMapper.writeValueAsString(List.of(hero1, hero2));
             HttpRequest req = HttpRequest.newBuilder()
@@ -67,6 +70,16 @@ public class BoardEconomyEngineProxy extends BoardEconomyEngine {
     }
 
     @Override
+    public boolean isEnterable(Point point) {
+        return false;
+    }
+
+    @Override
+    public boolean isHeroAdjacent(Point target) {
+        return false;
+    }
+
+    @Override
     public boolean canMove(Point point) {
         return Boolean.TRUE.equals(getTileState(point.getX(), point.getY()).get("canMove"));
     }
@@ -82,80 +95,86 @@ public class BoardEconomyEngineProxy extends BoardEconomyEngine {
     }
 
     @Override
+    public boolean canAttack(Point point) {
+        return Boolean.TRUE.equals(getTileState(point.getX(), point.getY()).get("canAttack"));
+    }
+
+    @Override
     public void move(Point point) {
         postAction("/move", point.getX(), point.getY());
         invalidateCache();
-        super.move(point);
     }
 
     @Override
     public void interact(Point point) {
         postAction("/interact", point.getX(), point.getY());
         invalidateCache();
-        super.interact(point);
     }
 
     @Override
     public void enter(Point point) {
         postAction("/enter", point.getX(), point.getY());
         invalidateCache();
-        super.enter(point);
     }
 
     @Override
     public void pass() {
         postAction("/pass", -1, -1);
         invalidateCache();
-        super.pass();
     }
 
     @Override
     public void secondInteraction(Point point) {
         postAction("/secondInteraction", point.getX(), point.getY());
         invalidateCache();
-        super.secondInteraction(point);
     }
 
     @Override
     public EconomyHero getCurrentHero() {
-        return super.getCurrentHero();
+        try {
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(BASE_URL + "/currentHero")).GET().build();
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() == 200 && !res.body().isEmpty()) {
+                return objectMapper.readValue(res.body(), EconomyHero.class);
+            }
+        } catch (Exception e) { e.printStackTrace(); }
+        return null;
     }
 
     @Override
     public Optional<MapObjectIf> getMapObject(Point point) {
-        Map<String, Object> tile = getTileState(point.getX(), point.getY());
-        if (Boolean.TRUE.equals(tile.get("hasMapObject"))) {
-            Optional<MapObjectIf> localObj = super.getMapObject(point);
-            if (localObj.isPresent()) {
-                return localObj;
+        try {
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(BASE_URL + "/mapObject?x=" + point.getX() + "&y=" + point.getY())).GET().build();
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() == 200 && !res.body().isEmpty()) {
+                return Optional.ofNullable(objectMapper.readValue(res.body(), MapObjectIf.class));
             }
-            return Optional.of(new MapObjectIf() {
-                @Override
-                public String getPath() {
-                    String path = (String) tile.get("mapObjectPath");
-                    return (path != null && !path.startsWith("/")) ? "/" + path : path;
-                }
-                @Override public void endOfTurn() {}
-                @Override public void generateResource() {}
-                @Override public void generateUnits() { }
-                @Override public void interact(EconomyHero hero) {}
-                @Override public typeOfObject getTypeOfObject() { return null; }
-                @Override public EconomyHero getOwner() { return null; }
-
-                @Override
-                public EnterAction firstInteraction() {
-                    return null;
-                }
-
-                @Override public EnterAction secondInteraction() { return null; }
-
-                @Override
-                public void resetBuildingOption() {
-
-                }
-            });
-        }
+        } catch (Exception e) { e.printStackTrace(); }
         return Optional.empty();
+    }
+
+    @Override
+    public void addObserver(PropertyChangeListener aObserver) {
+    }
+
+    @Override
+    public Optional<Town> getTownUnderHero(EconomyHero aCurrentHero) {
+        return Optional.empty();
+    }
+
+    @Override
+    public void openShop(BuildingIf buildingOpt) {
+
+    }
+
+    @Override
+    public void openUpgrades(BuildingIf buildingOpt) {
+
+    }
+
+    @Override
+    public void enterBank(BuildingIf building) {
+
     }
 
     private void postAction(String endpoint, int x, int y) {
@@ -164,5 +183,11 @@ public class BoardEconomyEngineProxy extends BoardEconomyEngine {
             HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).POST(HttpRequest.BodyPublishers.noBody()).build();
             httpClient.send(req, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) { e.printStackTrace(); }
+    }
+
+    @Override
+    public String getMapObjectPath(Point point) {
+        Object path = getTileState(point.getX(), point.getY()).get("mapObjectPath");
+        return path != null ? path.toString() : null;
     }
 }

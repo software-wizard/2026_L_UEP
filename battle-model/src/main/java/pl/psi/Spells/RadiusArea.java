@@ -7,11 +7,13 @@ import java.util.List;
 
 public class RadiusArea implements SpellAreaIf {
 
-    private final double radius;
+    private double radius;
 
     public RadiusArea(double radius) {
         this.radius = radius;
     }
+
+    public RadiusArea() {}
 
     @Override
     public List<BattlePoint> getArea(BattlePoint centerPoint) {

@@ -6,15 +6,16 @@ import lombok.Getter;
 @Builder
 public class EconomyCreature {
     @Getter
-    private final CreatureStatistic stats;
-    private final int amount;
-    private final int goldCost;
+    private CreatureStatistic stats;
+    private int amount;
+    private int goldCost;
 
     EconomyCreature( final CreatureStatistic aStats, final int aAmount, final int aGoldCost ){
         stats = aStats;
         amount = aAmount;
         goldCost = aGoldCost;
     }
+    EconomyCreature(){}
 
     public int getAmount() {
         return amount;

@@ -6,7 +6,7 @@ import javafx.scene.control.*;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import pl.psi.BattlePoint;
-import pl.psi.GameEngine;
+import pl.psi.gui.GameEngineIf;
 import pl.psi.Hero;
 import pl.psi.Spells.Spell;
 import pl.psi.creatures.Creature;
@@ -15,11 +15,11 @@ import java.io.IOException;
 
 public class SpellUIManager {
 
-    private final GameEngine gameEngine;
+    private final GameEngineIf gameEngine;
     private final SpellCastingManager spellManager;
     private final Runnable guiRefresher;
 
-    public SpellUIManager(GameEngine gameEngine, SpellCastingManager spellManager, Runnable guiRefresher) {
+    public SpellUIManager(GameEngineIf gameEngine, SpellCastingManager spellManager, Runnable guiRefresher) {
         this.gameEngine = gameEngine;
         this.spellManager = spellManager;
         this.guiRefresher = guiRefresher;
@@ -27,6 +27,10 @@ public class SpellUIManager {
 
     public void openSpellDialog() {
         Hero currentHero = gameEngine.getCurrentHero();
+        if (currentHero == null) {
+            System.err.println("Cannot open spell dialog: No active hero found (Battle may not have started properly).");
+            return;
+        }
         if (!currentHero.getSpellCastingState().canCast()) {
             Alert blocked = new Alert(Alert.AlertType.WARNING);
             blocked.setTitle("Ograniczenie");

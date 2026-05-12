@@ -1,9 +1,11 @@
 package pl.psi.Spells;
 
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import lombok.Getter;
 import pl.psi.creatures.Creature;
 import pl.psi.creatures.CreatureStatisticIf;
 
+@JsonTypeInfo(use = JsonTypeInfo.Id.CLASS, property = "@class")
 @Getter
 public abstract class Spell {
 
@@ -11,7 +13,7 @@ public abstract class Spell {
     int spellLevel;
     int duration;
     @Getter
-    private final SpellAreaIf areaStrategy;
+    private SpellAreaIf areaStrategy;
 
     public Spell(String name, int spellLevel) {
         this.name = name;
@@ -37,6 +39,9 @@ public abstract class Spell {
         this.duration = duration;
         this.spellLevel = spellLevel;
         this.areaStrategy = areaStrategy;
+    }
+
+    public Spell() {
     }
 
     public abstract void cast(Creature targetCreature, int spellPower);

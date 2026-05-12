@@ -9,7 +9,7 @@ import pl.psi.creatures.CreatureStats;
 @Getter
 public class BuffSpell extends Spell {
 
-    private final CreatureStats buffStats;
+    private CreatureStats buffStats;
 
 
     public BuffSpell(String name, int spellLevel, int duration, CreatureStats buffStats) {
@@ -21,6 +21,7 @@ public class BuffSpell extends Spell {
         super(name, spellLevel, duration, areaStrategy);
         this.buffStats = buffStats;
     }
+    public BuffSpell() {}
 
     @Override
     public void cast(Creature targetCreature, int spellPower) {

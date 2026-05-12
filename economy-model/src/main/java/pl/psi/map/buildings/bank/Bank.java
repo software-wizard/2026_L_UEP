@@ -3,22 +3,27 @@ package pl.psi.map.buildings.bank;
 import lombok.Getter;
 import pl.psi.economy.Point;
 import pl.psi.creatures.EconomyCreature;
+import pl.psi.economy.PointKeyDeserializer;
 import pl.psi.hero.EconomyHero;
 import pl.psi.map.buildings.BuildingIf;
 import pl.psi.map.buildings.enterAction.EnterAction;
 import pl.psi.map.buildings.enterAction.EnterActionType;
 import pl.psi.map.resources.Resources;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 import java.util.Map;
 
 public class Bank implements BuildingIf {
-    final Resources prize;
+    Resources prize;
+    @JsonDeserialize(keyUsing = PointKeyDeserializer.class)
     @Getter
-    final Map<Point, EconomyCreature> enemies;
+    Map<Point, EconomyCreature> enemies = Map.of();
 
     public Bank(BankStatistics statistics) {
         this.prize = statistics.getPrize();
         this.enemies = statistics.getEnemies();
+    }
+    public Bank() {
     }
 
     @Override

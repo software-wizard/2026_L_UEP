@@ -7,20 +7,20 @@ import lombok.*;
 /**
  * TODO: Describe this class (The first line - until the first dot - will interpret as the brief description).
  */
-@RequiredArgsConstructor
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 @Getter
 public class CreatureStats implements CreatureStatisticIf{
-    private final String name;
-    private final int attack;
-
-    private final int armor;
-    private final int maxHp;
-    private final int moveRange;
-    private final Range< Integer > damage;
-    private final int tier;
-    private final String description;
-    private final boolean isUpgraded;
+    private String name;
+    private int attack;
+    private int armor;
+    private int maxHp;
+    private int moveRange;
+    private Range< Integer > damage;
+    private int tier;
+    private String description;
+    private boolean isUpgraded;
 
     public CreatureStats(CreatureStats other) {
         this.name = other.name;

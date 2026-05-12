@@ -9,4 +9,6 @@ public class SingleTargetArea implements SpellAreaIf {
     public List<BattlePoint> getArea(BattlePoint centerPoint) {
         return List.of(centerPoint);
     }
+
+    public SingleTargetArea() {}
 }

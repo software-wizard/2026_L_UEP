@@ -1,6 +1,7 @@
 package pl.psi.Spells;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import pl.psi.creatures.Creature;
 import pl.psi.creatures.CreatureStatisticIf;
 import pl.psi.creatures.CreatureStats;
@@ -9,13 +10,13 @@ import pl.psi.creatures.CreatureStats;
 @Getter
 public class DebuffSpell extends Spell {
 
-    private final CreatureStats debuffStats;
-
+    private CreatureStats debuffStats;
 
     public DebuffSpell(String name, int spellLevel, int duration, CreatureStats debuffStats) {
         super(name, spellLevel, duration);
         this.debuffStats = debuffStats;
     }
+    public DebuffSpell() {}
 
     public DebuffSpell(String name, int spellLevel, int duration, CreatureStats debuffStats, SpellAreaIf areaStrategy) {
         super(name, spellLevel, duration, areaStrategy);

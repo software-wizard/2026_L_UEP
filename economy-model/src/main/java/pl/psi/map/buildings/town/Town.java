@@ -26,6 +26,8 @@ public class Town implements BuildingIf {
 
         this.owner = owner;
     }
+    public Town() {
+    }
 
     private void setupTown() {
         this.builtBuildings.add(TownBuilding.VILLAGE_HALL);

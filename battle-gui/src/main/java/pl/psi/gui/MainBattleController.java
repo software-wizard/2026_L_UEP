@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public class MainBattleController implements PropertyChangeListener {
-    private final GameEngineProxy gameEngine;
+    private final GameEngineIf gameEngine;
     private final Consumer<BattleResult> battleFinishedHandler;
     private final SpellCastingManager spellManager = new SpellCastingManager();
     private SpellUIManager spellUIManager;
@@ -127,7 +127,7 @@ public class MainBattleController implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         if ("SPELL_CAST".equals(evt.getPropertyName())) {
             spellUIManager.showSpellCastDialog();
-        } else if (GameEngine.BATTLE_FINISHED.equals(evt.getPropertyName())) {
+        } else if (GameEngineIf.BATTLE_FINISHED.equals(evt.getPropertyName())) {
             handleBattleFinished();
             return;
         }

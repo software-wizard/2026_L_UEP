@@ -7,12 +7,15 @@ import pl.psi.map.buildings.enterAction.EnterAction;
 
 public class ResourceGenerator implements InteractableIf, ResourceGenIf {
 
-    private final ResourceGenType type;
+    private ResourceGenType type;
     @Getter
     private EconomyHero owner;
 
     public ResourceGenerator(ResourceGenType type) {
         this.type = type;
+    }
+
+    public ResourceGenerator() {
     }
 
     public void interact(EconomyHero hero) {

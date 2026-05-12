@@ -10,7 +10,6 @@ import pl.psi.converter.EcoBattleConverter;
 import pl.psi.creatures.EconomyCreature;
 import pl.psi.hero.EconomyHero;
 import pl.psi.hero.Statistics;
-import pl.psi.map.BoardEconomyEngine;
 import pl.psi.map.MapObjectIf;
 import pl.psi.map.buildings.bank.Bank;
 import pl.psi.map.buildings.town.Town;
@@ -23,7 +22,7 @@ import java.beans.PropertyChangeListener;
 import java.util.Map;
 
 public class EconomyBoardController implements PropertyChangeListener {
-    private final BoardEconomyEngine gameEngine;
+    private final BoardEconomyEngineIf gameEngine;
     @FXML private GridPane gridMap;
     @FXML private Button passButton,equipmentButton;
     @FXML private Label expLabel,lvlLabel, goldLabel, woodLabel, oreLabel, mercuryLabel, sulphurLabel, crystalLabel, gemsLabel,attackLabel,defenceLabel,powerLabel,knowledgeLabel;
@@ -68,8 +67,10 @@ public class EconomyBoardController implements PropertyChangeListener {
         if (gameEngine.isHero(point) && !gameEngine.isCurrentHero(point)) {
             tile.setName("Other Hero");
         }
-
-        gameEngine.getMapObject(point).ifPresent(mapObject -> {tile.setImage(mapObject.getPath());});
+        String mapObjectPath = gameEngine.getMapObjectPath(point);
+        if (mapObjectPath != null) {
+            tile.setImage(mapObjectPath);
+        }
 
         if (gameEngine.canMove(point)) {
             tile.setBackground(Color.GREY);
