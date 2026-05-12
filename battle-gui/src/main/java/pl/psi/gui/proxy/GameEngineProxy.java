@@ -207,14 +207,12 @@ public class GameEngineProxy implements GameEngineIf {
     }
     @Override
     public boolean isBattleOver() {
-        // TODO: You may want to fetch this from your /boardState or a new endpoint.
         // Returning false temporarily to fix compilation.
         return false;
     }
 
     @Override
     public Optional<pl.psi.BattleResults.BattleResult> getBattleResult() {
-        // TODO: Fetch the actual battle result from the server when implemented
         return Optional.empty();
     }
 }

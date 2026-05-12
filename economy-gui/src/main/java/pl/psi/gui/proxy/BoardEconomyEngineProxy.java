@@ -155,26 +155,40 @@ public class BoardEconomyEngineProxy implements BoardEconomyEngineIf {
 
     @Override
     public void addObserver(PropertyChangeListener aObserver) {
+        observerSupport.addPropertyChangeListener(aObserver);
     }
 
     @Override
     public Optional<Town> getTownUnderHero(EconomyHero aCurrentHero) {
+        try {
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/townUnderHero"))
+                    .GET()
+                    .build();
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+
+            if (res.statusCode() == 200 && !res.body().isEmpty()) {
+                return Optional.ofNullable(objectMapper.readValue(res.body(), Town.class));
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         return Optional.empty();
     }
 
     @Override
     public void openShop(BuildingIf buildingOpt) {
-
+        observerSupport.firePropertyChange("OPEN_SHOP", null, new Object[]{getCurrentHero(), buildingOpt});
     }
 
     @Override
     public void openUpgrades(BuildingIf buildingOpt) {
-
+        observerSupport.firePropertyChange("OPEN_UPGRADES", null, new Object[]{getCurrentHero(), buildingOpt});
     }
 
     @Override
     public void enterBank(BuildingIf building) {
-
+        observerSupport.firePropertyChange("ENTER_BANK", null, new Object[]{getCurrentHero(), building});
     }
 
     private void postAction(String endpoint, int x, int y) {

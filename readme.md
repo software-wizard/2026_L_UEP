@@ -1,7 +1,11 @@
 #How to run?
-1. Install docker and docker-compose
-2. Run in command line `docker-compose down -v && docker-compose up --build`
-3. Run client from LaunchBoardEconomy
+1. Install docker and docker-compose example: https://docs.docker.com/desktop/setup/install/windows-install/
+2. Run in command line `mvn clean install -DskipTests && docker-compose down -v && docker-compose up --build`
+3. For economy client run LaunchBoardEconomy/ For battle client run LaunchBattle
+
+#How to debug ?
+1. Add new Run/Debug configuration
+2. Select Remote JVM Debug, default configuration is fine (Transport: Socket, port: 5005, host: localhost)
 
 https://www.spriters-resource.com/pc_computer/heroes3/ - ikonki z
 gry http://www.heroesofmightandmagic.com/heroes3/creaturescastle.shtml - opis jednostek, czarów

@@ -9,9 +9,11 @@ import pl.psi.map.buildings.enterAction.EnterAction;
 @AllArgsConstructor
 public class EconomySpell implements InteractableIf {
 
+    public EconomySpell() {
+    }
 
     @Getter
-    private final String name;
+    private String name;
     @Getter
     private final int cost = 1000;
 

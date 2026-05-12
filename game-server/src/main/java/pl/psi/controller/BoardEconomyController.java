@@ -282,4 +282,14 @@ public class BoardEconomyController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @GetMapping("/townUnderHero")
+    public ResponseEntity<Town> getTownUnderHero() {
+        try {
+            EconomyHero currentHero = this.gameStateService.getBoardEconomyEngine().getCurrentHero();
+            Optional<Town> townOpt = this.gameStateService.getBoardEconomyEngine().getTownUnderHero(currentHero);
+            return townOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.noContent().build());
+        } catch (Exception e) {
+            return ResponseEntity.noContent().build();
+        }
+    }
 }
