@@ -15,6 +15,7 @@ import pl.psi.map.buildings.town.Town;
 
 import java.util.ArrayList;
 import java.util.List;
+import pl.psi.gui.proxy.EconomyEngineProxy;
 
 public class ArtifactShopController {
 
@@ -76,11 +77,14 @@ public class ArtifactShopController {
     }
 
     private void buyArtifact(Artifact artifact) {
-        if (hero.canAffordGold(artifact.getCost())) {
-            hero.payGold(artifact.getCost());
-            hero.addArtifact(artifact);
+        try {
+            EconomyEngineProxy proxy = new EconomyEngineProxy(hero);
+            proxy.buyArtifact(artifact);
             availableArtifacts.remove(artifact);
+            artifactBox.getChildren().clear();
             loadArtifacts();
+        } catch (IllegalStateException e) {
+            System.err.println("Cannot buy artifact: " + e.getMessage());
         }
     }
 

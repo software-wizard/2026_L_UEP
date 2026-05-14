@@ -3,6 +3,8 @@ package pl.psi.gui.proxy;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import pl.psi.EconomyEngine;
 import pl.psi.creatures.EconomyCreature;
+import pl.psi.hero.artifacts.Artifact;
+import pl.psi.hero.artifacts.EconomySpell;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -43,6 +45,49 @@ public class EconomyEngineProxy extends EconomyEngine {
             throw e;
         } catch (Exception e) {
             throw new IllegalStateException("Buy request failed", e);
+        }
+    }
+    @Override
+    public void buyArtifact(final Artifact artifact) {
+        try {
+            String json = objectMapper.writeValueAsString(artifact);
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/buyArtifact"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+
+            if (res.statusCode() != 200) {
+                throw new IllegalStateException("Server rejected artifact buy: " + res.body());
+            }
+            super.buyArtifact(artifact);
+        } catch (IllegalStateException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException("Buy artifact request failed", e);
+        }
+    }
+
+    @Override
+    public void buySpell(final EconomySpell spell) {
+        try {
+            String json = objectMapper.writeValueAsString(spell);
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/buySpell"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+
+            if (res.statusCode() != 200) {
+                throw new IllegalStateException("Server rejected spell buy: " + res.body());
+            }
+            super.buySpell(spell);
+        } catch (IllegalStateException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException("Buy spell request failed", e);
         }
     }
 }

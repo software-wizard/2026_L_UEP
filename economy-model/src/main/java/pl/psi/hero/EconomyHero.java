@@ -38,7 +38,7 @@ public class EconomyHero implements PropertyChangeListener
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
     private List<AbstractSkill> skills;
     private final Statistics baseStatistics;
-    private final List<Artifact> artifacts = new ArrayList<>();
+    private List<Artifact> artifacts = new ArrayList<>();
     private final List<EconomySpell> spells = new ArrayList<>();
     protected List<ExpModifierIf> expModifiers = new ArrayList<>();
 
@@ -227,9 +227,11 @@ public class EconomyHero implements PropertyChangeListener
         artifacts.add(artifact);
     }
 
-    @JsonIgnore
     public List<Artifact> getArtifacts() {
-        return List.copyOf(artifacts);
+        return artifacts;
+    }
+    public void setArtifacts(List<Artifact> artifacts) {
+        this.artifacts = artifacts;
     }
 
     @JsonIgnore

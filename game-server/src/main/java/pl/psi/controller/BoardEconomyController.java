@@ -292,4 +292,35 @@ public class BoardEconomyController {
             return ResponseEntity.noContent().build();
         }
     }
+    @PostMapping("/buyArtifact")
+    public ResponseEntity<String> buyArtifact(@RequestBody Artifact artifact) {
+        try {
+            EconomyHero currentHero = this.gameStateService.getBoardEconomyEngine().getCurrentHero();
+            EconomyEngine economyEngine = new EconomyEngine(currentHero);
+
+            economyEngine.buyArtifact(artifact);
+
+            return ResponseEntity.ok("Artifact purchased successfully.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error purchasing artifact.");
+        }
+    }
+
+    @PostMapping("/buySpell")
+    public ResponseEntity<String> buySpell(@RequestBody EconomySpell spell) {
+        try {
+            EconomyHero currentHero = this.gameStateService.getBoardEconomyEngine().getCurrentHero();
+            EconomyEngine economyEngine = new EconomyEngine(currentHero);
+
+            economyEngine.buySpell(spell);
+
+            return ResponseEntity.ok("Spell purchased successfully.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error purchasing spell.");
+        }
+    }
 }

@@ -26,28 +26,25 @@ public class EquipmentController {
     }
 
     private void showEquipment() {
-        System.out.println("Hero has " + hero.getArtifacts().size() + " artifacts.");
-
-
-
         equipmentList.getChildren().clear();
 
         for (Artifact artifact : hero.getArtifacts()) {
-
-            System.out.println("Loading image: " + artifact.getPath());
-            System.out.println("Resolved: " + getClass().getResource(artifact.getPath()));
-
             VBox artifactBox = new VBox(2);
             artifactBox.setStyle("-fx-padding: 5; -fx-border-color: #ccc;");
 
-            ImageView imageView = new ImageView(new Image(getClass().getResourceAsStream(artifact.getPath())));
-            imageView.setFitWidth(50);
-            imageView.setPreserveRatio(true);
+            try {
+                ImageView imageView = new ImageView(new Image(getClass().getResourceAsStream(artifact.getPath())));
+                imageView.setFitWidth(50);
+                imageView.setPreserveRatio(true);
+                artifactBox.getChildren().add(imageView);
+            } catch (Exception e) {
+                System.err.println("Could not load image for artifact: " + artifact.getPath());
+            }
 
             Text stats = new Text(artifact.getStats().toString());
             Text name = new Text(artifact.toString());
 
-            artifactBox.getChildren().addAll(imageView, name, stats);
+            artifactBox.getChildren().addAll(name, stats);
             equipmentList.getChildren().add(artifactBox);
         }
     }

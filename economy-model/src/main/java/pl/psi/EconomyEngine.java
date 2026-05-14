@@ -6,6 +6,8 @@ package pl.psi;
 import pl.psi.creatures.EconomyCreature;
 import pl.psi.hero.CreatureShop;
 import pl.psi.hero.EconomyHero;
+import pl.psi.hero.artifacts.Artifact;
+import pl.psi.hero.artifacts.EconomySpell;
 import pl.psi.map.resources.Resources;
 
 public class EconomyEngine {
@@ -31,4 +33,21 @@ public class EconomyEngine {
 //    public void addObserver(final String aPropertyName, final PropertyChangeListener aObserver) {
 //        observerSupport.addPropertyChangeListener(aPropertyName, aObserver);
 //    }
+    public void buyArtifact(final Artifact artifact) {
+        if (hero1.canAffordGold(artifact.getCost())) {
+            hero1.payGold(artifact.getCost());
+            hero1.addArtifact(artifact);
+        } else {
+            throw new IllegalStateException("Not enough gold to buy this artifact.");
+    }
+}
+
+    public void buySpell(final EconomySpell spell) {
+        if (hero1.canAffordGold(spell.getCost())) {
+            hero1.payGold(spell.getCost());
+            hero1.addSpell(spell);
+        } else {
+            throw new IllegalStateException("Not enough gold to buy this spell.");
+        }
+    }
 }
