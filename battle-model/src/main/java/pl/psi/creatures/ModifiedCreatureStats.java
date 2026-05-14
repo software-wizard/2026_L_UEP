@@ -1,15 +1,20 @@
 package pl.psi.creatures;
-
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.google.common.collect.Range;
+import lombok.Getter;
 
 public class ModifiedCreatureStats implements CreatureStatisticIf {
-
-    private final CreatureStatisticIf baseStats;
-    private final StatsModifier bonusStats;
+    @Getter
+    @JsonProperty("base")
+    private CreatureStatisticIf baseStats;
+    @JsonProperty("modifier")
+    private StatsModifier bonusStats;
 
     public ModifiedCreatureStats(CreatureStatisticIf base, StatsModifier bonus) {
         this.baseStats = base;
         this.bonusStats = bonus;
+    }
+    public ModifiedCreatureStats() {
     }
 
     @Override

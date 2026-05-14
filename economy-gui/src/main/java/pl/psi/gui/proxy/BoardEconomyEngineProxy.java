@@ -8,6 +8,7 @@ import pl.psi.gui.BoardEconomyEngineIf;
 import pl.psi.map.MapObjectIf;
 import pl.psi.map.buildings.BuildingIf;
 import pl.psi.map.buildings.town.Town;
+import pl.psi.map.buildings.bank.Bank;
 
 import java.beans.PropertyChangeSupport;
 import java.beans.PropertyChangeListener;
@@ -103,30 +104,48 @@ public class BoardEconomyEngineProxy implements BoardEconomyEngineIf {
     public void move(Point point) {
         postAction("/move", point.getX(), point.getY());
         invalidateCache();
+        observerSupport.firePropertyChange("REFRESH", null, null);
     }
 
     @Override
     public void interact(Point point) {
         postAction("/interact", point.getX(), point.getY());
         invalidateCache();
+        observerSupport.firePropertyChange("REFRESH", null, null);
     }
 
     @Override
     public void enter(Point point) {
         postAction("/enter", point.getX(), point.getY());
         invalidateCache();
+        getMapObject(point).ifPresent(mapObject -> {
+            if (mapObject instanceof Town) {
+                openShop((Town) mapObject);
+            } else if (mapObject instanceof Bank) {
+                enterBank((Bank) mapObject);
+            }
+        });
+
+        observerSupport.firePropertyChange("REFRESH", null, null);
     }
 
     @Override
     public void pass() {
         postAction("/pass", -1, -1);
         invalidateCache();
+        observerSupport.firePropertyChange("REFRESH", null, null);
     }
 
     @Override
     public void secondInteraction(Point point) {
         postAction("/secondInteraction", point.getX(), point.getY());
         invalidateCache();
+        getMapObject(point).ifPresent(mapObject -> {
+            if (mapObject instanceof Town) {
+                openUpgrades((Town) mapObject);
+            }
+        });
+        observerSupport.firePropertyChange("REFRESH", null, null);
     }
 
     @Override

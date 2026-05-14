@@ -46,12 +46,8 @@ public class BoardEconomy {
 
     public boolean canMove(final EconomyHero hero, final Point targetPoint) {
         Object obj = map.get(targetPoint);
-        Object objOnInteractionMap = interactionMap.get(targetPoint);
 
-        if (objOnInteractionMap != null) {
-            return true;
-        }
-        if (obj != null) {
+        if (obj != null && obj != hero) {
             return false;
         }
         final Point oldPosition = getPosition(hero);

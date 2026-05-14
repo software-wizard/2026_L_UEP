@@ -5,13 +5,14 @@ import pl.psi.creatures.CreatureStats;
 
 @Getter
 public class ActiveSpellEffect {
-    private final Spell spell;
+    private Spell spell;
     private int remainingTurns;
 
     public ActiveSpellEffect(Spell spell, int duration) {
         this.spell = spell;
         this.remainingTurns = duration;
     }
+    public ActiveSpellEffect() {}
 
     public void decreaseDuration() {
         remainingTurns--;

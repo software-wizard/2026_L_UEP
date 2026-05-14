@@ -1,12 +1,15 @@
 package pl.psi.creatures;
 
 public class StatsModifier {
-    private final int attackBonus; // sprawdzic inne statystyki tez
-    private final int armorBonus;
+    private int attackBonus; // sprawdzic inne statystyki tez
+    private int armorBonus;
 
     public StatsModifier(int attackBonus, int armorBonus) {
         this.attackBonus = attackBonus;
         this.armorBonus = armorBonus;
+    }
+
+    public StatsModifier() {
     }
 
     public int getAttackBonus() {

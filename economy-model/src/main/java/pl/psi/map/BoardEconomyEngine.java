@@ -48,15 +48,14 @@ public class BoardEconomyEngine {
     public boolean canEnter(final Point point) {
         // Allow entering if there is a building AND (no hero OR it's the current hero)
         if (isEnterable(point)) {
-            return !isHero(point) || isCurrentHero(point);
+            return (!isHero(point) || isCurrentHero(point)) && board.canMove(turnQueue.getCurrentHero(), point);
         }
         return false;
     }
 
     public boolean canInteract(Point point) {
-        // Allow interaction if it's interactable AND (no hero OR it's the current hero)
         if (getInteractable(point).isPresent()) {
-            return !isHero(point) || isCurrentHero(point);
+            return (!isHero(point) || isCurrentHero(point)) && board.canMove(turnQueue.getCurrentHero(), point);
         }
         return false;
     }
@@ -67,10 +66,16 @@ public class BoardEconomyEngine {
     }
 
     public void interact(final Point point) {
+        if (!board.getPosition(turnQueue.getCurrentHero()).equals(point)) {
+            throw new IllegalStateException("Hero is not close enough to interact with this tile.");
+        }
         board.interact(turnQueue.getCurrentHero(), point);
     }
 
     public void enter(final Point point) {
+        if (!board.getPosition(turnQueue.getCurrentHero()).equals(point)) {
+            throw new IllegalStateException("Hero is not on the building tile.");
+        }
         EnterAction action = board.enter(point);
         switch (action.getType()) {
             case OPEN_SHOP: {
@@ -85,6 +90,9 @@ public class BoardEconomyEngine {
     }
 
     public void secondInteraction(final Point point) {
+        if (!board.getPosition(turnQueue.getCurrentHero()).equals(point)) {
+            throw new IllegalStateException("Hero is not on the building tile.");
+        }
         EnterAction action = board.secondInteraction(point);
         switch (action.getType()) {
             case OPEN_UPGRADE:{
