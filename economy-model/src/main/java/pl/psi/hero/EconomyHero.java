@@ -19,6 +19,12 @@ import pl.psi.hero.skills.AbstractSkill;
 import pl.psi.hero.skills.ArmorerSkill;
 import pl.psi.hero.skills.OffenceSkill;
 import pl.psi.hero.skills.LearningSkill;
+import pl.psi.hero.skills.LogisticsSkill;
+import pl.psi.hero.skills.TacticsSkill;
+import pl.psi.hero.skills.AirMagicSkill;
+import pl.psi.hero.skills.EarthMagicSkill;
+import pl.psi.hero.skills.FireMagicSkill;
+import pl.psi.hero.skills.WaterMagicSkill;
 import pl.psi.map.resources.Resources;
 
 @Getter
@@ -131,10 +137,15 @@ public class EconomyHero implements PropertyChangeListener
         Optional<AbstractSkill> existing = skills.stream()
                 .filter(s -> s.getName().equals(aSelectedSkill.getName()))
                 .findFirst();
+
         if (existing.isPresent()) {
             existing.get().upgrade();
         } else {
             skills.add(aSelectedSkill);
+
+            if (aSelectedSkill instanceof ExpModifierIf) {
+                addExpModifier((ExpModifierIf) aSelectedSkill);
+            }
         }
     }
 
@@ -144,6 +155,12 @@ public class EconomyHero implements PropertyChangeListener
         addIfPossible(possible, pl.psi.hero.skills.SkillName.OFFENCE, new pl.psi.hero.skills.OffenceSkill());
         addIfPossible(possible, pl.psi.hero.skills.SkillName.ARMORER, new pl.psi.hero.skills.ArmorerSkill());
         addIfPossible(possible, pl.psi.hero.skills.SkillName.LEARNING, new pl.psi.hero.skills.LearningSkill());
+        addIfPossible(possible, pl.psi.hero.skills.SkillName.LOGISTICS, new pl.psi.hero.skills.LogisticsSkill());
+        addIfPossible(possible, pl.psi.hero.skills.SkillName.TACTICS, new pl.psi.hero.skills.TacticsSkill());
+        addIfPossible(possible, pl.psi.hero.skills.SkillName.AIR_MAGIC, new pl.psi.hero.skills.AirMagicSkill());
+        addIfPossible(possible, pl.psi.hero.skills.SkillName.EARTH_MAGIC, new pl.psi.hero.skills.EarthMagicSkill());
+        addIfPossible(possible, pl.psi.hero.skills.SkillName.FIRE_MAGIC, new pl.psi.hero.skills.FireMagicSkill());
+        addIfPossible(possible, pl.psi.hero.skills.SkillName.WATER_MAGIC, new pl.psi.hero.skills.WaterMagicSkill());
         return possible;
     }
 
@@ -288,22 +305,6 @@ public class EconomyHero implements PropertyChangeListener
         return getTotalStatistics().getKnowledge();
     }
 
-    public void addSkill(final ArmorerSkill aSkill)
-    {
-        if( skills == null )
-        {
-            skills = new ArrayList<>();
-        }
-        skills.add( aSkill );
-    }
-    public void addSkill(final OffenceSkill aSkill)
-    {
-        if( skills == null )
-        {
-            skills = new ArrayList<>();
-        }
-        skills.add( aSkill );
-    }
     public void addObserver(PropertyChangeListener observer) {
         pcs.addPropertyChangeListener(observer);
     }

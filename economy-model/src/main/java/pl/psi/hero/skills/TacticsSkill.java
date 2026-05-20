@@ -1,23 +1,21 @@
 package pl.psi.hero.skills;
 
-import pl.psi.hero.ExpModifierIf;
+public class TacticsSkill extends AbstractSkill {
+    private float tacticsFactor;
 
-public class LearningSkill extends AbstractSkill implements ExpModifierIf {
-    private float expBonus;
-
-    public LearningSkill() {
+    public TacticsSkill() {
         super();
-        this.expBonus = 0.05f;
+        this.tacticsFactor = 1.0f;
     }
 
     @Override
     public void upgrade() {
         if (this.level.equals(SkillLevel.BASIC)) {
             this.level = SkillLevel.ADVANCED;
-            this.expBonus = 0.10f;
+            this.tacticsFactor = 2.0f;
         } else if (this.level.equals(SkillLevel.ADVANCED)) {
             this.level = SkillLevel.EXPERT;
-            this.expBonus = 0.15f;
+            this.tacticsFactor = 3.0f;
         } else {
             throw new IllegalStateException("Cannot upgrade from Expert level.");
         }
@@ -25,16 +23,11 @@ public class LearningSkill extends AbstractSkill implements ExpModifierIf {
 
     @Override
     public SkillName getName() {
-        return SkillName.LEARNING;
+        return SkillName.TACTICS;
     }
 
     @Override
     public float getFactor() {
-        return expBonus;
-    }
-
-    @Override
-    public double getExpMultiplier() {
-        return 1.0 + expBonus;
+        return tacticsFactor;
     }
 }

@@ -25,7 +25,7 @@ import java.util.Map;
 public class EconomyBoardController implements PropertyChangeListener {
     private final BoardEconomyEngine gameEngine;
     @FXML private GridPane gridMap;
-    @FXML private Button passButton, equipmentButton, heroWindowButton, testExpButton;
+    @FXML private Button passButton, equipmentButton, heroWindowButton;
     @FXML private Label expLabel, lvlLabel, goldLabel, woodLabel, oreLabel, mercuryLabel, sulphurLabel, crystalLabel, gemsLabel, attackLabel, defenceLabel, powerLabel, knowledgeLabel;
     private final EconomyHero battleHero1;
     private final EconomyHero battleHero2;
@@ -44,7 +44,7 @@ public class EconomyBoardController implements PropertyChangeListener {
         passButton.setOnMouseClicked(e -> gameEngine.pass());
         equipmentButton.setOnMouseClicked(e -> showEquipment());
         heroWindowButton.setOnMouseClicked(e -> showHeroWindow());
-        testExpButton.setOnMouseClicked(e -> gameEngine.getCurrentHero().addExperience(200));
+
         battleHero1.addObserver(this);
         battleHero2.addObserver(this);
     }
@@ -156,7 +156,10 @@ public class EconomyBoardController implements PropertyChangeListener {
         WindowManager.openEquipment(gameEngine.getCurrentHero());
     }
 
-    private void showHeroWindow() { WindowManager.openHeroWindow(gameEngine.getCurrentHero()); }
+    private void showHeroWindow() {
+        WindowManager.openHeroWindow(gameEngine.getCurrentHero());
+    }
+
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
         refreshGui();
@@ -183,9 +186,15 @@ public class EconomyBoardController implements PropertyChangeListener {
                 EcoBattleConverter.startBankBattle(hero2, enemies);
                 break;
 
-            case "levelUp_hero":
-                EconomyHero levelHero = (EconomyHero) evt.getNewValue();
-                javafx.application.Platform.runLater(() -> WindowManager.openSkillChoice(levelHero));
+            case "levelUp":
+                EconomyHero levelHero;
+                if (evt.getNewValue() instanceof EconomyHero) {
+                    levelHero = (EconomyHero) evt.getNewValue();
+                } else {
+                    levelHero = (EconomyHero) evt.getSource();
+                }
+                final EconomyHero finalHero = levelHero;
+                javafx.application.Platform.runLater(() -> WindowManager.openSkillChoice(finalHero));
                 break;
         }
     }
