@@ -4,12 +4,12 @@ import pl.psi.creatures.Faction;
 
 public class CloverField extends SpecialField {
     public CloverField() {
-        super(Color.ORANGE, FieldName.BUFF_FIELD);
+        super(Color.GREEN, FieldName.BUFF_FIELD);
     }
 
     @Override
     public void doSomething(Creature aCreature) {
-        if (SpecialField.canFly(aCreature.getName())) {
+        if (shouldIgnore(aCreature)) {
             return;
         }
         if (aCreature.getFaction() == Faction.NEUTRAL) {

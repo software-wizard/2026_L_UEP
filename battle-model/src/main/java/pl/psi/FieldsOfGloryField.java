@@ -2,10 +2,9 @@ package pl.psi;
 
 import pl.psi.creatures.Creature;
 
-public class DmgField extends SpecialField {
-
-    public DmgField() {
-        super(Color.BROWN, FieldName.DMG_FIELD);
+public class FieldsOfGloryField extends SpecialField {
+    public FieldsOfGloryField() {
+        super(Color.GRAY, FieldName.FIELDS_OF_GLORY);
     }
 
     @Override
@@ -13,6 +12,6 @@ public class DmgField extends SpecialField {
         if (shouldIgnore(aCreature)) {
             return;
         }
-        aCreature.applyDamage(aCreature, 20);
+        aCreature.setLuck(aCreature.getLuck() - 2);
     }
 }

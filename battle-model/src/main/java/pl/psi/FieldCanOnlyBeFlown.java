@@ -11,7 +11,7 @@ public class FieldCanOnlyBeFlown extends SpecialField {
 
     @Override
     public void doSomething(Creature aCreature) {
-        if (!SpecialField.canFly(aCreature.getName())) {
+        if (!canFly(aCreature)) {
             throw new CannotPassFieldException("You can't pass this field");
         }
     }

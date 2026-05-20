@@ -9,7 +9,7 @@ public class RocklandField extends SpecialField {
 
     @Override
     public void doSomething(Creature aCreature) {
-        if (SpecialField.canFly(aCreature.getName())) {
+        if (shouldIgnore(aCreature)) {
             return;
         }
         aCreature.setEarthMagicLevel(MagicLevel.EXPERT);

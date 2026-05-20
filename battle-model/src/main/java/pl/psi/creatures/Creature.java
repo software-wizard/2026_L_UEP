@@ -75,6 +75,10 @@ public class Creature implements PropertyChangeListener {
     @Setter
     private MagicLevel airMagicLevel = MagicLevel.NONE;
 
+    @Getter
+    @Setter
+    private int armorModifier = 0;
+
     private final List<ActiveSpellEffect> activeSpellEffects = new ArrayList<>();
     private float reduceDemegeFactor;
 
@@ -162,7 +166,7 @@ public class Creature implements PropertyChangeListener {
 
 
     public int getArmor() {
-        return stats.getArmor();
+        return stats.getArmor() + armorModifier;
     }
 
     @Override

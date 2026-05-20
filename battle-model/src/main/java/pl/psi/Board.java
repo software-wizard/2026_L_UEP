@@ -121,9 +121,6 @@ public class Board {
         if (map.containsKey(aBattlePoint)) {
             return false;
         }
-        if (mapWithSpecialFields.containsKey(aBattlePoint)) {
-            mapWithSpecialFields.get(aBattlePoint).canInteract(aCreature);
-        }
         final BattlePoint oldPosition = getPosition(aCreature);
         return aBattlePoint.distance(oldPosition.getX(), oldPosition.getY()) < aCreature.getMoveRange();
     }

@@ -10,11 +10,11 @@ import pl.psi.creatures.CreatureStatisticIf;
 @Setter
 public abstract class SpecialField {
     public enum Color{
-        CYAN, BROWN, ORANGE, YELLOW, GRAY, RED
+        CYAN, BROWN, ORANGE, YELLOW, GRAY, RED, GREEN
     }
 
     public enum FieldName{
-        DMG_FIELD, SPELL_FIELD, BUFF_FIELD, FIELD_CAN_ONLY_BE_FLOWN, DEBUFF_FIELD, FIRE_FIELD
+        DMG_FIELD, SPELL_FIELD, BUFF_FIELD, FIELD_CAN_ONLY_BE_FLOWN, DEBUFF_FIELD, FIRE_FIELD, CRACKED_ICE, DUNES, FIELDS_OF_GLORY
     }
 
     @Getter
@@ -29,19 +29,17 @@ public abstract class SpecialField {
 
     public abstract void doSomething(Creature aCreature);
 
-    public static boolean canFly(String name) {
-        if (name.equals("Ghost Dragon") || name.equals("Archangel") || name.equals("Efreeti") || name.equals("Gargoyle")) {
-            return true;
-        } else {
-            return false;
-        }
+    public boolean isNegative() {
+        return fieldName == FieldName.DMG_FIELD || fieldName == FieldName.DEBUFF_FIELD || fieldName == FieldName.DUNES || fieldName == FieldName.FIELDS_OF_GLORY || fieldName == FieldName.CRACKED_ICE;
     }
 
-    boolean canInteract(Creature aCreature) {
-//        if((aCreature.canFly(aCreature.getName())) && (SpecialField.getFieldName() == SpecialField.FieldName.FIELD_CAN_ONLY_BE_FLOWN)){
-            return true;
-//        }
-//        return false;
+    public static boolean canFly(Creature aCreature) {
+        String name = aCreature.getName();
+        return name.equals("Ghost Dragon") || name.equals("Archangel") || name.equals("Efreeti") || name.equals("Gargoyle");
+    }
+
+    protected boolean shouldIgnore(Creature aCreature) {
+        return isNegative() && canFly(aCreature);
     }
 
 
