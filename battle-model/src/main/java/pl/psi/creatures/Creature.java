@@ -42,6 +42,39 @@ public class Creature implements PropertyChangeListener {
     private int counterAttackCounter = 1;
     @JsonIgnore
     private DamageCalculatorIf calculator;
+
+    @Getter
+    @Setter
+    private int morale = 0;
+
+    @Getter
+    @Setter
+    private int luck = 0;
+
+    @Getter
+    @Setter
+    private Faction faction = Faction.NEUTRAL;
+
+    @Getter
+    @Setter
+    private double movementCostModifier = 1.0;
+
+    @Getter
+    @Setter
+    private MagicLevel earthMagicLevel = MagicLevel.NONE;
+
+    @Getter
+    @Setter
+    private MagicLevel fireMagicLevel = MagicLevel.NONE;
+
+    @Getter
+    @Setter
+    private MagicLevel waterMagicLevel = MagicLevel.NONE;
+
+    @Getter
+    @Setter
+    private MagicLevel airMagicLevel = MagicLevel.NONE;
+
     private final List<ActiveSpellEffect> activeSpellEffects = new ArrayList<>();
     private float reduceDemegeFactor;
 
