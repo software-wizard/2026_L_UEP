@@ -70,22 +70,27 @@ public class Board {
     void move(final Creature aCreature, final BattlePoint aBattlePoint) {
 
         if (canMove(aCreature, aBattlePoint)) {
-            List<BattlePoint> path = examinePath(getPosition(aCreature), aBattlePoint);
+            if (aCreature.isFlying()) {
+                // Flyers bypass all intermediate tiles — jump straight to destination
+                move0(aCreature, aBattlePoint);
+            } else {
+                List<BattlePoint> path = examinePath(getPosition(aCreature), aBattlePoint);
 
-            for (int i = 0; i < path.size() - 1; i++) {
-                if (mapWithSpecialFields.containsKey(path.get(i))) {
-                    SpecialField currentField = mapWithSpecialFields.get(path.get(i));
+                for (int i = 0; i < path.size() - 1; i++) {
+                    if (mapWithSpecialFields.containsKey(path.get(i))) {
+                        SpecialField currentField = mapWithSpecialFields.get(path.get(i));
 
-                    if (currentField.getFieldName().equals(FieldType.TRIGGERED_BY_STEPPING)) {
-                        currentField.doSomething(aCreature);
+                        if (currentField.getFieldName().equals(FieldType.TRIGGERED_BY_STEPPING)) {
+                            currentField.doSomething(aCreature);
+                        }
                     }
                 }
-            }
 
-            if (!aCreature.isAlive()) {
-                return;
+                if (!aCreature.isAlive()) {
+                    return;
+                }
+                move0(aCreature, aBattlePoint);
             }
-            move0(aCreature, aBattlePoint);
         }
     }
 
@@ -104,6 +109,7 @@ public class Board {
     }
 
     boolean canMove(final Creature aCreature, final BattlePoint aBattlePoint) {
+        // Destination occupied by any creature — nobody can land here
         if (map.containsKey(aBattlePoint)) {
             return false;
         }
@@ -112,6 +118,9 @@ public class Board {
         }
         final BattlePoint oldPosition = getPosition(aCreature);
         double distance = aBattlePoint.distance(oldPosition.getX(), oldPosition.getY());
+        // Flying creatures ignore terrain/obstacles — straight-line distance only,
+        // no path validation needed. Walking creatures use the same check but are
+        // expected to be blocked by occupied intermediate tiles via examinePath.
         return distance < aCreature.getRemainingMovePoints();
     }
 

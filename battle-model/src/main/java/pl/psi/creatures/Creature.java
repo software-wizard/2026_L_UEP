@@ -1,10 +1,4 @@
-package pl.psi.creatures;//  ******************************************************************
-
-//
-//  Copyright 2022 PSI Software AG. All rights reserved.
-//  PSI PROPRIETARY/CONFIDENTIAL. Use is subject to license terms
-//
-//  ******************************************************************
+package pl.psi.creatures;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -17,6 +11,7 @@ import lombok.AccessLevel;
 import lombok.Setter;
 import pl.psi.Hero;
 import pl.psi.Spells.ActiveSpellEffect;
+import pl.psi.creatures.MovementType;
 import pl.psi.Spells.BuffSpell;
 import pl.psi.Spells.Spell;
 import pl.psi.TurnQueue;
@@ -122,7 +117,7 @@ public class Creature implements PropertyChangeListener {
         for (ActiveSpellEffect effect : activeSpellEffects) {
             modifiedStats = effect.getSpell().modifyStats(modifiedStats);
         }
-        this.stats = modifiedStats; // ewentualnie obsłuż inaczej lub rzuć wyjątek
+        this.stats = modifiedStats;
     }
 
     public int getArmor() {
@@ -179,6 +174,10 @@ public class Creature implements PropertyChangeListener {
 
     public int getMoveRange() {
         return stats.getMoveRange();
+    }
+
+    public boolean isFlying() {
+        return stats.getMovementType() == MovementType.FLYING;
     }
 
     public void applyMagicDamage(Spell aDamageSpell) {

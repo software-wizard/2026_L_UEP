@@ -8,81 +8,93 @@ import lombok.Setter;
 @Getter
 public enum CreatureStatistic implements CreatureStatisticIf
 {
-    // NECROPILIS FRACTION
+    // NECROPOLIS FRACTION
     SKELETON( "Skeleton", 5, 4, 6, 4, Range.closed( 1, 3 ), 1,
-        "Average lvl1 foot soldier, but always in huge numbers thanks to necromancy skill and skeleton transformer.",
-        false ), //
+            "Average lvl1 foot soldier, but always in huge numbers thanks to necromancy skill and skeleton transformer.",
+            false, MovementType.WALKING ),
     WALKING_DEAD( "Walking Dead", 5, 5, 15, 3, Range.closed( 2, 3 ), 2,
-        "Basically its the same skeleton with more hit points. I prefer buying 2 skeletons instead.", false ), //
+            "Basically its the same skeleton with more hit points. I prefer buying 2 skeletons instead.",
+            false, MovementType.WALKING ),
     WIGHT( "Wight", 7, 7, 18, 5, Range.closed( 3, 5 ), 3,
-        "Regenerating ability is really good when fighting weak enemies, especially shooters.\nSpecial: top wight of the stack regenerates all lost damage in the beginning of each round",
-        false ), //
+            "Regenerating ability is really good when fighting weak enemies, especially shooters.\nSpecial: top wight of the stack regenerates all lost damage in the beginning of each round",
+            false, MovementType.WALKING ),
     VAMPIRE( "Vampire", 10, 9, 30, 6, Range.closed( 5, 8 ), 4,
-        "NOTHING compared to their upgraded brothers. Keep the population growing and recruit after the upgrade.\nSpecial: no enemy retaliation.",
-        false ), //
+            "NOTHING compared to their upgraded brothers. Keep the population growing and recruit after the upgrade.\nSpecial: no enemy retaliation.",
+            false, MovementType.FLYING ),
     LICH( "Lich", 13, 10, 30, 6, Range.closed( 11, 15 ), 5,
-        "Now they last longer and are able to do more damage! A must for good necropolis army.\nSpecial: death cloud range attack - damages living creatures on adjacent hexes to target.\n",
-        false ), //
+            "Now they last longer and are able to do more damage! A must for good necropolis army.\nSpecial: death cloud range attack - damages living creatures on adjacent hexes to target.\n",
+            false, MovementType.WALKING ),
     BLACK_KNIGHT( "Black Knight", 16, 16, 120, 7, Range.closed( 15, 30 ), 6,
-        "Awesome ground unit. As any undead it cannot be blinded, so your enemies will have to look out.\nSpecial: 20% chance to curse enemy.\n",
-        false ), //
+            "Awesome ground unit. As any undead it cannot be blinded, so your enemies will have to look out.\nSpecial: 20% chance to curse enemy.\n",
+            false, MovementType.WALKING ),
     BONE_DRAGON( "Bone Dragon", 17, 15, 150, 9, Range.closed( 25, 50 ), 7,
-        "They are truly fearsome for enemies with low morale. Simply keeping them on battlefield scares enemies.\nSpecial: -1 to enemy morale.\n",
-        false ), //
+            "They are truly fearsome for enemies with low morale. Simply keeping them on battlefield scares enemies.\nSpecial: -1 to enemy morale.\n",
+            false, MovementType.FLYING ),
     SKELETON_WARRIOR( "Skeleton Warrior", 6, 6, 6, 5, Range.closed( 1, 3 ), 1,
-        "Numerous skeletons become even better, but running back to town and upgrading is a problem... If there is no room in your army for ordinary skeletons, necromancy skill will resurrect skeleton warriors, but there will be less of them than normal skeletons, so it might be a good idea not to upgrade cursed temple at all.",
-        true ), //
+            "Numerous skeletons become even better, but running back to town and upgrading is a problem... If there is no room in your army for ordinary skeletons, necromancy skill will resurrect skeleton warriors, but there will be less of them than normal skeletons, so it might be a good idea not to upgrade cursed temple at all.",
+            true, MovementType.WALKING ),
     ZOMBIE( "Zombie", 5, 5, 20, 4, Range.closed( 2, 3 ), 2,
-        "Attack ratings are way too low... In my opinion, necropolis has the worst lvl2 creature.\nSpecial: 20% chance to disease enemies (-2Att -2Def for 3 rounds)\n",
-        true ), //
+            "Attack ratings are way too low... In my opinion, necropolis has the worst lvl2 creature.\nSpecial: 20% chance to disease enemies (-2Att -2Def for 3 rounds)\n",
+            true, MovementType.WALKING ),
     WRAITH( "Wraith", 7, 7, 18, 5, Range.closed( 3, 5 ), 3,
-        "Regenerating ability is really good when fighting weak enemies, especially shooters.\nSpecial: top wight of the stack regenerates all lost damage in the beginning of each round\n",
-        true ), //
+            "Regenerating ability is really good when fighting weak enemies, especially shooters.\nSpecial: top wight of the stack regenerates all lost damage in the beginning of each round\n",
+            true, MovementType.FLYING ),
     VAMPIRE_LORD( "Vampire Lord", 10, 10, 40, 9, Range.closed( 5, 8 ), 4,
-        "My favorite necropolis unit. Use them as main striking unit and you might end up with no losses!\nSpecial: no enemy retaliation ; resurrects members of their own stack by restoring health equal to the amount of damage they do to living enemies.\n",
-        true ), //
+            "My favorite necropolis unit. Use them as main striking unit and you might end up with no losses!\nSpecial: no enemy retaliation ; resurrects members of their own stack by restoring health equal to the amount of damage they do to living enemies.\n",
+            true, MovementType.FLYING ),
     POWER_LICH( "Power Lich", 13, 10, 40, 7, Range.closed( 11, 15 ), 5,
-        "Now they last longer and are able to do more damage! A must for good necropolis army.\nSpecial: death cloud range attack - damages living creatures on adjacent hexes to target.\n",
-        true ), //
+            "Now they last longer and are able to do more damage! A must for good necropolis army.\nSpecial: death cloud range attack - damages living creatures on adjacent hexes to target.\n",
+            true, MovementType.WALKING ),
     DREAD_KNIGHT( "Dread Knight", 18, 18, 120, 9, Range.closed( 15, 30 ), 6,
-        "I think it's the best lvl6 unit in the game! Double damage ability puts Dread Knights above Naga Queens.\nSpecial: 20% chance to curse enemy ; 20% chance to do double damage.\n",
-        true ), //
+            "I think it's the best lvl6 unit in the game! Double damage ability puts Dread Knights above Naga Queens.\nSpecial: 20% chance to curse enemy ; 20% chance to do double damage.\n",
+            true, MovementType.WALKING ),
     GHOST_DRAGON( "Ghost Dragon", 19, 17, 200, 14, Range.closed( 25, 50 ), 7,
-        "When situation seems hopeless, take a chance on the best enemy stack! If you'll get lucky, half their hit points will be gone instantly!! Ageing ability makes ghost dragons as dangerous as other lvl7 creatures.\nSpecial: -1 to enemy morale ; 20% chance to age enemy (halve hit points of all stack members).\n",
-        true ),
-    // Bastion FRACTION
+            "When situation seems hopeless, take a chance on the best enemy stack! If you'll get lucky, half their hit points will be gone instantly!! Ageing ability makes ghost dragons as dangerous as other lvl7 creatures.\nSpecial: -1 to enemy morale ; 20% chance to age enemy (halve hit points of all stack members).\n",
+            true, MovementType.FLYING ),
+
+    // BASTION FRACTION
     CENTAUR( "Centaur", 5, 3, 8, 6, Range.closed( 2, 3 ), 1,
-        "Good lvl1 unit,fast and durable(for lvl1 unit).",false ), //
+            "Good lvl1 unit, fast and durable (for lvl1 unit).",
+            false, MovementType.WALKING ),
     BATTLE_CENTAUR( "Battle_Centaur", 6, 3, 10, 8, Range.closed( 2, 3 ), 1,
-        "Faster ,more durable centaur.", true ), //
+            "Faster, more durable centaur.",
+            true, MovementType.WALKING ),
     DWARF( "Dwarf", 6, 7, 20, 3, Range.closed( 2, 4 ), 2,
-        "Very durable.",false ), //
+            "Very durable.",
+            false, MovementType.WALKING ),
     DWARF_WARRIOR( "Dwarf_Warrior", 7, 7, 20, 5, Range.closed( 2, 4 ), 2,
-        "Faster ,more durable centaur.", true ), //
+            "Faster, more durable dwarf.",
+            true, MovementType.WALKING ),
     ELF( "Elf", 9, 5, 15, 6, Range.closed( 3, 5 ), 2,
-        "Very durable.",false ), //
+            "Very durable.",
+            false, MovementType.WALKING ),
     HIGH_ELF( "High_Elf", 9, 5, 15, 7, Range.closed( 3, 5 ), 3,
-        "Faster ,more durable centaur.", true ), //
+            "Faster, more durable elf.",
+            true, MovementType.WALKING ),
     PEGASUS( "Pegasus", 9, 8, 30, 8, Range.closed( 5, 9 ), 4,
-        "Very durable.",false ), //
+            "Very durable.",
+            false, MovementType.FLYING ),
     SILVER_PEGASUS( "Silver_Pegasus", 9, 10, 30, 12, Range.closed( 5, 9 ), 4,
-        "Faster ,more durable centaur.", true ), //
+            "Faster, more durable pegasus.",
+            true, MovementType.FLYING ),
     TREEMAN( "Treeman", 9, 12, 55, 3, Range.closed( 10, 14 ), 5,
-        "Very durable.",false ), //
+            "Very durable.",
+            false, MovementType.WALKING ),
     ENT( "Ent", 9, 12, 65, 4, Range.closed( 10, 14 ), 5,
-        "Faster ,more durable centaur.", true ), //
+            "Faster, more durable treeman.",
+            true, MovementType.WALKING ),
     UNICORN( "Unicorn", 15, 14, 90, 7, Range.closed( 5, 9 ), 6,
-        "Very durable.",false ), //
+            "Very durable.",
+            false, MovementType.WALKING ),
     BATTLE_UNICORN( "Battle_Unicorn", 15, 14, 110, 9, Range.closed( 5, 9 ), 6,
-        "Faster ,more durable centaur.", true ), //
+            "Faster, more durable unicorn.",
+            true, MovementType.WALKING ),
     GREEN_DRAGON( "Green_Dragon", 18, 18, 180, 10, Range.closed( 40, 50 ), 7,
-        "Very durable.",false ), //
+            "Very durable.",
+            false, MovementType.FLYING ),
     GOLD_DRAGON( "Gold_Dragon", 27, 27, 250, 16, Range.closed( 40, 50 ), 7,
-        "Faster ,more durable centaur.", true );
-
-
-
-
+            "Faster, more durable dragon.",
+            true, MovementType.FLYING );
 
 
     @Getter
@@ -100,17 +112,19 @@ public enum CreatureStatistic implements CreatureStatisticIf
     @Setter
     private int moveRange;
     @Getter
-    private final Range< Integer > damage;
+    private final Range<Integer> damage;
     @Getter
     private final int tier;
     @Getter
     private final String description;
     @Getter
     private final boolean isUpgraded;
+    @Getter
+    private final MovementType movementType;
 
     CreatureStatistic( final String aName, final int aAttack, final int aArmor, final int aMaxHp,
-        final int aMoveRange, final Range< Integer > aDamage, final int aTier, final String aDescription,
-        final boolean aIsUpgraded )
+                       final int aMoveRange, final Range<Integer> aDamage, final int aTier, final String aDescription,
+                       final boolean aIsUpgraded, final MovementType aMovementType )
     {
         name = aName;
         attack = aAttack;
@@ -121,6 +135,7 @@ public enum CreatureStatistic implements CreatureStatisticIf
         tier = aTier;
         description = aDescription;
         isUpgraded = aIsUpgraded;
+        movementType = aMovementType;
     }
 
     String getTranslatedName()
