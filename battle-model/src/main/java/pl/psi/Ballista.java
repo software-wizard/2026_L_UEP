@@ -8,7 +8,6 @@ import java.util.ArrayList;
 public class Ballista {
 
     private final Hero owner;
-    private static final int BASE_DAMAGE = 30;
 
     public Ballista(Hero aOwner) {
         this.owner = aOwner;
@@ -17,11 +16,13 @@ public class Ballista {
     public void attack(Creature aDefender) {
         int artilleryLevel = owner.getSkillLevel("ARTILLERY");
 
-        aDefender.applyDamage(aDefender, BASE_DAMAGE);
+        int calculatedDamage = 20 * (owner.getAttack() + 1);
+
+        aDefender.applyDamage(aDefender, calculatedDamage);
 
         if (artilleryLevel == 3) {
             if (aDefender.isAlive()) {
-                aDefender.applyDamage(aDefender, BASE_DAMAGE);
+                aDefender.applyDamage(aDefender, calculatedDamage);
             }
         }
     }
@@ -41,7 +42,6 @@ public class Ballista {
         if (!aliveEnemies.isEmpty()) {
             Collections.shuffle(aliveEnemies);
             Creature randomTarget = aliveEnemies.get(0);
-
             attack(randomTarget);
         }
     }

@@ -19,12 +19,22 @@ public class Hero {
     @Getter
     private List<Spell> spells;
 
+    @Getter
+    private int attack = 0;
+
     private final Map<String, Integer> skills = new HashMap<>(); //
 
     public Hero(final List< Creature > aCreatures, List<Spell> aSpells)
     {
         creatures = aCreatures;
         spells = new java.util.ArrayList<>(aSpells);
+    }
+
+    public Hero(final List< Creature > aCreatures, List<Spell> aSpells, int aAttack)
+    {
+        creatures = aCreatures;
+        spells = new java.util.ArrayList<>(aSpells);
+        attack = aAttack;
     }
 
     public void apply(Spell s, Creature c) {
