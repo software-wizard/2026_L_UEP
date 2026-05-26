@@ -1,8 +1,8 @@
 package pl.psi;
 
 import java.util.List;
-import java.util.Map; //
-import java.util.HashMap;  //
+import java.util.Map;
+import java.util.HashMap;
 
 import pl.psi.Spells.ActiveSpellEffect;
 import pl.psi.Spells.Spell;
