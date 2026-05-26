@@ -1,6 +1,8 @@
 package pl.psi;
 
 import java.util.List;
+import java.util.Map; //
+import java.util.HashMap;  //
 
 import pl.psi.Spells.ActiveSpellEffect;
 import pl.psi.Spells.Spell;
@@ -16,6 +18,8 @@ public class Hero {
     private final List< Creature > creatures;
     @Getter
     private List<Spell> spells;
+
+    private final Map<String, Integer> skills = new HashMap<>(); //
 
     public Hero(final List< Creature > aCreatures, List<Spell> aSpells)
     {
@@ -37,5 +41,13 @@ public class Hero {
 
     public void removeCreature(Creature creature) {
         creatures.remove(creature);
+    }
+
+    public int getSkillLevel(String skillName) {
+        return skills.getOrDefault(skillName.toUpperCase(), 0);
+    }
+
+    public void setSkillLevel(String skillName, int level) {
+        skills.put(skillName.toUpperCase(), level);
     }
 }
