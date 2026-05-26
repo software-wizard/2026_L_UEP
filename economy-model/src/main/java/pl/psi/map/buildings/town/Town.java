@@ -13,6 +13,10 @@ public class Town implements BuildingIf {
     private final Set<TownBuilding> builtTownBuildings = new HashSet<>();
     private final Set<UpgradeBuildings> builtUpgradeBuildings = new HashSet<>();
 
+    // Bastion faction buildings
+    private final Set<BastionTownBuilding> builtBastionTownBuildings = new HashSet<>();
+    private final Set<BastionUpgradeBuildings> builtBastionUpgradeBuildings = new HashSet<>();
+
     public void build(BuildingType building, EconomyHero hero) {
         building.buildIn(this, hero);
     }
@@ -33,6 +37,7 @@ public class Town implements BuildingIf {
         building.registerInTown(this);
     }
 
+    // --- Necropolis checks ---
 
     public boolean hasBuilt(TownBuilding building) {
         return builtTownBuildings.contains(building);
@@ -42,9 +47,22 @@ public class Town implements BuildingIf {
         return builtUpgradeBuildings.contains(building);
     }
 
+    // --- Bastion checks ---
+
+    public boolean hasBuilt(BastionTownBuilding building) {
+        return builtBastionTownBuildings.contains(building);
+    }
+
+    public boolean hasBuilt(BastionUpgradeBuildings building) {
+        return builtBastionUpgradeBuildings.contains(building);
+    }
+
+    // Generic fallback — delegates to the typed overloads above
     public boolean hasBuilt(BuildingType building) {
         return building.isBuiltIn(this);
     }
+
+    // --- Registration ---
 
     public void addTownBuilding(TownBuilding building) {
         builtTownBuildings.add(building);
@@ -52,6 +70,32 @@ public class Town implements BuildingIf {
 
     public void addUpgradeBuilding(UpgradeBuildings building) {
         builtUpgradeBuildings.add(building);
+    }
+
+    public void addBastionTownBuilding(BastionTownBuilding building) {
+        builtBastionTownBuildings.add(building);
+    }
+
+    public void addBastionUpgradeBuilding(BastionUpgradeBuildings building) {
+        builtBastionUpgradeBuildings.add(building);
+    }
+
+    // --- Getters (for UI / shop queries) ---
+
+    public Set<TownBuilding> getBuiltTownBuildings() {
+        return builtTownBuildings;
+    }
+
+    public Set<UpgradeBuildings> getBuiltUpgradeBuildings() {
+        return builtUpgradeBuildings;
+    }
+
+    public Set<BastionTownBuilding> getBuiltBastionTownBuildings() {
+        return builtBastionTownBuildings;
+    }
+
+    public Set<BastionUpgradeBuildings> getBuiltBastionUpgradeBuildings() {
+        return builtBastionUpgradeBuildings;
     }
 
     @Override
@@ -65,7 +109,6 @@ public class Town implements BuildingIf {
 
     @Override
     public void enter(EconomyHero hero) {
-
     }
 
     @Override
@@ -74,7 +117,6 @@ public class Town implements BuildingIf {
 
     @Override
     public void interact(EconomyHero hero) {
-
     }
 
     @Override
@@ -96,6 +138,4 @@ public class Town implements BuildingIf {
     public EnterAction secondInteraction() {
         return new EnterAction(EnterActionType.OPEN_UPGRADE, this);
     }
-
-
 }
