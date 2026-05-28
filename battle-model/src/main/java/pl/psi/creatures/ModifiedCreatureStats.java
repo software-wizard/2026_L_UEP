@@ -56,4 +56,9 @@ public class ModifiedCreatureStats implements CreatureStatisticIf {
     public boolean isUpgraded() {
         return baseStats.isUpgraded();
     }
+
+    @Override
+    public MovementType getMovementType() {
+        return baseStats.getMovementType();
+    }
 }
