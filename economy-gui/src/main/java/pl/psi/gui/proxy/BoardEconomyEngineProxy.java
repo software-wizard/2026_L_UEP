@@ -7,6 +7,7 @@ import pl.psi.hero.EconomyHero;
 import pl.psi.gui.BoardEconomyEngineIf;
 import pl.psi.map.MapObjectIf;
 import pl.psi.map.buildings.BuildingIf;
+import pl.psi.map.buildings.town.BuildingType;
 import pl.psi.map.buildings.town.Town;
 import pl.psi.map.buildings.bank.Bank;
 
@@ -39,6 +40,7 @@ public class BoardEconomyEngineProxy implements BoardEconomyEngineIf {
             httpClient.send(req, HttpResponse.BodyHandlers.ofString());
         } catch (Exception e) { e.printStackTrace(); }
     }
+    public BoardEconomyEngineProxy() {}
 
     private Map<String, Object> getTileState(int x, int y) {
         if (cachedBoardState == null) {
@@ -222,5 +224,28 @@ public class BoardEconomyEngineProxy implements BoardEconomyEngineIf {
     public String getMapObjectPath(Point point) {
         Object path = getTileState(point.getX(), point.getY()).get("mapObjectPath");
         return path != null ? path.toString() : null;
+    }
+    public void buildInTown(BuildingType building) {
+        try {
+            String bName = ((Enum<?>) building).name();
+
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/build?buildingName=" + bName))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .build();
+
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+
+            if (res.statusCode() != 200) {
+                throw new IllegalStateException("Server rejected build: " + res.body());
+            }
+
+            observerSupport.firePropertyChange("REFRESH", null, null);
+
+        } catch (IllegalStateException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException("Network error: Could not send build request.");
+        }
     }
 }

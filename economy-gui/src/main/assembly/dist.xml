@@ -8,16 +8,17 @@
     </formats>
     <fileSets>
         <fileSet>
-            <directory>${project.build.directory}/classes</directory>
+            <directory>src/main/resources</directory>
+            <outputDirectory></outputDirectory>
             <includes>
                 <include>start.bat</include>
             </includes>
-            <outputDirectory>/</outputDirectory>
+            <filtered>true</filtered>
         </fileSet>
         <fileSet>
             <directory>${env.JAVA_HOME}</directory>
             <outputDirectory>/java</outputDirectory>
-            <filtered>true</filtered>
+            <filtered>false</filtered>
         </fileSet>
     </fileSets>
     <files>

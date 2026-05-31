@@ -4,6 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ListView;
 import lombok.Getter;
+import pl.psi.gui.proxy.BoardEconomyEngineProxy;
 import pl.psi.hero.EconomyHero;
 import pl.psi.map.buildings.town.*;
 
@@ -63,9 +64,7 @@ public class UpgradeController {
                 selected = CreatureBuildings.valueOf(buildingName);
             }
 
-            town.build(selected, hero);
-            showAlert(Alert.AlertType.INFORMATION, "Upgrade Purchased", selected + " unlocked!");
-            refreshUpgrades();
+            buyUpgrade(selected);
 
         } catch (IllegalArgumentException e) {
             showAlert(Alert.AlertType.ERROR, "Error", "Selected upgrade is invalid.");
@@ -115,6 +114,17 @@ public class UpgradeController {
         @Override
         public String toString() {
             return displayName;
+        }
+    }
+    private void buyUpgrade(BuildingType building) {
+        try {
+            BoardEconomyEngineProxy proxy = new BoardEconomyEngineProxy();
+            proxy.buildInTown(building);
+            town.build(building, hero);
+            refreshUpgrades();
+
+        } catch (IllegalStateException ex) {
+            System.err.println("Cannot build: " + ex.getMessage());
         }
     }
 

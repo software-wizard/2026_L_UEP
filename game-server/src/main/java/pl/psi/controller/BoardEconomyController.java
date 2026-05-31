@@ -11,7 +11,9 @@ import pl.psi.hero.artifacts.EconomySpell;
 import pl.psi.map.MapObjectIf;
 import pl.psi.map.buildings.bank.Bank;
 import pl.psi.map.buildings.bank.BankStatistics;
+import pl.psi.map.buildings.town.BuildingType;
 import pl.psi.map.buildings.town.Town;
+import pl.psi.map.buildings.town.TownBuilding;
 import pl.psi.map.resources.Gold;
 import pl.psi.map.resources.Resources;
 import pl.psi.map.resources.generators.ResourceGenType;
@@ -321,6 +323,30 @@ public class BoardEconomyController {
             return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.internalServerError().body("Error purchasing spell.");
+        }
+    }
+    @PostMapping("/build")
+    public ResponseEntity<String> buildInTown(@RequestParam String buildingName) {
+        try {
+            EconomyHero currentHero = this.gameStateService.getBoardEconomyEngine().getCurrentHero();
+            Optional<Town> townOpt = this.gameStateService.getBoardEconomyEngine().getTownUnderHero(currentHero);
+
+            if (townOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Hero is not in a town!");
+            }
+            BuildingType buildingToBuild;
+            try {
+                buildingToBuild = TownBuilding.valueOf(buildingName);
+            } catch (IllegalArgumentException e) {
+                buildingToBuild = CreatureBuildings.valueOf(buildingName);
+            }
+            townOpt.get().build(buildingToBuild, currentHero);
+
+            return ResponseEntity.ok("Building constructed successfully.");
+        } catch (IllegalStateException | IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Error: " + e.getMessage());
         }
     }
 }
