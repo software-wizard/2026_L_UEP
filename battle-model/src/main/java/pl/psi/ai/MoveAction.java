@@ -3,7 +3,7 @@ package pl.psi.ai;
 import pl.psi.BattlePoint;
 
 /** Simple data holder for a movement decision. */
-public class MoveAction {
+public class MoveAction implements Action {
     private final BattlePoint target;
 
     public MoveAction(final BattlePoint target) {

@@ -1,7 +1,12 @@
 package pl.psi.ai;
 
 import pl.psi.BattlePoint;
+import pl.psi.GameEngine;
+import pl.psi.Hero;
+import pl.psi.creatures.Creature;
 
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -76,6 +81,51 @@ public class BattleAI {
         }
 
         return Optional.of(new MoveAction(lastFree));
+    }
+
+    /**
+     * Higher-level decision method that uses GameEngine's public API to inspect the board
+     * and returns either MoveAction, AttackAction, PassAction or empty when nothing to do.
+     */
+    public Optional<? extends Object> decide(final BattlePoint currentPos,
+                                              final Creature creature,
+                                              final GameEngine engine,
+                                              final Hero aiHero) {
+
+        // scan board for enemies and occupied tiles (uses public GameEngine API)
+        List<BattlePoint> enemies = new ArrayList<>();
+        Set<BattlePoint> occupied = new HashSet<>();
+
+        for (int x = 0; x <= 14; x++) {
+            for (int y = 0; y <= 14; y++) {
+                BattlePoint p = new BattlePoint(x, y);
+                engine.getCreature(p).ifPresent(c -> {
+                    occupied.add(p);
+                    if (!aiHero.getCreatures().contains(c)) {
+                        enemies.add(p);
+                    }
+                });
+            }
+        }
+
+        if (enemies.isEmpty()) {
+            return Optional.empty();
+        }
+
+        // if any enemy is in attack range, attack the first one reachable
+        for (BattlePoint e : enemies) {
+            if (engine.canAttack(e)) {
+                return Optional.of(new AttackAction(e));
+            }
+        }
+
+        // otherwise compute greedy move towards nearest enemy
+        Optional<MoveAction> move = chooseGreedyMove(currentPos, creature.getMoveRange(), enemies, occupied);
+        if (move.isPresent()) {
+            return move;
+        }
+
+        return Optional.empty();
     }
 }
 
