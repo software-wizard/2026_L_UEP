@@ -87,10 +87,10 @@ public class BattleAI {
      * Higher-level decision method that uses GameEngine's public API to inspect the board
      * and returns either MoveAction, AttackAction, PassAction or empty when nothing to do.
      */
-    public Optional<? extends Object> decide(final BattlePoint currentPos,
-                                              final Creature creature,
-                                              final GameEngine engine,
-                                              final Hero aiHero) {
+    public Optional<Action> decide(final BattlePoint currentPos,
+                                    final Creature creature,
+                                    final GameEngine engine,
+                                    final Hero aiHero) {
 
         // scan board for enemies and occupied tiles (uses public GameEngine API)
         List<BattlePoint> enemies = new ArrayList<>();
@@ -122,7 +122,7 @@ public class BattleAI {
         // otherwise compute greedy move towards nearest enemy
         Optional<MoveAction> move = chooseGreedyMove(currentPos, creature.getMoveRange(), enemies, occupied);
         if (move.isPresent()) {
-            return move;
+            return Optional.of(move.get());
         }
 
         return Optional.empty();

@@ -39,10 +39,7 @@ public class AIController implements PropertyChangeListener {
                     BattlePoint p = new BattlePoint(x, y);
                     if (engine.isCurrentCreature(p)) {
                         currentPos = p;
-                        Optional<Creature> oc = engine.getCreature(p);
-                        if (oc.isPresent()) {
-                            currentCreature = oc.get();
-                        }
+                        currentCreature = engine.getCreature(p).orElse(null);
                         break outer;
                     }
                 }
@@ -52,12 +49,12 @@ public class AIController implements PropertyChangeListener {
                 return;
             }
 
-            Optional<?> decision = ai.decide(currentPos, currentCreature, engine, aiHero);
-            if (!decision.isPresent()) {
+            Optional<Action> decision = ai.decide(currentPos, currentCreature, engine, aiHero);
+            if (decision.isEmpty()) {
                 return;
             }
 
-            Object action = decision.get();
+            Action action = decision.get();
             if (action instanceof MoveAction) {
                 engine.move(((MoveAction) action).getTarget());
             } else if (action instanceof AttackAction) {
