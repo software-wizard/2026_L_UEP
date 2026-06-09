@@ -77,7 +77,7 @@ Split na aplikacje serwerową - Swidłowski Jakub
 4. Dockeryzacja
 
 
-Artefakry - Ratajczak Monika, Emilia Piwowarczyk
+Artefakry - Ratajczak Monika, Emilia Piwowarczyk, Hanna Liubamirskaya
 1. Sloty na artefakty
 2. Primary 4 dowolne
 3. Set smoka
