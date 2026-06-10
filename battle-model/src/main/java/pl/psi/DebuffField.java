@@ -1,6 +1,6 @@
 package pl.psi;
 
-import pl.psi.Spells.BuffSpell;
+import pl.psi.Spells.DebuffSpell;
 import pl.psi.creatures.Creature;
 import pl.psi.creatures.CreatureStats;
 
@@ -12,19 +12,19 @@ public class DebuffField extends SpecialField {
 
     @Override
     public void doSomething(Creature aCreature) {
-        BuffSpell buff = new BuffSpell(
+        DebuffSpell debuff = new DebuffSpell(
                 "debuffField",
                 1,
                 3,
                 CreatureStats.builder()
-                        .attack(-5)
-                        .armor(-10)
-                        .maxHp(-20)
-                        .moveRange(-1)
+                        .attack(5)
+                        .armor(10)
+                        .maxHp(20)
+                        .moveRange(1)
                         .name(aCreature.getName())
                         .description("temporary debuff")
                         .build()
         );
-        aCreature.applySpellEffect(buff, 3);
+        aCreature.applySpellEffect(debuff, 3);
     }
 }

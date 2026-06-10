@@ -83,12 +83,17 @@ public class Board {
         if (canMove(aCreature, aBattlePoint)) {
             List<BattlePoint> path = examinePath(getPosition(aCreature), aBattlePoint);
 
-            for (int i = 0; i < path.size() - 1; i++) {
-                if (mapWithSpecialFields.containsKey(path.get(i))) {
-                    SpecialField currentField = mapWithSpecialFields.get(path.get(i));
+            for (int i = 0; i < path.size(); i++) {
+                BattlePoint currentPoint = path.get(i);
+                if (mapWithSpecialFields.containsKey(currentPoint)) {
+                    SpecialField currentField = mapWithSpecialFields.get(currentPoint);
 
-                    //Ten warunek sprawdza, czy pole specjalne na ściezce ruchu powinno aktywowac sie po przejsciu jednostki
-                    if (currentField.getFieldName().equals(FieldType.TRIGGERED_BY_STEPPING)) {
+                    if (currentField.getFieldName() == SpecialField.FieldName.QUICKSAND && !SpecialField.canFly(aCreature)) {
+                        move0(aCreature, currentPoint);
+                        return;
+                    }
+
+                    if (i < path.size() - 1 && currentField.getFieldName().equals(FieldType.TRIGGERED_BY_STEPPING)) {
                         currentField.doSomething(aCreature);
                     }
                 }

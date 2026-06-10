@@ -14,7 +14,7 @@ public abstract class SpecialField {
     }
 
     public enum FieldName{
-        DMG_FIELD, SPELL_FIELD, BUFF_FIELD, FIELD_CAN_ONLY_BE_FLOWN, DEBUFF_FIELD, FIRE_FIELD, CRACKED_ICE, DUNES, FIELDS_OF_GLORY
+        DMG_FIELD, SPELL_FIELD, BUFF_FIELD, FIELD_CAN_ONLY_BE_FLOWN, DEBUFF_FIELD, FIRE_FIELD, CRACKED_ICE, QUICKSAND, FIELDS_OF_GLORY, MAGIC_PLAINS
     }
 
     @Getter
@@ -30,7 +30,7 @@ public abstract class SpecialField {
     public abstract void doSomething(Creature aCreature);
 
     public boolean isNegative() {
-        return fieldName == FieldName.DMG_FIELD || fieldName == FieldName.DEBUFF_FIELD || fieldName == FieldName.DUNES || fieldName == FieldName.FIELDS_OF_GLORY || fieldName == FieldName.CRACKED_ICE;
+        return fieldName == FieldName.DMG_FIELD || fieldName == FieldName.DEBUFF_FIELD || fieldName == FieldName.QUICKSAND || fieldName == FieldName.FIELDS_OF_GLORY || fieldName == FieldName.CRACKED_ICE;
     }
 
     public static boolean canFly(Creature aCreature) {

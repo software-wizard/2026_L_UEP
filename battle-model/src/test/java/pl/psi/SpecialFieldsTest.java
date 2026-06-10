@@ -2,6 +2,7 @@ package pl.psi;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
@@ -254,6 +255,37 @@ public class SpecialFieldsTest {
     }
 
     @Test
+    void debuffFieldDurationTest() {
+        final Creature creature = new Creature.Builder().statistic(CreatureStats.builder()
+                        .name("Knight")
+                        .maxHp(100)
+                        .moveRange(5)
+                        .attack(10)
+                        .armor(10)
+                        .damage(NOT_IMPORTANT_DMG)
+                        .build())
+                .build();
+
+        final List<Creature> c1 = List.of(creature);
+        final BiMap<BattlePoint, SpecialField> specialFields = HashBiMap.create();
+        specialFields.put(new BattlePoint(3, 3), new DebuffField());
+        final Board board = new Board(c1, List.of(), specialFields, new HashMap<>());
+
+        board.move(creature, new BattlePoint(3, 3));
+
+        assertThat(creature.getAttack()).isEqualTo(5);
+
+        creature.propertyChange(new java.beans.PropertyChangeEvent(this, "END_OF_TURN", 0, 1));
+        assertThat(creature.getAttack()).isEqualTo(5);
+
+        creature.propertyChange(new java.beans.PropertyChangeEvent(this, "END_OF_TURN", 1, 2));
+        assertThat(creature.getAttack()).isEqualTo(5);
+
+        creature.propertyChange(new java.beans.PropertyChangeEvent(this, "END_OF_TURN", 2, 3));
+        assertThat(creature.getAttack()).isEqualTo(10);
+    }
+
+    @Test
     void fieldCanOnlyBeFlownTest() {
         final Creature walker = new Creature.Builder().statistic(CreatureStats.builder()
                         .name("Walker")
@@ -284,5 +316,71 @@ public class SpecialFieldsTest {
         } catch (Exception e) {
             assertThat(e).isInstanceOf(pl.psi.Exceptions.CannotPassFieldException.class);
         }
+    }
+
+    @Test
+    void quicksandFieldTest() {
+        final Creature creature = new Creature.Builder().statistic(CreatureStats.builder()
+                        .name("Walker")
+                        .maxHp(100)
+                        .moveRange(10)
+                        .build())
+                .build();
+
+        final Creature flyingDragon = new Creature.Builder().statistic(CreatureStats.builder()
+                        .name("Ghost Dragon")
+                        .maxHp(100)
+                        .moveRange(10)
+                        .build())
+                .build();
+
+        // On a 15x15 board, default positions for list are (0, 1), (0, 3) etc.
+        // We will set their positions manually via bankCreatures map to be precise.
+        final List<Creature> emptyList = List.of();
+        final Map<BattlePoint, Creature> bankCreatures = new HashMap<>();
+        bankCreatures.put(new BattlePoint(0, 1), creature);
+        bankCreatures.put(new BattlePoint(0, 3), flyingDragon);
+
+        final QuicksandField quicksand1 = new QuicksandField();
+        final QuicksandField quicksand2 = new QuicksandField();
+
+        final BiMap<BattlePoint, SpecialField> specialFields = HashBiMap.create();
+        specialFields.put(new BattlePoint(2, 1), quicksand1);
+        specialFields.put(new BattlePoint(2, 3), quicksand2);
+
+        final Board board = new Board(emptyList, emptyList, specialFields, bankCreatures);
+
+        // Walker moves from (0,1) to (4,1), crossing quicksand at (2,1)
+        board.move(creature, new BattlePoint(4, 1));
+        // Walker should stop EXACTLY at (2,1) because of quicksand
+        assertThat(board.getPosition(creature)).isEqualTo(new BattlePoint(2, 1));
+        assertThat(quicksand1.isRevealed()).isTrue();
+
+        // Flyer moves from (0,3) to (4,3), crossing quicksand at (2,3)
+        board.move(flyingDragon, new BattlePoint(4, 3));
+        // Flyer ignores quicksand and successfully reaches (4,3)
+        assertThat(board.getPosition(flyingDragon)).isEqualTo(new BattlePoint(4, 3));
+        assertThat(quicksand2.isRevealed()).isFalse();
+    }
+
+    @Test
+    void magicPlainsFieldTest() {
+        final Creature walker = new Creature.Builder().statistic(CreatureStats.builder()
+                        .name("Test Walker").maxHp(100).moveRange(5).build()).build();
+        walker.setEarthMagicLevel(MagicLevel.NONE);
+        walker.setFireMagicLevel(MagicLevel.NONE);
+        walker.setWaterMagicLevel(MagicLevel.NONE);
+        walker.setAirMagicLevel(MagicLevel.NONE);
+
+        final List<Creature> c1 = List.of(walker);
+        final BiMap<BattlePoint, SpecialField> specialFields = HashBiMap.create();
+        specialFields.put(new BattlePoint(1, 1), new MagicPlainsField());
+        final Board board = new Board(c1, List.of(), specialFields, new HashMap<>());
+
+        board.move(walker, new BattlePoint(1, 1));
+        assertThat(walker.getEarthMagicLevel()).isEqualTo(MagicLevel.EXPERT);
+        assertThat(walker.getFireMagicLevel()).isEqualTo(MagicLevel.EXPERT);
+        assertThat(walker.getWaterMagicLevel()).isEqualTo(MagicLevel.EXPERT);
+        assertThat(walker.getAirMagicLevel()).isEqualTo(MagicLevel.EXPERT);
     }
 }
