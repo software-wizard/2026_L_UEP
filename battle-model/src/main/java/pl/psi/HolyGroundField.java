@@ -4,7 +4,7 @@ import pl.psi.creatures.Faction;
 
 public class HolyGroundField extends SpecialField {
     public HolyGroundField() {
-        super(Color.YELLOW, FieldName.BUFF_FIELD);
+        super(FieldName.BUFF_FIELD);
     }
 
     @Override

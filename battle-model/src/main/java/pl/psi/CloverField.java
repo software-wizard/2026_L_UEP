@@ -4,7 +4,7 @@ import pl.psi.creatures.Faction;
 
 public class CloverField extends SpecialField {
     public CloverField() {
-        super(Color.GREEN, FieldName.BUFF_FIELD);
+        super(FieldName.BUFF_FIELD);
     }
 
     @Override

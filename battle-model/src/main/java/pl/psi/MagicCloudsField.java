@@ -4,7 +4,7 @@ import pl.psi.creatures.MagicLevel;
 
 public class MagicCloudsField extends SpecialField {
     public MagicCloudsField() {
-        super(Color.GRAY, FieldName.BUFF_FIELD);
+        super(FieldName.BUFF_FIELD);
     }
 
     @Override

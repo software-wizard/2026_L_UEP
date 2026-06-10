@@ -4,7 +4,7 @@ import pl.psi.creatures.MagicLevel;
 
 public class LucidPoolsField extends SpecialField {
     public LucidPoolsField() {
-        super(Color.CYAN, FieldName.BUFF_FIELD);
+        super(FieldName.BUFF_FIELD);
     }
 
     @Override

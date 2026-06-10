@@ -7,7 +7,7 @@ import pl.psi.creatures.CreatureStats;
 public class BuffField extends SpecialField {
 
     public BuffField() {
-        super(Color.ORANGE, FieldName.BUFF_FIELD);
+        super(FieldName.BUFF_FIELD);
     }
 
     @Override

@@ -73,7 +73,7 @@ public class FireWallSpell extends Spell {
         int duration;
 
         public FireWall(int duration) {
-            super(Color.RED, FIRE_FIELD);
+            super(FIRE_FIELD);
             this.duration = duration;
         }
 

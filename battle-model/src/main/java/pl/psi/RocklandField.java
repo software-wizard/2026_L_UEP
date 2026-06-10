@@ -4,7 +4,7 @@ import pl.psi.creatures.MagicLevel;
 
 public class RocklandField extends SpecialField {
     public RocklandField() {
-        super(Color.BROWN, FieldName.BUFF_FIELD);
+        super(FieldName.BUFF_FIELD);
     }
 
     @Override

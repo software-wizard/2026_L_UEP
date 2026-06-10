@@ -5,7 +5,7 @@ import pl.psi.creatures.MagicLevel;
 
 public class MagicPlainsField extends SpecialField {
     public MagicPlainsField() {
-        super(Color.CYAN, FieldName.MAGIC_PLAINS);
+        super(FieldName.MAGIC_PLAINS);
     }
 
     @Override

@@ -7,7 +7,7 @@ import pl.psi.creatures.CreatureStats;
 public class DebuffField extends SpecialField {
 
     public DebuffField() {
-        super(Color.GRAY, FieldName.DEBUFF_FIELD);
+        super(FieldName.DEBUFF_FIELD);
     }
 
     @Override

@@ -4,7 +4,7 @@ import pl.psi.creatures.Creature;
 
 public class CrackedIceField extends SpecialField {
     public CrackedIceField() {
-        super(Color.CYAN, FieldName.CRACKED_ICE);
+        super(FieldName.CRACKED_ICE);
     }
 
     @Override

@@ -4,7 +4,7 @@ import pl.psi.creatures.Creature;
 
 public class FieldsOfGloryField extends SpecialField {
     public FieldsOfGloryField() {
-        super(Color.GRAY, FieldName.FIELDS_OF_GLORY);
+        super(FieldName.FIELDS_OF_GLORY);
     }
 
     @Override

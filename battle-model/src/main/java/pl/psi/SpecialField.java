@@ -9,21 +9,15 @@ import pl.psi.creatures.CreatureStatisticIf;
 @Getter
 @Setter
 public abstract class SpecialField {
-    public enum Color{
-        CYAN, BROWN, ORANGE, YELLOW, GRAY, RED, GREEN
-    }
 
     public enum FieldName{
         DMG_FIELD, SPELL_FIELD, BUFF_FIELD, FIELD_CAN_ONLY_BE_FLOWN, DEBUFF_FIELD, FIRE_FIELD, CRACKED_ICE, QUICKSAND, FIELDS_OF_GLORY, MAGIC_PLAINS
     }
 
     @Getter
-    private Color color;
-    @Getter
     private FieldName fieldName;
 
-    protected SpecialField(Color aColor, FieldName aFieldName) {
-        color = aColor;
+    protected SpecialField(FieldName aFieldName) {
         fieldName = aFieldName;
     }
 

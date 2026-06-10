@@ -4,7 +4,7 @@ import pl.psi.creatures.MagicLevel;
 
 public class FieryFieldsField extends SpecialField {
     public FieryFieldsField() {
-        super(Color.RED, FieldName.BUFF_FIELD);
+        super(FieldName.BUFF_FIELD);
     }
 
     @Override

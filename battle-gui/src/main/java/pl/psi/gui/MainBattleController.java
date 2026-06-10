@@ -105,17 +105,42 @@ public class MainBattleController implements PropertyChangeListener {
     }
 
     private Color getColor(SpecialField specialField) {
-        if (specialField.getColor() == SpecialField.Color.BROWN) {
-            return Color.BROWN;
-        } else if (specialField.getColor() == SpecialField.Color.CYAN) {
-            return Color.CYAN;
-        } else if (specialField.getColor() == SpecialField.Color.YELLOW) {
-            return Color.YELLOW;
-        } else if (specialField.getColor() == SpecialField.Color.ORANGE) {
+        if (specialField instanceof pl.psi.HolyGroundField) {
+            return Color.GOLD;
+        } else if (specialField instanceof pl.psi.FieldCanOnlyBeFlown) {
+            return Color.DARKRED;
+        } else if (specialField instanceof pl.psi.CloverField) {
+            return Color.LIMEGREEN;
+        } else if (specialField instanceof pl.psi.EvilFogField) {
+            return Color.PURPLE;
+        } else if (specialField instanceof pl.psi.FieldsOfGloryField) {
+            return Color.LIGHTSLATEGREY;
+        } else if (specialField instanceof pl.psi.MagicPlainsField) {
+            return Color.VIOLET;
+        } else if (specialField instanceof pl.psi.MagicCloudsField) {
+            return Color.LIGHTBLUE;
+        } else if (specialField instanceof pl.psi.LucidPoolsField) {
+            return Color.TEAL;
+        } else if (specialField instanceof pl.psi.RocklandField) {
+            return Color.SADDLEBROWN;
+        } else if (specialField instanceof pl.psi.FieryFieldsField) {
+            return Color.ORANGERED;
+        } else if (specialField instanceof pl.psi.QuicksandField) {
+            return Color.KHAKI;
+        } else if (specialField instanceof pl.psi.CrackedIceField) {
+            return Color.ALICEBLUE;
+        } else if (specialField instanceof pl.psi.DmgField) {
+            return Color.CRIMSON;
+        } else if (specialField instanceof pl.psi.BuffField) {
             return Color.ORANGE;
-        } else if (specialField.getColor() == SpecialField.Color.GRAY) {
+        } else if (specialField instanceof pl.psi.DebuffField) {
             return Color.GRAY;
+        } else if (specialField instanceof pl.psi.FireWall) {
+            return Color.RED;
+        } else if (specialField instanceof pl.psi.SpellField) {
+            return Color.CYAN;
         }
+
         return null;
     }
 

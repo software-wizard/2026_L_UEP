@@ -4,7 +4,7 @@ import pl.psi.creatures.Faction;
 
 public class EvilFogField extends SpecialField {
     public EvilFogField() {
-        super(Color.GRAY, FieldName.DEBUFF_FIELD);
+        super(FieldName.DEBUFF_FIELD);
     }
 
     @Override

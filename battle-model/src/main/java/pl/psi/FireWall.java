@@ -10,7 +10,7 @@ public class FireWall extends SpecialField {
     int damage;
 
     public FireWall(int damage) {
-        super(Color.ORANGE, FIRE_FIELD);
+        super(FIRE_FIELD);
         this.duration = 2;
         this.damage = damage;
     }

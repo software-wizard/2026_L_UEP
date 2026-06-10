@@ -10,7 +10,7 @@ public class QuicksandField extends SpecialField {
     private boolean revealed = false;
 
     public QuicksandField() {
-        super(Color.YELLOW, FieldName.QUICKSAND);
+        super(FieldName.QUICKSAND);
     }
 
     @Override

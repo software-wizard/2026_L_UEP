@@ -6,7 +6,7 @@ import pl.psi.creatures.Creature;
 public class FieldCanOnlyBeFlown extends SpecialField {
 
     public FieldCanOnlyBeFlown() {
-        super(Color.YELLOW, FieldName.FIELD_CAN_ONLY_BE_FLOWN);
+        super(FieldName.FIELD_CAN_ONLY_BE_FLOWN);
     }
 
     @Override
