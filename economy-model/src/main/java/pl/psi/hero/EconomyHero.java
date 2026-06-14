@@ -17,6 +17,7 @@ import pl.psi.map.resources.Resources;
 
 public class EconomyHero implements PropertyChangeListener
 {
+    @Getter
     private final Fraction fraction;
     private final List< EconomyCreature > creatureList;
     @Getter
