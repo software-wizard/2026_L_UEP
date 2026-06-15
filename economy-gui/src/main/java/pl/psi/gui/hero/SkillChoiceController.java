@@ -6,7 +6,6 @@ import javafx.stage.Stage;
 import pl.psi.hero.EconomyHero;
 import pl.psi.hero.skills.AbstractSkill;
 
-import java.util.Collections;
 import java.util.List;
 
 public class SkillChoiceController {
@@ -19,9 +18,7 @@ public class SkillChoiceController {
 
     public void init(EconomyHero hero) {
         this.hero = hero;
-        List<AbstractSkill> possible = hero.getPossibleSkills();
-        Collections.shuffle(possible);
-        this.options = possible.subList(0, Math.min(2, possible.size()));
+        this.options = hero.getPossibleSkills();
 
         if (options.size() >= 1) {
             skill1Button.setText(getSkillLabel(options.get(0)));

@@ -4,9 +4,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -25,12 +25,14 @@ import pl.psi.hero.skills.AirMagicSkill;
 import pl.psi.hero.skills.EarthMagicSkill;
 import pl.psi.hero.skills.FireMagicSkill;
 import pl.psi.hero.skills.WaterMagicSkill;
+import pl.psi.hero.skills.SkillLevel;
 import pl.psi.map.resources.Resources;
 
 @Getter
 @Setter
 public class EconomyHero implements PropertyChangeListener
 {
+    private static final int MAX_SKILLS = 8;
     private static final int MIN_INITIAL_EXPERIENCE = 40;
     private static final int MAX_INITIAL_EXPERIENCE = 90;
     private static final String LEVEL_UP = "levelUp";
@@ -141,6 +143,9 @@ public class EconomyHero implements PropertyChangeListener
         if (existing.isPresent()) {
             existing.get().upgrade();
         } else {
+            if (skills.size() >= MAX_SKILLS) {
+                throw new IllegalStateException("Hero cannot learn more than " + MAX_SKILLS + " skills.");
+            }
             skills.add(aSelectedSkill);
 
             if (aSelectedSkill instanceof ExpModifierIf) {
@@ -150,25 +155,54 @@ public class EconomyHero implements PropertyChangeListener
     }
 
     public List<AbstractSkill> getPossibleSkills() {
+        List<AbstractSkill> newSkills = new ArrayList<>();
+        List<AbstractSkill> upgradeableSkills = new ArrayList<>();
+
+        for (AbstractSkill skillTemplate : getAllSkillTemplates()) {
+            Optional<AbstractSkill> existing = skills.stream()
+                    .filter(s -> s.getName() == skillTemplate.getName())
+                    .findFirst();
+
+            if (existing.isPresent()) {
+                if (existing.get().getLevel() != SkillLevel.EXPERT) {
+                    upgradeableSkills.add(skillTemplate);
+                }
+            } else if (skills.size() < MAX_SKILLS) {
+                newSkills.add(skillTemplate);
+            }
+        }
+
+        Collections.shuffle(newSkills);
+        Collections.shuffle(upgradeableSkills);
+
         List<AbstractSkill> possible = new ArrayList<>();
-        // Simple logic for now: only Offence and Armorer
-        addIfPossible(possible, pl.psi.hero.skills.SkillName.OFFENCE, new pl.psi.hero.skills.OffenceSkill());
-        addIfPossible(possible, pl.psi.hero.skills.SkillName.ARMORER, new pl.psi.hero.skills.ArmorerSkill());
-        addIfPossible(possible, pl.psi.hero.skills.SkillName.LEARNING, new pl.psi.hero.skills.LearningSkill());
-        addIfPossible(possible, pl.psi.hero.skills.SkillName.LOGISTICS, new pl.psi.hero.skills.LogisticsSkill());
-        addIfPossible(possible, pl.psi.hero.skills.SkillName.TACTICS, new pl.psi.hero.skills.TacticsSkill());
-        addIfPossible(possible, pl.psi.hero.skills.SkillName.AIR_MAGIC, new pl.psi.hero.skills.AirMagicSkill());
-        addIfPossible(possible, pl.psi.hero.skills.SkillName.EARTH_MAGIC, new pl.psi.hero.skills.EarthMagicSkill());
-        addIfPossible(possible, pl.psi.hero.skills.SkillName.FIRE_MAGIC, new pl.psi.hero.skills.FireMagicSkill());
-        addIfPossible(possible, pl.psi.hero.skills.SkillName.WATER_MAGIC, new pl.psi.hero.skills.WaterMagicSkill());
+        if (!newSkills.isEmpty()) {
+            possible.add(newSkills.get(0));
+        }
+        if (!upgradeableSkills.isEmpty()) {
+            possible.add(upgradeableSkills.get(0));
+        }
+        if (possible.size() < 2 && newSkills.size() > 1) {
+            possible.add(newSkills.get(1));
+        }
+        if (possible.size() < 2 && upgradeableSkills.size() > 1) {
+            possible.add(upgradeableSkills.get(1));
+        }
         return possible;
     }
 
-    private void addIfPossible(List<AbstractSkill> list, pl.psi.hero.skills.SkillName name, AbstractSkill skillTemplate) {
-        Optional<AbstractSkill> existing = skills.stream().filter(s -> s.getName() == name).findFirst();
-        if (existing.isEmpty() || existing.get().getLevel() != pl.psi.hero.skills.SkillLevel.EXPERT) {
-            list.add(skillTemplate);
-        }
+    private List<AbstractSkill> getAllSkillTemplates() {
+        return List.of(
+                new OffenceSkill(),
+                new ArmorerSkill(),
+                new LearningSkill(),
+                new LogisticsSkill(),
+                new TacticsSkill(),
+                new AirMagicSkill(),
+                new EarthMagicSkill(),
+                new FireMagicSkill(),
+                new WaterMagicSkill()
+        );
     }
 
     public void addSpell(EconomySpell aPickableSpell) {
