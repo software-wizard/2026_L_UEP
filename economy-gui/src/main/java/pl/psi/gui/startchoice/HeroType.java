@@ -124,13 +124,21 @@ public enum HeroType {
         return new HeroData(new Statistics(2, 0, 1, 1), List.of(
                 factory.create(false, 1, 40)
         ));
+    }),
+    TESTER("Tester", EconomyHero.Fraction.NECROPOLIS, () -> {
+        var factory = new EconomyNecropolisFactory();
+        return new HeroData(new Statistics(1, 1, 1, 1), List.of(
+                factory.create(false, 1, 1)
+        ));
     });
+
+
 
     public static List<String> getHeroNamesForFraction(EconomyHero.Fraction fraction) {
         // Return hero names based on the fraction
         switch (fraction) {
             case NECROPOLIS:
-                return List.of("Sandro", "Vidomina", "Nimbus", "Thant", "Xsi", "Moandor", "Isra", "Clavius", "Tamika", "Galthran", "Vokial", "Straker", "Septienna", "Naadir", "Fiona", "Charna");
+                return List.of("Sandro", "Vidomina", "Nimbus", "Thant", "Xsi", "Moandor", "Isra", "Clavius", "Tamika", "Galthran", "Vokial", "Straker", "Septienna", "Naadir", "Fiona", "Charna", "Tester");
             default:
                 return List.of();  // Return an empty list for unknown fractions
         }

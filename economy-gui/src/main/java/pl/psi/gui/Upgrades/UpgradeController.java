@@ -8,8 +8,6 @@ import pl.psi.hero.EconomyHero;
 import pl.psi.map.buildings.town.*;
 
 import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class UpgradeController {
@@ -38,10 +36,11 @@ public class UpgradeController {
 
         upgradeList.getItems().clear();
 
-        Stream.concat(
+        Stream.<BuildingType>concat(
                         Arrays.stream(TownBuilding.values()),
-                        Arrays.stream(UpgradeBuildings.values())
-                ).filter(b -> !town.hasBuilt(b))
+                        Arrays.stream(CreatureBuildings.values()) // Ensure this matches your Enum name
+                )
+                .filter(b -> !town.hasBuilt(b))
                 .filter(b -> b.getPrerequisites().stream().allMatch(town::hasBuilt))
                 .map(BuildingDisplay::new)
                 .map(BuildingDisplay::toString)
@@ -61,7 +60,7 @@ public class UpgradeController {
             if (isTownBuilding(buildingName)) {
                 selected = TownBuilding.valueOf(buildingName);
             } else {
-                selected = UpgradeBuildings.valueOf(buildingName);
+                selected = CreatureBuildings.valueOf(buildingName);
             }
 
             town.build(selected, hero);

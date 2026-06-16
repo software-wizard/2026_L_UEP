@@ -4,6 +4,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import pl.psi.economy.Point;
 import pl.psi.hero.EconomyHero;
+import pl.psi.hero.Statistics;
+import pl.psi.map.buildings.town.Town;
+import pl.psi.map.resources.Resources;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -15,11 +18,15 @@ class BoardApiTest {
 
     private EconomyHero hero1;
     private EconomyHero hero2;
+    private Town town;
+    private Resources startingResources;
 
     @BeforeEach
     void setUp() {
-        hero1 = mock(EconomyHero.class);
-        hero2 = mock(EconomyHero.class);
+        town = new Town(hero1);
+        startingResources = new Resources(100000, 100, 100, 100, 100, 100, 100);
+        Statistics aStats = new Statistics(10, 10, 10, 10);
+        hero1 = new EconomyHero(EconomyHero.Fraction.NECROPOLIS, startingResources, aStats);
     }
 
     @Test

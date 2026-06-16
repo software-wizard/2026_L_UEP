@@ -1,5 +1,7 @@
 package pl.psi;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Collection;
@@ -19,6 +21,7 @@ public class TurnQueue {
     public static final String NEXT_CREATURE = "NEXT_CREATURE";
     private final Collection<Creature> creatures;
     private final Queue<Creature> creaturesQueue;
+    @JsonIgnore
     private final PropertyChangeSupport observerSupport = new PropertyChangeSupport(this);
     private Creature currentCreature;
     private int roundNumber;

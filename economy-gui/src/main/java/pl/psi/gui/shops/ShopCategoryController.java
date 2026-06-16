@@ -5,6 +5,7 @@ import javafx.scene.control.Button;
 import pl.psi.gui.WindowManager;
 import pl.psi.hero.EconomyHero;
 import pl.psi.map.buildings.town.Town;
+import pl.psi.map.buildings.town.TownCapability;
 
 public class ShopCategoryController {
 
@@ -17,15 +18,17 @@ public class ShopCategoryController {
     @FXML private Button skillsButton;
 
     public ShopCategoryController() {
-        // Domyślny konstruktor wymagany przez FXMLLoader
     }
 
     public void init(EconomyHero hero, Town town) {
         this.hero = hero;
         this.town = town;
 
-        // Można też ustawić onAction tutaj, jeśli initialize() nie działa jak trzeba
+
         creaturesButton.setOnAction(e -> WindowManager.openCreatureShop(hero, town));
+
+        boolean canBuySpells = town.hasCapability(TownCapability.SPELL_PURCHASE);
+        spellsButton.setDisable(!canBuySpells);
         spellsButton.setOnAction(e -> WindowManager.openSpellShop(hero, town));
         artifactsButton.setOnAction(e -> WindowManager.openArtifactShop(hero, town));
         skillsButton.setOnAction(e -> WindowManager.openSkillShop(hero, town));
@@ -33,6 +36,6 @@ public class ShopCategoryController {
 
     @FXML
     private void initialize() {
-        // Możesz zostawić puste lub z logiem inicjalizacji
+
     }
 }

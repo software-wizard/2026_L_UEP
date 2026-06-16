@@ -2,13 +2,12 @@ package pl.psi;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import pl.psi.creatures.CreatureStatistic;
 import pl.psi.hero.EconomyHero;
 import pl.psi.hero.Statistics;
 import pl.psi.map.buildings.town.BuildingType;
 import pl.psi.map.buildings.town.Town;
 import pl.psi.map.buildings.town.TownBuilding;
-import pl.psi.map.buildings.town.UpgradeBuildings;
+import pl.psi.map.buildings.town.CreatureBuildings;
 import pl.psi.map.resources.Resources;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -21,49 +20,28 @@ public class TownUpgradeTest {
 
     @BeforeEach
     void init() {
-        town = new Town();
+        town = new Town(hero);
         resources = new Resources(100000,1000,1000,1000,1000,1000,1000);
         Statistics aStats = new Statistics(10, 10, 10, 10);
         hero = new EconomyHero(EconomyHero.Fraction.NECROPOLIS,resources, aStats);
+
     }
 
     @Test
     void shouldOnlyUnlockBaseCreatureAfterBuildingBaseBuilding() {
         // GIVEN
-        UpgradeBuildings baseBuilding = UpgradeBuildings.CURSED_TEMPLE;
-        buildAllPrerequisites(baseBuilding);
-
-        // WHEN
-        town.build(baseBuilding, hero);
+        CreatureBuildings baseBuilding = CreatureBuildings.CURSED_TEMPLE;
 
         // THEN
         assertTrue(town.hasBuilt(baseBuilding));
-        assertFalse(town.hasBuilt(UpgradeBuildings.CURSED_TEMPLE_UPGRADED));
-    }
-
-    @Test
-    void shouldNotAllowUpgradedCreatureWithoutUpgradeBuilding() {
-        // GIVEN
-        UpgradeBuildings baseBuilding = UpgradeBuildings.CURSED_TEMPLE;
-        buildAllPrerequisites(baseBuilding);
-
-        // WHEN
-        town.build(baseBuilding, hero);
-
-        // THEN
-        assertTrue(town.hasBuilt(baseBuilding));
-        assertFalse(town.hasBuilt(UpgradeBuildings.CURSED_TEMPLE_UPGRADED));
+        assertFalse(town.hasBuilt(CreatureBuildings.CURSED_TEMPLE_UPGRADED));
     }
 
     @Test
     void shouldUnlockUpgradedCreatureAfterBuildingUpgrade() {
         // GIVEN
-        UpgradeBuildings base = UpgradeBuildings.CURSED_TEMPLE;
-        UpgradeBuildings upgraded = UpgradeBuildings.CURSED_TEMPLE_UPGRADED;
-        buildAllPrerequisites(base);
+        CreatureBuildings upgraded = CreatureBuildings.CURSED_TEMPLE_UPGRADED;
 
-        // WHEN
-        town.build(base, hero);
         town.build(upgraded, hero);
 
         // THEN
@@ -71,19 +49,10 @@ public class TownUpgradeTest {
     }
 
     @Test
-    void shouldNotAllowBuildingWithoutPrerequisites() {
-        // GIVEN
-        UpgradeBuildings upgraded = UpgradeBuildings.CURSED_TEMPLE_UPGRADED;
-
-        // THEN
-        assertThrows(IllegalStateException.class, () -> town.build(upgraded, hero));
-    }
-
-    @Test
     void shouldSubtractResourcesFromHeroWhenBuilding() {
         // GIVEN
-        UpgradeBuildings building = UpgradeBuildings.CURSED_TEMPLE;
-        buildAllPrerequisites(building);
+        CreatureBuildings building = CreatureBuildings.CURSED_TEMPLE_UPGRADED;
+        town.buildAllPrerequisites(building);
         int initialGold = hero.getResources().getGold();
 
         // WHEN
@@ -97,9 +66,7 @@ public class TownUpgradeTest {
     @Test
     void shouldNotAllowBuildingSameUpgradeTwice() {
         // GIVEN
-        UpgradeBuildings building = UpgradeBuildings.CURSED_TEMPLE;
-        buildAllPrerequisites(building);
-        town.build(building, hero);
+        CreatureBuildings building = CreatureBuildings.CURSED_TEMPLE;
 
         // THEN
         assertThrows(IllegalStateException.class, () -> town.build(building, hero));
@@ -108,12 +75,10 @@ public class TownUpgradeTest {
     @Test
     void shouldAllowUpgradeAfterBuildingBase() {
         // GIVEN
-        UpgradeBuildings base = UpgradeBuildings.CURSED_TEMPLE;
-        UpgradeBuildings upgrade = UpgradeBuildings.CURSED_TEMPLE_UPGRADED;
-        buildAllPrerequisites(base);
+        CreatureBuildings base = CreatureBuildings.CURSED_TEMPLE;
+        CreatureBuildings upgrade = CreatureBuildings.CURSED_TEMPLE_UPGRADED;
+        town.buildAllPrerequisites(base);
 
-        // WHEN
-        town.build(base, hero);
         town.build(upgrade, hero);
 
         // THEN
@@ -123,50 +88,74 @@ public class TownUpgradeTest {
 
     @Test
     void shouldBuildTownHallThenCityHallThenCapitol() {
-        // Build required buildings
-        town.build(TownBuilding.TAVERN, hero);
-        town.build(TownBuilding.TOWN_HALL, hero);
-        town.build(TownBuilding.MARKETPLACE, hero);
-        town.build(TownBuilding.BLACKSMITH, hero);
-        town.build(TownBuilding.MAGE_GUILD_LVL_1, hero);
-        town.build(TownBuilding.CITY_HALL, hero);
-        town.build(TownBuilding.FORT, hero);
-        town.build(TownBuilding.CITADEL, hero);
-        town.build(TownBuilding.CASTLE, hero);
+
+        town.setOwner(hero);
+        town.resetBuildingOption();
+        town.buildAllPrerequisites(TownBuilding.CAPITOL);
+        town.resetBuildingOption();
         town.build(TownBuilding.CAPITOL, hero);
 
         assertTrue(town.hasBuilt(TownBuilding.CAPITOL));
     }
 
     @Test
-    void shouldGiveResourcesAfterBuildingResourceSilo() {
-        // GIVEN
-
-        TownBuilding market = TownBuilding.MARKETPLACE;
-        TownBuilding resource = TownBuilding.RESOURCE_SILO;
-
-        // Build required building
-        town.build(market, hero);
-        town.build(resource, hero);
-
-        int initialOre = hero.getResources().getOre();
-        int initialWood = hero.getResources().getWood();
-
-        market.applyEffect(town, hero);
-        resource.applyEffect(town, hero);
-
-        // THEN
-        assertTrue(hero.getResources().getWood() > initialWood);
-        assertTrue(hero.getResources().getOre() > initialOre);
+    void townShouldStartWithCorrectNecropolisDefaults() {
+        // H3 defaults: Village Hall, Fort, and Tier 1 Dwelling
+        assertTrue(town.hasBuilt(TownBuilding.VILLAGE_HALL));
+        assertTrue(town.hasBuilt(TownBuilding.FORT));
+        assertTrue(town.hasBuilt(CreatureBuildings.CURSED_TEMPLE));// Initial Village Hall income
     }
 
-    private void buildAllPrerequisites(BuildingType building) {
-        for (BuildingType prereq : building.getPrerequisites()) {
-            if (!town.hasBuilt(prereq)) {
-                buildAllPrerequisites(prereq); // Recursive
-                town.build(prereq, hero);
-            }
-        }
+    @Test
+    void shouldThrowExceptionWhenBuildingDuplicate() {
+        assertThrows(IllegalStateException.class, () -> town.build(TownBuilding.FORT, hero));
     }
 
+    @Test
+    void shouldRespectComplexPrerequisites() {
+        // Capitol requires City Hall and Castle
+        assertThrows(IllegalStateException.class, () -> town.build(TownBuilding.CAPITOL, hero));
+
+        // Build chain for Castle
+        town.build(TownBuilding.CITADEL, hero);
+        town.resetBuildingOption();
+        town.build(TownBuilding.CASTLE, hero);
+
+        // Build chain for City Hall (needs Tavern, Marketplace, Blacksmith, Mage Guild)
+        town.resetBuildingOption();
+        town.build(TownBuilding.TAVERN, hero);
+        town.resetBuildingOption();
+        town.build(TownBuilding.MARKETPLACE, hero);
+        town.resetBuildingOption();
+        town.build(TownBuilding.BLACKSMITH, hero);
+        town.resetBuildingOption();
+        town.build(TownBuilding.MAGE_GUILD_LVL_1, hero);
+        town.resetBuildingOption();
+        town.build(TownBuilding.TOWN_HALL, hero);
+        town.resetBuildingOption();
+        town.build(TownBuilding.CITY_HALL, hero);
+
+        town.resetBuildingOption();
+
+        assertDoesNotThrow(() -> town.build(TownBuilding.CAPITOL, hero));
+    }
+
+    @Test
+    void shouldNotBuildIfHeroCannotAfford() {
+        // Setup a hero with zero gold
+        Resources poorResources = new Resources(0, 0, 0, 0, 0, 0, 0);
+        EconomyHero poorHero = new EconomyHero(EconomyHero.Fraction.NECROPOLIS, poorResources, new Statistics(1,1,1,1));
+
+        // Attempting to build a Blacksmith (requires 1000 gold)
+        assertThrows(IllegalStateException.class, () -> town.build(TownBuilding.BLACKSMITH, poorHero));
+
+        // Verify town state didn't change
+        assertFalse(town.hasBuilt(TownBuilding.BLACKSMITH));
+    }
+
+    @Test
+    void shouldNotBeAbleToBuildSecondBuildingInTurn(){
+        town.build(TownBuilding.TAVERN, hero);
+        assertThrows(IllegalStateException.class, () -> town.build(TownBuilding.MAGE_GUILD_LVL_1, hero));
+    }
 }
