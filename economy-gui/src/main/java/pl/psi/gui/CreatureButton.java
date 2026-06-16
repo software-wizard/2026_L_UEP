@@ -1,5 +1,6 @@
 package pl.psi.gui;
 
+import pl.psi.creatures.EconomyBastionFactory;
 import pl.psi.creatures.EconomyNecropolisFactory;
 
 import javafx.geometry.Pos;
@@ -23,9 +24,28 @@ public class CreatureButton extends Button
                           final boolean aUpgraded, final int aTier )
     {
         super( aFactory.create( aUpgraded, aTier, 1)
-            .getName() );
+                .getName() );
         creatureName = aFactory.create( aUpgraded, aTier, 1 )
-            .getName();
+                .getName();
+        getStyleClass().add( "creatureButton" );
+
+        addEventHandler( MouseEvent.MOUSE_CLICKED, ( e ) -> {
+            final int amount = startDialogAndGetCreatureAmount();
+            if( amount != 0 )
+            {
+                aCreatureShopController.buy( aFactory.create( aUpgraded, aTier, amount ) );
+            }
+            aCreatureShopController.refreshGui();
+        } );
+    }
+
+    public CreatureButton(final CreatureShopController aCreatureShopController, final EconomyBastionFactory aFactory,
+                          final boolean aUpgraded, final int aTier )
+    {
+        super( aFactory.create( aUpgraded, aTier, 1)
+                .getName() );
+        creatureName = aFactory.create( aUpgraded, aTier, 1 )
+                .getName();
         getStyleClass().add( "creatureButton" );
 
         addEventHandler( MouseEvent.MOUSE_CLICKED, ( e ) -> {
@@ -48,7 +68,7 @@ public class CreatureButton extends Button
         prepareConfirmAndCancelButton( bottomPane, slider );
         prepareTop( topPane, slider );
         centerPane.getChildren()
-            .add( slider );
+                .add( slider );
 
         dialog.showAndWait();
 
@@ -59,15 +79,15 @@ public class CreatureButton extends Button
     {
         // TODO creature cops should be visible here
         aTopPane.getChildren()
-            .add( new Label( "Single Cost: " + "0" ) );
+                .add( new Label( "Single Cost: " + "0" ) );
         final Label slideValueLabel = new Label( "0" );
         aSlider.valueProperty()
-            .addListener(
-                ( slider, aOld, aNew ) -> slideValueLabel.setText( String.valueOf( aNew.intValue() ) ) );
+                .addListener(
+                        ( slider, aOld, aNew ) -> slideValueLabel.setText( String.valueOf( aNew.intValue() ) ) );
         aTopPane.getChildren()
-            .add( slideValueLabel );
+                .add( slideValueLabel );
         aTopPane.getChildren()
-            .add( new Label( "Purchase Cost: " ) );
+                .add( new Label( "Purchase Cost: " ) );
     }
 
     private Stage prepareWindow( final Pane aCenter, final Pane aBottom, final Pane aTop )
@@ -76,10 +96,10 @@ public class CreatureButton extends Button
         final BorderPane pane = new BorderPane();
         final Scene scene = new Scene( pane, 500, 300 );
         scene.getStylesheets()
-            .add( "fxml/main.css" );
+                .add( "fxml/main.css" );
         dialog.setScene( scene );
         dialog.initOwner( this.getScene()
-            .getWindow() );
+                .getWindow() );
         dialog.initModality( Modality.APPLICATION_MODAL );
         dialog.setTitle( "Buying " + creatureName );
 
@@ -104,9 +124,9 @@ public class CreatureButton extends Button
         HBox.setHgrow( okButton, Priority.ALWAYS );
         HBox.setHgrow( cancelButton, Priority.ALWAYS );
         aBottomPane.getChildren()
-            .add( okButton );
+                .add( okButton );
         aBottomPane.getChildren()
-            .add( cancelButton );
+                .add( cancelButton );
     }
 
     private Slider createSlider()
