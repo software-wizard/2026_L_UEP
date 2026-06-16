@@ -8,8 +8,6 @@ import pl.psi.hero.EconomyHero;
 import pl.psi.map.buildings.town.*;
 
 import java.util.Arrays;
-import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class UpgradeController {
@@ -38,16 +36,26 @@ public class UpgradeController {
 
         upgradeList.getItems().clear();
 
-        Stream.concat(
-                        Arrays.stream(TownBuilding.values()),
-                        Arrays.stream(UpgradeBuildings.values())
-                ).filter(b -> !town.hasBuilt(b))
-                .filter(b -> b.getPrerequisites().stream().allMatch(town::hasBuilt))
-                .map(BuildingDisplay::new)
-                .map(BuildingDisplay::toString)
-                .forEach(upgradeList.getItems()::add);
+        if (hero.getFraction() == EconomyHero.Fraction.BASTION) {
+            Stream.concat(
+                            Arrays.stream(BastionTownBuilding.values()),
+                            Arrays.stream(BastionUpgradeBuildings.values())
+                    ).filter(b -> !town.hasBuilt(b))
+                    .filter(b -> b.getPrerequisites().stream().allMatch(town::hasBuilt))
+                    .map(BuildingDisplay::new)
+                    .map(BuildingDisplay::toString)
+                    .forEach(upgradeList.getItems()::add);
+        } else {
+            Stream.concat(
+                            Arrays.stream(TownBuilding.values()),
+                            Arrays.stream(UpgradeBuildings.values())
+                    ).filter(b -> !town.hasBuilt(b))
+                    .filter(b -> b.getPrerequisites().stream().allMatch(town::hasBuilt))
+                    .map(BuildingDisplay::new)
+                    .map(BuildingDisplay::toString)
+                    .forEach(upgradeList.getItems()::add);
+        }
     }
-
 
     @FXML
     private void handleBuy() {
@@ -58,10 +66,18 @@ public class UpgradeController {
             String buildingName = selectedItem.split("] ")[1].split(" ")[0];
 
             BuildingType selected;
-            if (isTownBuilding(buildingName)) {
-                selected = TownBuilding.valueOf(buildingName);
+            if (hero.getFraction() == EconomyHero.Fraction.BASTION) {
+                if (isBastionTownBuilding(buildingName)) {
+                    selected = BastionTownBuilding.valueOf(buildingName);
+                } else {
+                    selected = BastionUpgradeBuildings.valueOf(buildingName);
+                }
             } else {
-                selected = UpgradeBuildings.valueOf(buildingName);
+                if (isTownBuilding(buildingName)) {
+                    selected = TownBuilding.valueOf(buildingName);
+                } else {
+                    selected = UpgradeBuildings.valueOf(buildingName);
+                }
             }
 
             town.build(selected, hero);
@@ -78,6 +94,15 @@ public class UpgradeController {
     private boolean isTownBuilding(String name) {
         try {
             TownBuilding.valueOf(name);
+            return true;
+        } catch (IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+    private boolean isBastionTownBuilding(String name) {
+        try {
+            BastionTownBuilding.valueOf(name);
             return true;
         } catch (IllegalArgumentException e) {
             return false;
@@ -103,6 +128,8 @@ public class UpgradeController {
             String category;
             if (building instanceof TownBuilding) {
                 category = ((TownBuilding) building).getCategory().name();
+            } else if (building instanceof BastionTownBuilding) {
+                category = ((BastionTownBuilding) building).getCategory().name();
             } else {
                 category = "CREATURE_UPGRADE";
             }
@@ -118,5 +145,4 @@ public class UpgradeController {
             return displayName;
         }
     }
-
 }
