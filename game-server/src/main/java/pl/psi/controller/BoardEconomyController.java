@@ -44,23 +44,25 @@ public class BoardEconomyController {
 
     private Map<Point, MapObjectIf> generateMapBlueprint(String mapName, EconomyHero aHero1, EconomyHero aHero2) {
         if ("DefaultMap".equals(mapName)) {
-            return new HashMap<>(Map.ofEntries( //podmien implementacje zeby bylo mozna zmienic jej stan
-                    Map.entry(new Point(4,4), new Artifact(ArtifactType.SWORD_OF_HELLFIRE)),
-                    Map.entry(new Point(17,1), new Town(aHero1)),
-                    Map.entry(new Point(1,7), new Town(aHero2)),
-                    Map.entry(new Point(3,2), new ResourceGenerator(ResourceGenType.GEM)),
-                    Map.entry(new Point(5,6), new ResourceGenerator(ResourceGenType.GOLD)),
-                    Map.entry(new Point(8,1), new ResourceGenerator(ResourceGenType.MERCURY)),
-                    Map.entry(new Point(10,4), new ResourceGenerator(ResourceGenType.WOOD)),
-                    Map.entry(new Point(13,7), new ResourceGenerator(ResourceGenType.SULFUR)),
-                    Map.entry(new Point(15,2), new ResourceGenerator(ResourceGenType.CRYSTAL)),
-                    Map.entry(new Point(6,8), new ResourceGenerator(ResourceGenType.ORE)),
-                    Map.entry(new Point(9,3), new Gold(new Resources(1000,0,0,0,0,0,0))),
-                    Map.entry(new Point(10,6), new Gold(new Resources(1000,0,0,0,0,0,0))),
-                    Map.entry(new Point(2,2), new Bank(BankStatistics.CASTLE_1)),
-                    Map.entry(new Point(8,8), new Bank(BankStatistics.CASTLE_2)),
-                    Map.entry(new Point(8,5), new EconomySpell("Default"))
-            ));
+            Map<Point, MapObjectIf> map = new HashMap<>();
+
+            map.put(new Point(4,4), new Artifact(ArtifactType.SWORD_OF_HELLFIRE));
+            map.put(new Point(17,1), new Town(aHero1));
+            map.put(new Point(1,7), new Town(aHero2));
+            map.put(new Point(3,2), new ResourceGenerator(ResourceGenType.GEM));
+            map.put(new Point(5,6), new ResourceGenerator(ResourceGenType.GOLD));
+            map.put(new Point(8,1), new ResourceGenerator(ResourceGenType.MERCURY));
+            map.put(new Point(10,4), new ResourceGenerator(ResourceGenType.WOOD));
+            map.put(new Point(13,7), new ResourceGenerator(ResourceGenType.SULFUR));
+            map.put(new Point(15,2), new ResourceGenerator(ResourceGenType.CRYSTAL));
+            map.put(new Point(6,8), new ResourceGenerator(ResourceGenType.ORE));
+            map.put(new Point(9,3), new Gold(new Resources(1000,0,0,0,0,0,0)));
+            map.put(new Point(10,6), new Gold(new Resources(1000,0,0,0,0,0,0)));
+            map.put(new Point(2,2), new Bank(BankStatistics.CASTLE_1));
+            map.put(new Point(8,8), new Bank(BankStatistics.CASTLE_2));
+            map.put(new Point(8,5), new EconomySpell("Default"));
+
+            return map;
         }
         return new HashMap<>();
     }
