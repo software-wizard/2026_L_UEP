@@ -69,7 +69,7 @@ public class HeroSelectionController {
         for (HeroType heroType : HeroType.values()) {
             if (heroType.displayName.equals(heroName) && heroType.fraction == fraction) {
                 HeroType.HeroData data = heroType.getData();
-                EconomyHero hero = new EconomyHero(fraction, resources, data.getStats());
+                EconomyHero hero = new EconomyHero(fraction, heroType.heroClass, resources, data.getStats(), data.getStartingSkills());
                 data.getCreatures().forEach(hero::addCreature);
                 return hero;
             }

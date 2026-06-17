@@ -1,9 +1,14 @@
-package pl.psi.hero.skills;
+package pl.psi.hero.skills.impl;
 
-public class AirMagicSkill extends AbstractSkill {
+import pl.psi.hero.skills.AbstractSkill;
+import pl.psi.hero.skills.SkillLevel;
+import pl.psi.hero.skills.SkillName;
+import pl.psi.hero.skills.modifiers.SpellModifierIf;
+
+public class FireMagicSkill extends AbstractSkill implements SpellModifierIf {
     private float magicFactor;
 
-    public AirMagicSkill() {
+    public FireMagicSkill() {
         super();
         this.magicFactor = 0.1f;
     }
@@ -23,11 +28,16 @@ public class AirMagicSkill extends AbstractSkill {
 
     @Override
     public SkillName getName() {
-        return SkillName.AIR_MAGIC;
+        return SkillName.FIRE_MAGIC;
     }
 
     @Override
     public float getFactor() {
         return magicFactor;
+    }
+
+    @Override
+    public int changeSpellPower(SkillName spellSchool, int currentSpellPower) {
+        return spellSchool == getName() ? Math.round(currentSpellPower * (1 + magicFactor)) : currentSpellPower;
     }
 }

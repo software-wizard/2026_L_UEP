@@ -4,9 +4,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
@@ -16,16 +16,11 @@ import pl.psi.creatures.EconomyCreature;
 import pl.psi.hero.artifacts.Artifact;
 import pl.psi.hero.artifacts.EconomySpell;
 import pl.psi.hero.skills.AbstractSkill;
-import pl.psi.hero.skills.ArmorerSkill;
-import pl.psi.hero.skills.OffenceSkill;
-import pl.psi.hero.skills.LearningSkill;
-import pl.psi.hero.skills.LogisticsSkill;
-import pl.psi.hero.skills.TacticsSkill;
-import pl.psi.hero.skills.AirMagicSkill;
-import pl.psi.hero.skills.EarthMagicSkill;
-import pl.psi.hero.skills.FireMagicSkill;
-import pl.psi.hero.skills.WaterMagicSkill;
-import pl.psi.hero.skills.SkillLevel;
+import pl.psi.hero.skills.HeroStartingSkill;
+import pl.psi.hero.skills.SkillChoiceManager;
+import pl.psi.hero.skills.SkillFactory;
+import pl.psi.hero.skills.SkillRegistry;
+import pl.psi.hero.skills.modifiers.ExpModifierIf;
 import pl.psi.map.resources.Resources;
 
 @Getter
@@ -38,6 +33,7 @@ public class EconomyHero implements PropertyChangeListener
     private static final String LEVEL_UP = "levelUp";
 
     private final Fraction fraction;
+    private final HeroClass heroClass;
     private final List< EconomyCreature > creatureList;
     private Resources resources;
     private final int moveRange = 10;
@@ -51,20 +47,43 @@ public class EconomyHero implements PropertyChangeListener
     private final Statistics baseStatistics;
     private final List<Artifact> artifacts = new ArrayList<>();
     private final List<EconomySpell> spells = new ArrayList<>();
+    private final SkillFactory skillFactory = new SkillFactory();
+    private final SkillRegistry skillRegistry = new SkillRegistry(skillFactory);
+    private final SkillChoiceManager skillChoiceManager = new SkillChoiceManager(skillRegistry, skillFactory, new Random());
     protected List<ExpModifierIf> expModifiers = new ArrayList<>();
 
     public EconomyHero( final Fraction aFraction, final Resources aResources, final Statistics aStats)
     {
+        this(aFraction, HeroClass.NECROMANCER, aResources, aStats);
+    }
+
+    public EconomyHero(final Fraction aFraction, final HeroClass aHeroClass, final Resources aResources, final Statistics aStats)
+    {
+        this(aFraction, aHeroClass, aResources, aStats, List.of());
+    }
+
+    public EconomyHero(
+            final Fraction aFraction,
+            final HeroClass aHeroClass,
+            final Resources aResources,
+            final Statistics aStats,
+            final List<HeroStartingSkill> aStartingSkills)
+    {
         fraction = aFraction;
+        heroClass = aHeroClass;
         creatureList = new ArrayList<>();
         remainingMoves = moveRange;
         resources = aResources;
         baseStatistics = aStats;
         skills = new ArrayList<>();
+        initializeStartingSkills(aStartingSkills);
         experience = ThreadLocalRandom.current().nextInt(MIN_INITIAL_EXPERIENCE, MAX_INITIAL_EXPERIENCE + 1);
     }
+
     public EconomyHero() {
         this.fraction = Fraction.NECROPOLIS;
+        // Legacy/default constructor uses Necromancer because only Necropolis exists in the current economy model.
+        this.heroClass = HeroClass.NECROMANCER;
         this.creatureList = new ArrayList<>();
         this.resources = new Resources(0, 0, 0, 0, 0, 0, 0);
         this.baseStatistics = new Statistics(0, 0, 0, 0);
@@ -73,7 +92,7 @@ public class EconomyHero implements PropertyChangeListener
     }
 
     public void resetMoveRange() {
-        this.remainingMoves = moveRange;
+        this.remainingMoves = getEffectiveMoveRange();
     }
 
     public boolean canMoveTo(double distance) {
@@ -86,6 +105,10 @@ public class EconomyHero implements PropertyChangeListener
 
     public int getRemainingMoveRange() {
         return remainingMoves;
+    }
+
+    public int getEffectiveMoveRange() {
+        return moveRange;
     }
 
     public void addCreature(final EconomyCreature aCreature)
@@ -154,55 +177,28 @@ public class EconomyHero implements PropertyChangeListener
         }
     }
 
-    public List<AbstractSkill> getPossibleSkills() {
-        List<AbstractSkill> newSkills = new ArrayList<>();
-        List<AbstractSkill> upgradeableSkills = new ArrayList<>();
+    public void initializeStartingSkills(List<HeroStartingSkill> startingSkills) {
+        if (startingSkills == null) {
+            return;
+        }
+        for (HeroStartingSkill startingSkill : startingSkills) {
+            if (skills.stream().anyMatch(skill -> skill.getName().equals(startingSkill.getName()))) {
+                continue;
+            }
+            if (skills.size() >= MAX_SKILLS) {
+                throw new IllegalStateException("Hero cannot learn more than " + MAX_SKILLS + " skills.");
+            }
+            AbstractSkill skill = skillFactory.create(startingSkill.getName(), startingSkill.getLevel());
+            skills.add(skill);
 
-        for (AbstractSkill skillTemplate : getAllSkillTemplates()) {
-            Optional<AbstractSkill> existing = skills.stream()
-                    .filter(s -> s.getName() == skillTemplate.getName())
-                    .findFirst();
-
-            if (existing.isPresent()) {
-                if (existing.get().getLevel() != SkillLevel.EXPERT) {
-                    upgradeableSkills.add(skillTemplate);
-                }
-            } else if (skills.size() < MAX_SKILLS) {
-                newSkills.add(skillTemplate);
+            if (skill instanceof ExpModifierIf) {
+                addExpModifier((ExpModifierIf) skill);
             }
         }
-
-        Collections.shuffle(newSkills);
-        Collections.shuffle(upgradeableSkills);
-
-        List<AbstractSkill> possible = new ArrayList<>();
-        if (!newSkills.isEmpty()) {
-            possible.add(newSkills.get(0));
-        }
-        if (!upgradeableSkills.isEmpty()) {
-            possible.add(upgradeableSkills.get(0));
-        }
-        if (possible.size() < 2 && newSkills.size() > 1) {
-            possible.add(newSkills.get(1));
-        }
-        if (possible.size() < 2 && upgradeableSkills.size() > 1) {
-            possible.add(upgradeableSkills.get(1));
-        }
-        return possible;
     }
 
-    private List<AbstractSkill> getAllSkillTemplates() {
-        return List.of(
-                new OffenceSkill(),
-                new ArmorerSkill(),
-                new LearningSkill(),
-                new LogisticsSkill(),
-                new TacticsSkill(),
-                new AirMagicSkill(),
-                new EarthMagicSkill(),
-                new FireMagicSkill(),
-                new WaterMagicSkill()
-        );
+    public List<AbstractSkill> getPossibleSkills() {
+        return skillChoiceManager.getPossibleSkills(this);
     }
 
     public void addSpell(EconomySpell aPickableSpell) {
@@ -228,15 +224,12 @@ public class EconomyHero implements PropertyChangeListener
             return;
         }
 
+        // Experience gain still uses ExpModifierIf so existing exp modifiers keep their behavior.
         double totalMultiplier = expModifiers.stream()
                 .map(ExpModifierIf::getExpMultiplier)
                 .reduce(1.0, (a, b) -> a * b);
 
         // Alternatywa: Jeśli wolisz dodawać bonusy (np. +5% i +10% daje +15%, a nie 1.05 * 1.10):
-        // double totalMultiplier = 1.0 + expModifiers.stream()
-        //         .mapToDouble(m -> m.getExpMultiplier() - 1.0)
-        //         .sum();
-
         // 2. Aplikowanie zmian i zaokrąglanie
         int actualExperienceToAdd = (int) Math.round(baseExperienceToAdd * totalMultiplier);
 

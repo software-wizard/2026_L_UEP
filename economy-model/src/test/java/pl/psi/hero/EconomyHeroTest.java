@@ -4,8 +4,8 @@
 //import org.junit.jupiter.api.Disabled;
 //import org.junit.jupiter.api.Test;
 //import pl.psi.creatures.*;
-//import pl.psi.hero.skills.ArmorerSkill;
-//import pl.psi.hero.skills.OffenceSkill;
+//import pl.psi.hero.skills.impl.ArmorerSkill;
+//import pl.psi.hero.skills.impl.OffenceSkill;
 //import pl.psi.map.resources.Resources;
 //
 //import static org.junit.jupiter.api.Assertions.*;

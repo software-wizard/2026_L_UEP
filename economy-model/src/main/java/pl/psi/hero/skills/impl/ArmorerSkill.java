@@ -1,4 +1,8 @@
-package pl.psi.hero.skills;
+package pl.psi.hero.skills.impl;
+
+import pl.psi.hero.skills.AbstractSkill;
+import pl.psi.hero.skills.SkillLevel;
+import pl.psi.hero.skills.SkillName;
 
 public class ArmorerSkill extends AbstractSkill {
     private float reducedDamageFactor;

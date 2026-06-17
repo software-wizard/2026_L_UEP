@@ -1,6 +1,11 @@
-package pl.psi.hero.skills;
+package pl.psi.hero.skills.impl;
 
-public class OffenceSkill extends AbstractSkill {
+import pl.psi.hero.skills.AbstractSkill;
+import pl.psi.hero.skills.SkillLevel;
+import pl.psi.hero.skills.SkillName;
+import pl.psi.hero.skills.modifiers.DamageModifierIf;
+
+public class OffenceSkill extends AbstractSkill implements DamageModifierIf {
     private float attackBonus;
 
     public OffenceSkill( )
@@ -31,5 +36,10 @@ public class OffenceSkill extends AbstractSkill {
     public SkillName getName() {return SkillName.OFFENCE;}
     @Override
     public float getFactor() {return attackBonus; }
+
+    @Override
+    public int changeDamage(int currentDamage) {
+        return Math.round(currentDamage * (1 + attackBonus));
+    }
 
 }

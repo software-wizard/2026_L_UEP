@@ -1,6 +1,11 @@
-package pl.psi.hero.skills;
+package pl.psi.hero.skills.impl;
 
-public class LogisticsSkill extends AbstractSkill {
+import pl.psi.hero.skills.AbstractSkill;
+import pl.psi.hero.skills.SkillLevel;
+import pl.psi.hero.skills.SkillName;
+import pl.psi.hero.skills.modifiers.MovementModifierIf;
+
+public class LogisticsSkill extends AbstractSkill implements MovementModifierIf {
     private float movementBonusFactor;
 
     public LogisticsSkill() {
@@ -29,5 +34,10 @@ public class LogisticsSkill extends AbstractSkill {
     @Override
     public float getFactor() {
         return movementBonusFactor;
+    }
+
+    @Override
+    public int changeMove(int currentMove) {
+        return Math.round(currentMove * (1 + movementBonusFactor));
     }
 }

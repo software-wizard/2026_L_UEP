@@ -8,5 +8,6 @@ public abstract class AbstractSkill {
     public abstract SkillName getName();
     public abstract void upgrade();
     public SkillLevel getLevel() {return this.level;}
+    public void setLevel(SkillLevel level) {this.level = level;}
     public abstract float getFactor();
 }

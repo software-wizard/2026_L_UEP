@@ -2,16 +2,16 @@ package pl.psi.hero;
 
 import org.junit.jupiter.api.Test;
 import pl.psi.hero.skills.AbstractSkill;
-import pl.psi.hero.skills.AirMagicSkill;
-import pl.psi.hero.skills.ArmorerSkill;
-import pl.psi.hero.skills.EarthMagicSkill;
-import pl.psi.hero.skills.FireMagicSkill;
-import pl.psi.hero.skills.LearningSkill;
-import pl.psi.hero.skills.LogisticsSkill;
-import pl.psi.hero.skills.OffenceSkill;
 import pl.psi.hero.skills.SkillName;
-import pl.psi.hero.skills.TacticsSkill;
-import pl.psi.hero.skills.WaterMagicSkill;
+import pl.psi.hero.skills.impl.AirMagicSkill;
+import pl.psi.hero.skills.impl.ArmorerSkill;
+import pl.psi.hero.skills.impl.EarthMagicSkill;
+import pl.psi.hero.skills.impl.FireMagicSkill;
+import pl.psi.hero.skills.impl.LearningSkill;
+import pl.psi.hero.skills.impl.LogisticsSkill;
+import pl.psi.hero.skills.impl.OffenceSkill;
+import pl.psi.hero.skills.impl.TacticsSkill;
+import pl.psi.hero.skills.impl.WaterMagicSkill;
 
 import java.util.List;
 import java.util.Set;
