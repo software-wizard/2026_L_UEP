@@ -26,6 +26,8 @@ public class EconomyBoardController implements PropertyChangeListener {
     private final BoardEconomyEngine gameEngine;
     @FXML private GridPane gridMap;
     @FXML private Button passButton,equipmentButton;
+    @FXML private Button loadMapButton;
+    @FXML private Button mapEditorButton;
     @FXML private Label expLabel,lvlLabel, goldLabel, woodLabel, oreLabel, mercuryLabel, sulphurLabel, crystalLabel, gemsLabel,attackLabel,defenceLabel,powerLabel,knowledgeLabel;
 
     private final EconomyHero battleHero1;
@@ -44,6 +46,14 @@ public class EconomyBoardController implements PropertyChangeListener {
         gameEngine.addObserver(this);
         passButton.setOnMouseClicked(e -> gameEngine.pass());
         equipmentButton.setOnMouseClicked(e -> showEquipment());
+
+        if (mapEditorButton != null) {
+            mapEditorButton.setOnMouseClicked(e -> new EcoMapEditorController().show());
+        }
+
+        if (loadMapButton != null) {
+            loadMapButton.setOnMouseClicked(e -> handleLoadMap());
+        }
     }
 
     private void refreshGui() {
@@ -178,6 +188,31 @@ public class EconomyBoardController implements PropertyChangeListener {
                 Map<Point, EconomyCreature> enemies = bank.getEnemies();
                 EcoBattleConverter.startBankBattle(hero2, enemies);
                 break;
+        }
+    }
+
+    private void handleLoadMap() {
+        javafx.stage.FileChooser fileChooser = new javafx.stage.FileChooser();
+        fileChooser.setTitle("Load Economy Map");
+        fileChooser.getExtensionFilters().add(new javafx.stage.FileChooser.ExtensionFilter("JSON Files (*.json)", "*.json"));
+        javafx.stage.Stage stage = (javafx.stage.Stage) loadMapButton.getScene().getWindow();
+        java.io.File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            try {
+                pl.psi.map.EcoMapPersistenceManager persistenceManager = new pl.psi.map.EcoMapPersistenceManager();
+                pl.psi.map.EcoMapData mapData = persistenceManager.loadMap(file);
+                Map<Point, MapObjectIf> loadedObjects = persistenceManager.convertToModelMap(mapData, battleHero1, battleHero2);
+
+                gameEngine.reloadInteractables(loadedObjects);
+                refreshGui();
+
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION, "Economy Map loaded successfully!", javafx.scene.control.ButtonType.OK);
+                alert.showAndWait();
+            } catch (Exception e) {
+                e.printStackTrace();
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.ERROR, "Failed to load map: " + e.getMessage(), javafx.scene.control.ButtonType.OK);
+                alert.showAndWait();
+            }
         }
     }
 }

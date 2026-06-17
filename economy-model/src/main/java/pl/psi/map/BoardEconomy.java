@@ -99,4 +99,9 @@ public class BoardEconomy {
     public static BoardEconomyBuilder builder() {
         return new BoardEconomyBuilder();
     }
+
+    public void reloadInteractables(java.util.Map<Point, MapObjectIf> newMap) {
+        interactionMap.clear();
+        interactionMap.putAll(newMap);
+    }
 }

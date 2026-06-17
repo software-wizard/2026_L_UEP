@@ -10,9 +10,6 @@ import pl.psi.creatures.Creature;
 import lombok.Getter;
 import lombok.Setter;
 
-/**
- * TODO: Describe this class (The first line - until the first dot - will interpret as the brief description).
- */
 public class Hero implements java.beans.PropertyChangeListener {
     @Getter
     private List< Creature > creatures = List.of();
@@ -23,6 +20,7 @@ public class Hero implements java.beans.PropertyChangeListener {
     private int spellPower = 1;
 
     @Getter
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private SpellCastingState spellCastingState = new ReadyToCastState();
 
     public Hero(final List< Creature > aCreatures, List<Spell> aSpells)

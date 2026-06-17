@@ -201,5 +201,11 @@ public class BoardEconomyEngine {
                 .filter(Town.class::isInstance)
                 .map(Town.class::cast);
     }
+
+    public void reloadInteractables(Map<Point, MapObjectIf> newMap) {
+        this.interactables.clear();
+        this.interactables.putAll(newMap);
+        board.reloadInteractables(newMap);
+    }
 }
 

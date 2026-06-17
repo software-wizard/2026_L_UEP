@@ -16,6 +16,11 @@ import pl.psi.BattleResults.BattleResult;
 import pl.psi.creatures.Creature;
 import pl.psi.gui.SpellGUI.SpellCastingManager;
 import pl.psi.gui.SpellGUI.SpellUIManager;
+import pl.psi.MapPersistenceManager;
+import pl.psi.MapData;
+import javafx.stage.FileChooser;
+import javafx.stage.Stage;
+import java.io.File;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
@@ -35,6 +40,10 @@ public class MainBattleController implements PropertyChangeListener {
     private Button passButton;
     @FXML
     private Button spellButton;
+    @FXML
+    private Button loadMapButton;
+    @FXML
+    private Button mapEditorButton;
 
     public MainBattleController(final Hero aHero1, final Hero aHero2, final Map<BattlePoint, Creature> bankEnemy,
                                 final BiMap<BattlePoint, SpecialField> aSpecialField,
@@ -54,6 +63,37 @@ public class MainBattleController implements PropertyChangeListener {
 
         if (spellButton != null) {
             spellButton.setOnMouseClicked(e -> spellUIManager.openSpellDialog());
+        }
+
+        if (mapEditorButton != null) {
+            mapEditorButton.setOnMouseClicked(e -> new MapEditorController().show());
+        }
+
+        if (loadMapButton != null) {
+            loadMapButton.setOnMouseClicked(e -> handleLoadMap());
+        }
+    }
+
+    private void handleLoadMap() {
+        if (gridMap == null || gridMap.getScene() == null) {
+            return;
+        }
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Load Combat Map");
+        fileChooser.getExtensionFilters().add(new FileChooser.ExtensionFilter("JSON Files (*.json)", "*.json"));
+        Stage stage = (Stage) gridMap.getScene().getWindow();
+        File file = fileChooser.showOpenDialog(stage);
+        if (file != null) {
+            try {
+                MapPersistenceManager persistenceManager = new MapPersistenceManager();
+                MapData mapData = persistenceManager.loadMap(file);
+                BiMap<BattlePoint, SpecialField> loadedFields = persistenceManager.convertToBiMap(mapData);
+                gameEngine.getSpecialFields().clear();
+                gameEngine.getSpecialFields().putAll(loadedFields);
+                refreshGui();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
         }
     }
 

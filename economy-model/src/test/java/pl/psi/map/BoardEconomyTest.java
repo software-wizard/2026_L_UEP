@@ -128,7 +128,29 @@ class BoardEconomyTest
         assertThat(hero1.getResources().getGold()).isEqualTo(startingResources.getGold()+1000);
     }
 
+    @Test
+    void ecoMapPersistenceTest() throws java.io.IOException {
+        Map<Point, MapObjectIf> originalObjects = new HashMap<>();
+        originalObjects.put(new Point(3, 2), new ResourceGenerator(ResourceGenType.GEM));
+        originalObjects.put(new Point(17, 1), new Town(hero1));
+        originalObjects.put(new Point(5, 6), new Gold(new Resources(1000, 0, 0, 0, 0, 0, 0)));
 
+        EcoMapPersistenceManager manager = new EcoMapPersistenceManager();
+        EcoMapData mapData = manager.convertToEcoMapData(originalObjects, 18, 9);
 
+        java.io.File tempFile = java.io.File.createTempFile("h3ecomap", ".json");
+        tempFile.deleteOnExit();
 
+        manager.saveMap(mapData, tempFile);
+
+        EcoMapData loadedData = manager.loadMap(tempFile);
+        assertThat(loadedData.getWidth()).isEqualTo(18);
+        assertThat(loadedData.getHeight()).isEqualTo(9);
+
+        Map<Point, MapObjectIf> loadedObjects = manager.convertToModelMap(loadedData, hero1, hero2);
+        assertThat(loadedObjects).hasSize(3);
+        assertThat(loadedObjects.get(new Point(3, 2))).isInstanceOf(ResourceGenerator.class);
+        assertThat(loadedObjects.get(new Point(17, 1))).isInstanceOf(Town.class);
+        assertThat(loadedObjects.get(new Point(5, 6))).isInstanceOf(Gold.class);
+    }
 }

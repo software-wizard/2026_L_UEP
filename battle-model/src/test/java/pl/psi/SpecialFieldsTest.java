@@ -383,4 +383,30 @@ public class SpecialFieldsTest {
         assertThat(walker.getWaterMagicLevel()).isEqualTo(MagicLevel.EXPERT);
         assertThat(walker.getAirMagicLevel()).isEqualTo(MagicLevel.EXPERT);
     }
+
+    @Test
+    void mapPersistenceTest() throws java.io.IOException {
+        BiMap<BattlePoint, SpecialField> originalFields = HashBiMap.create();
+        originalFields.put(new BattlePoint(1, 1), new HolyGroundField());
+        originalFields.put(new BattlePoint(3, 4), new QuicksandField());
+        originalFields.put(new BattlePoint(5, 5), new MagicPlainsField());
+
+        MapPersistenceManager manager = new MapPersistenceManager();
+        MapData mapData = manager.convertToMapData(originalFields, 15, 11);
+
+        java.io.File tempFile = java.io.File.createTempFile("h3map", ".json");
+        tempFile.deleteOnExit();
+
+        manager.saveMap(mapData, tempFile);
+
+        MapData loadedData = manager.loadMap(tempFile);
+        assertThat(loadedData.getWidth()).isEqualTo(15);
+        assertThat(loadedData.getHeight()).isEqualTo(11);
+
+        BiMap<BattlePoint, SpecialField> loadedFields = manager.convertToBiMap(loadedData);
+        assertThat(loadedFields).hasSize(3);
+        assertThat(loadedFields.get(new BattlePoint(1, 1)).getFieldName()).isEqualTo(SpecialField.FieldName.BUFF_FIELD);
+        assertThat(loadedFields.get(new BattlePoint(3, 4)).getFieldName()).isEqualTo(SpecialField.FieldName.QUICKSAND);
+        assertThat(loadedFields.get(new BattlePoint(5, 5)).getFieldName()).isEqualTo(SpecialField.FieldName.MAGIC_PLAINS);
+    }
 }

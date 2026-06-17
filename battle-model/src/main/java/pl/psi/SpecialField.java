@@ -10,6 +10,10 @@ import pl.psi.creatures.CreatureStatisticIf;
 @Setter
 public abstract class SpecialField {
 
+    public enum Color {
+        CYAN, BROWN, ORANGE, YELLOW, GRAY, RED, GREEN, DARKRED, VIOLET, SADDLEBROWN, LIGHTBLUE, TEAL, ORANGERED, GOLD, PURPLE, LIMEGREEN, LIGHTSLATEGREY, CRIMSON, ALICEBLUE, KHAKI
+    }
+
     public enum FieldName{
         DMG_FIELD, SPELL_FIELD, BUFF_FIELD, FIELD_CAN_ONLY_BE_FLOWN, DEBUFF_FIELD, FIRE_FIELD, CRACKED_ICE, QUICKSAND, FIELDS_OF_GLORY, MAGIC_PLAINS
     }
@@ -17,8 +21,28 @@ public abstract class SpecialField {
     @Getter
     private FieldName fieldName;
 
+    @Getter
+    @Setter
+    private Color color = Color.GRAY;
+
     protected SpecialField(FieldName aFieldName) {
         fieldName = aFieldName;
+        // Default color mapping based on FieldName
+        if (fieldName != null) {
+            switch (fieldName) {
+                case DMG_FIELD: color = Color.CRIMSON; break;
+                case SPELL_FIELD: color = Color.CYAN; break;
+                case BUFF_FIELD: color = Color.ORANGE; break;
+                case DEBUFF_FIELD: color = Color.GRAY; break;
+                case FIELD_CAN_ONLY_BE_FLOWN: color = Color.DARKRED; break;
+                case FIRE_FIELD: color = Color.ORANGE; break;
+                case CRACKED_ICE: color = Color.ALICEBLUE; break;
+                case QUICKSAND: color = Color.KHAKI; break;
+                case FIELDS_OF_GLORY: color = Color.LIGHTSLATEGREY; break;
+                case MAGIC_PLAINS: color = Color.VIOLET; break;
+                default: color = Color.GRAY; break;
+            }
+        }
     }
 
     public abstract void doSomething(Creature aCreature);
