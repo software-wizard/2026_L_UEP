@@ -21,11 +21,13 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
 
 public class MapEditorController {
     private final int width = 15;
     private final int height = 11;
-    private final BiMap<BattlePoint, SpecialField.FieldName> placedFields = HashBiMap.create();
+    private final Map<BattlePoint, SpecialField.FieldName> placedFields = new HashMap<>();
     private final MapPersistenceManager persistenceManager = new MapPersistenceManager();
     
     private ComboBox<String> toolSelector;
