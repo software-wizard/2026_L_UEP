@@ -51,6 +51,11 @@ public class EconomyHero implements PropertyChangeListener
         baseStatistics = aStats;
         skills = new ArrayList<>();
         experience = ThreadLocalRandom.current().nextInt(MIN_INITIAL_EXPERIENCE, MAX_INITIAL_EXPERIENCE + 1);
+        
+        spells.add(new EconomySpell("Attack Boost I"));
+        spells.add(new EconomySpell("Speed Boost I"));
+        spells.add(new EconomySpell("Slow I"));
+        spells.add(new EconomySpell("Fireball"));
     }
     public EconomyHero() {
         this.fraction = Fraction.NECROPOLIS;
@@ -59,6 +64,11 @@ public class EconomyHero implements PropertyChangeListener
         this.baseStatistics = new Statistics(0, 0, 0, 0);
         this.skills = new ArrayList<>();
         this.remainingMoves = moveRange;
+        
+        spells.add(new EconomySpell("Attack Boost I"));
+        spells.add(new EconomySpell("Speed Boost I"));
+        spells.add(new EconomySpell("Slow I"));
+        spells.add(new EconomySpell("Fireball"));
     }
 
     public void resetMoveRange() {

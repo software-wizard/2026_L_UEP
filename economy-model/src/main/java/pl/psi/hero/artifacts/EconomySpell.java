@@ -7,6 +7,7 @@ import pl.psi.map.InteractableIf;
 import pl.psi.map.buildings.enterAction.EnterAction;
 
 @AllArgsConstructor
+@lombok.NoArgsConstructor(force = true)
 public class EconomySpell implements InteractableIf {
 
 
