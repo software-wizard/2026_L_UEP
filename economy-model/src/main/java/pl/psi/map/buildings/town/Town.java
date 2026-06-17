@@ -1,57 +1,131 @@
 package pl.psi.map.buildings.town;
 
+import lombok.Getter;
+import lombok.Setter;
 import pl.psi.hero.EconomyHero;
 import pl.psi.map.buildings.BuildingIf;
 import pl.psi.map.buildings.enterAction.EnterAction;
 import pl.psi.map.buildings.enterAction.EnterActionType;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 public class Town implements BuildingIf {
 
-    private final Set<TownBuilding> builtTownBuildings = new HashSet<>();
-    private final Set<UpgradeBuildings> builtUpgradeBuildings = new HashSet<>();
+    @Getter
+    @Setter
+    EconomyHero owner;
+    private final Set<BuildingType> builtBuildings = new HashSet<>();
+    private final Map<BuildingType, Integer> unitPool = new HashMap<>();
+    private boolean canBuildBuilding = true;
 
-    public void build(BuildingType building, EconomyHero hero) {
-        building.buildIn(this, hero);
+    public Town(EconomyHero owner) {
+        setupTown();
+
+        this.owner = owner;
     }
 
-    public void buildBuilding(BuildingType building, EconomyHero hero) {
-        if (building.isBuiltIn(this)) {
+    private void setupTown() {
+        this.builtBuildings.add(TownBuilding.VILLAGE_HALL);
+        this.builtBuildings.add(TownBuilding.FORT);
+        this.builtBuildings.add(CreatureBuildings.CURSED_TEMPLE);
+        addUnitToPool(CreatureBuildings.CURSED_TEMPLE, CreatureBuildings.CURSED_TEMPLE.getGrowth());
+    }
+
+    //Budynki
+    //Outside function,
+    public void build(BuildingType building, EconomyHero hero) {
+        buildBuilding(building, hero);
+    }
+
+    private void buildBuilding(BuildingType building, EconomyHero hero) {
+        if(!canBuildBuilding){
+            throw new IllegalStateException("Cannot build a second building in this town this turn");
+        }
+        if (hero == null) {
+            throw new IllegalArgumentException("Hero is null, check if town has owner");
+        }
+        if (hasBuilt(building)) {
             throw new IllegalStateException("Building already constructed.");
         }
 
+        // Generic prerequisite check works for any BuildingType
         boolean allBuilt = building.getPrerequisites().stream()
-                .allMatch(prereq -> prereq.isBuiltIn(this));
+                .allMatch(this::hasBuilt);
 
         if (!allBuilt) {
             throw new IllegalStateException("Prerequisites not met for " + building);
         }
 
+        if (!hero.canAfford(building.getCost())) {
+            throw new IllegalStateException("Can't afford " + building);
+        }
+
         hero.pay(building.getCost());
-        building.registerInTown(this);
-    }
 
+        this.builtBuildings.add(building);
 
-    public boolean hasBuilt(TownBuilding building) {
-        return builtTownBuildings.contains(building);
-    }
+        if (!building.isUpgraded() && building instanceof CreatureBuildings) {
+            unitPool.put(building, building.getGrowth());
+        }
 
-    public boolean hasBuilt(UpgradeBuildings building) {
-        return builtUpgradeBuildings.contains(building);
+        canBuildBuilding = false;
     }
 
     public boolean hasBuilt(BuildingType building) {
-        return building.isBuiltIn(this);
+        return builtBuildings.contains(building);
     }
 
-    public void addTownBuilding(TownBuilding building) {
-        builtTownBuildings.add(building);
+    //TESTING FUNCTION
+    public void buildAllPrerequisites(BuildingType building) {
+        for (BuildingType prereq : building.getPrerequisites()) {
+            if (!this.hasBuilt(prereq)) {
+                buildAllPrerequisites(prereq);
+                resetBuildingOption();
+                this.build(prereq, owner);
+            }
+        }
     }
 
-    public void addUpgradeBuilding(UpgradeBuildings building) {
-        builtUpgradeBuildings.add(building);
+    //Jednostki
+    public void generateUnits() {
+        double modifier = getGrowthModifier(); // Bonusy z Fortu/Cytadeli/Zamku
+
+        for (BuildingType b : builtBuildings) {
+            if (!b.isUpgraded()) {
+                int growth = (int) (b.getGrowth() * modifier);
+                addUnitToPool(b,growth);
+            }
+        }
+    }
+
+    private double getGrowthModifier() {
+        if (hasCapability(TownCapability.CASTLE_UPGRADE)){
+            return 2;
+        } else if (hasCapability(TownCapability.CITADEL_UPGRADE)) {
+            return 1.5;
+        }else{
+            return 1;
+        }
+    }
+
+    public int getAvailableUnits(CreatureBuildings building) {
+        return unitPool.getOrDefault(building.getBaseBuilding(), 0);
+    }
+
+    public void buyUnits(CreatureBuildings building, int amount) {
+        CreatureBuildings base = building.getBaseBuilding();
+        int current = unitPool.getOrDefault(base, 0);
+        if (current >= amount) {
+            unitPool.put(base, current - amount);
+        }
+    }
+
+    public void addUnitToPool(BuildingType building, int amount) {
+        int current = unitPool.getOrDefault(building, 0);
+        unitPool.put(building, current + amount);
     }
 
     @Override
@@ -64,17 +138,19 @@ public class Town implements BuildingIf {
     }
 
     @Override
-    public void enter(EconomyHero hero) {
-
+    public void generateResource() {
+        for (BuildingType building : builtBuildings) {
+            building.generateResources(owner);
+        }
     }
 
-    @Override
-    public void generateResource() {
+    public boolean hasCapability(TownCapability capability) {
+        // Czyli usunąć capabilities i tutaj sprawdzać, jeżeli dostaje argument capability to sprawdzam czy built buildings ma odpowiedni budynek
+        return builtBuildings.stream().anyMatch(building -> building.getProvidedCapabilities().contains(capability));
     }
 
     @Override
     public void interact(EconomyHero hero) {
-
     }
 
     @Override
@@ -83,12 +159,7 @@ public class Town implements BuildingIf {
     }
 
     @Override
-    public EconomyHero getOwner() {
-        return null;
-    }
-
-    @Override
-    public EnterAction onEnter() {
+    public EnterAction firstInteraction() {
         return new EnterAction(EnterActionType.OPEN_SHOP, this);
     }
 
@@ -97,5 +168,8 @@ public class Town implements BuildingIf {
         return new EnterAction(EnterActionType.OPEN_UPGRADE, this);
     }
 
-
+    @Override
+    public void resetBuildingOption() {
+        canBuildBuilding = true;
+    }
 }

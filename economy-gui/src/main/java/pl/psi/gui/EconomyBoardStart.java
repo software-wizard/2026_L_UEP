@@ -22,6 +22,9 @@ import java.util.Map;
 
 public class EconomyBoardStart extends Application {
 
+    EconomyHero hero1;
+    EconomyHero hero2;
+
     public static final String SPELL_NAME = "Default";
 
     public static void main(final String[] args )
@@ -32,8 +35,8 @@ public class EconomyBoardStart extends Application {
     @Override
     public void start(Stage primaryStage) {
         HeroSelection.showAndWait().thenAccept(heroes -> {
-            EconomyHero hero1 = heroes[0];
-            EconomyHero hero2 = heroes[1];
+            hero1 = heroes[0];
+            hero2 = heroes[1];
 
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/fxml/economy-board.fxml"));
@@ -53,8 +56,8 @@ public class EconomyBoardStart extends Application {
     private Map<pl.psi.economy.Point, MapObjectIf> map() {
         return Map.ofEntries(
                 Map.entry(new pl.psi.economy.Point(4,4), new Artifact(ArtifactType.SWORD_OF_HELLFIRE)),
-                Map.entry(new pl.psi.economy.Point(17,1), new Town()),
-                Map.entry(new pl.psi.economy.Point(1,7), new Town()),
+                Map.entry(new pl.psi.economy.Point(17,1), new Town(hero1)),
+                Map.entry(new pl.psi.economy.Point(1,7), new Town(hero2)),
                 Map.entry(new pl.psi.economy.Point(3,2), new ResourceGenerator(ResourceGenType.GEM)),
                 Map.entry(new pl.psi.economy.Point(5,6), new ResourceGenerator(ResourceGenType.GOLD)),
                 Map.entry(new pl.psi.economy.Point(8,1), new ResourceGenerator(ResourceGenType.MERCURY)),

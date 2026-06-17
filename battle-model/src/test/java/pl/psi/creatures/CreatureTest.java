@@ -3,6 +3,9 @@ package pl.psi.creatures;
 import com.google.common.collect.Range;
 import org.junit.jupiter.api.Test;
 import pl.psi.TurnQueue;
+import pl.psi.creatures.Creature;
+import pl.psi.creatures.CreatureStats;
+import pl.psi.creatures.CreatureStatisticIf;
 
 import java.util.List;
 

@@ -1,5 +1,6 @@
 package pl.psi.map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import pl.psi.hero.EconomyHero;
 
@@ -16,6 +17,7 @@ public class TurnQueueEconomy {
     public static final String NEXT_HERO = "NEXT_HERO";
     private final Collection<EconomyHero> heroes;
     private final Queue<EconomyHero> heroQueue;
+    @JsonIgnore
     private final PropertyChangeSupport observerSupport = new PropertyChangeSupport(this);
     @Getter
     private EconomyHero currentHero;

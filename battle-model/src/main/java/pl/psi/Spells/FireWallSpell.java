@@ -44,7 +44,8 @@ public class FireWallSpell extends Spell {
 
     }
 
-    //chwilowo nie uzywane, zastanawiam sie nad implementacja
+
+
     public double fireWallDamageCalculator() {
         double levelBasedDamageBonus;
         switch (spellLevel) {
@@ -62,9 +63,8 @@ public class FireWallSpell extends Spell {
     }
 
     @Override
-    public void cast(Creature targetCreature) {
-        targetCreature.applyMagicDamage(this);
-
+    public void cast(Creature targetCreature, int spellPower) {
+        targetCreature.applyMagicDamage(this, spellPower);
     }
 
     public class FireWall extends SpecialField {
@@ -79,7 +79,7 @@ public class FireWallSpell extends Spell {
 
 
         public void doSomething(Creature targetCreature) {
-            cast(targetCreature);
+            cast(targetCreature, 1); // Default spell power for triggered field
         }
     }
 

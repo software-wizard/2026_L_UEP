@@ -83,7 +83,7 @@ public class BoardEconomy {
 
     public EnterAction enter(final Point targetPoint){
         MapObjectIf obj = interactionMap.get(targetPoint);
-            return obj.onEnter();
+            return obj.firstInteraction();
     }
 
     public EnterAction secondInteraction(final Point targetPoint){

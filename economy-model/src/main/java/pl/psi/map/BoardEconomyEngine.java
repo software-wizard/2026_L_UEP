@@ -1,9 +1,11 @@
 package pl.psi.map;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import pl.psi.hero.EconomyHero;
 import pl.psi.map.buildings.enterAction.EnterAction;
 import pl.psi.map.buildings.BuildingIf;
 import pl.psi.economy.Point;
+import pl.psi.map.buildings.town.Town;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
@@ -15,9 +17,11 @@ public class BoardEconomyEngine {
     public static final String HERO_MOVED = "HERO_MOVED";
     private final TurnQueueEconomy turnQueue;
     private final BoardEconomy board;
+    @JsonIgnore
     private final PropertyChangeSupport observerSupport = new PropertyChangeSupport(this);
     Map<Point, MapObjectIf> interactables;
     private int turnCounter;
+    private int dayCounter;
 
 
     public BoardEconomyEngine(final EconomyHero hero1, final EconomyHero hero2, Map<Point, MapObjectIf> map) {
@@ -42,15 +46,17 @@ public class BoardEconomyEngine {
     }
 
     public boolean canEnter(final Point point) {
-        if (!isHero(point)) {
-            return isEnterable(point);
+        // Allow entering if there is a building AND (no hero OR it's the current hero)
+        if (isEnterable(point)) {
+            return !isHero(point) || isCurrentHero(point);
         }
         return false;
     }
 
     public boolean canInteract(Point point) {
-        if (!isHero(point)) {
-            return getInteractable(point).isPresent();
+        // Allow interaction if it's interactable AND (no hero OR it's the current hero)
+        if (getInteractable(point).isPresent()) {
+            return !isHero(point) || isCurrentHero(point);
         }
         return false;
     }
@@ -120,9 +126,32 @@ public class BoardEconomyEngine {
         }
     }
 
-    private void endOfDay(){ // called after both players pass
+    public void endOfDay(){ // called after both players pass
+        dayCounter++;
+        if (dayCounter >= 7){
+            dayCounter = 0;
+            endOfWeek();
+        }
         System.out.println("End of day");
         generateResourcesEndDay();
+        resetBuldingOptionAtTowns();
+    }
+
+    private void resetBuldingOptionAtTowns() {
+        for (MapObjectIf mapObject : interactables.values()) {
+            mapObject.resetBuildingOption();
+        }
+    }
+
+    private void endOfWeek(){
+        System.out.println("End of week");
+        createUnitsAtTowns();
+    }
+
+    private void createUnitsAtTowns() {
+        for (MapObjectIf mapObject : interactables.values()) {
+            mapObject.generateUnits();
+        }
     }
 
     private void generateResourcesEndDay(){
@@ -130,7 +159,6 @@ public class BoardEconomyEngine {
             interactable.generateResource();
             }
         }
-
 
     public void addObserver(final PropertyChangeListener aObserver) {
         observerSupport.addPropertyChangeListener(aObserver);
@@ -166,6 +194,12 @@ public class BoardEconomyEngine {
     public void enterBank(BuildingIf building){
         observerSupport.firePropertyChange("ENTER_BANK", null, new Object[]{getCurrentHero(), building});
     }
-}
 
+    public Optional<Town> getTownUnderHero(EconomyHero aCurrentHero) {
+        Point pos = board.getPosition(aCurrentHero);
+        return board.getBuildingAt(pos)
+                .filter(Town.class::isInstance)
+                .map(Town.class::cast);
+    }
+}
 

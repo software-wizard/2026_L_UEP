@@ -70,6 +70,14 @@ public class Board {
         return Optional.ofNullable(map.get(aBattlePoint));
     }
 
+    public List<Creature> getCreaturesFromPoints(List<BattlePoint> points) {
+        List<Creature> creatures = new ArrayList<>();
+        for (BattlePoint point : points) {
+            getCreature(point).ifPresent(creatures::add);
+        }
+        return creatures;
+    }
+
     void move(final Creature aCreature, final BattlePoint aBattlePoint) {
 
         if (canMove(aCreature, aBattlePoint)) {

@@ -2,7 +2,10 @@ package pl.psi.hero;
 
 import com.google.j2objc.annotations.ObjectiveCName;
 import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class Statistics {
 
     @Getter
@@ -19,6 +22,8 @@ public class Statistics {
         this.defense = defense;
         this.power = power;
         this.knowledge = knowledge;
+    }
+    public Statistics() {
     }
 
     public void increase(Statistics stats) {

@@ -1,16 +1,27 @@
 package pl.psi.map.resources;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Value;
+import lombok.extern.jackson.Jacksonized;
 
 @Value
+@Builder
+@Jacksonized
+@AllArgsConstructor
 public class Resources {
 
-    int gold; //no need for private cause lombok Value marks it as private
+    int gold;
     int wood;
     int ore;
     int mercury;
     int sulphur;
     int crystal;
     int gems;
+
+    public boolean enoughToPayGold(int amount) {
+        return this.gold >= amount;
+    }
 
     public Resources change(Resources value) { //can be used for both addition and substraction
         return new Resources(
@@ -53,7 +64,4 @@ public class Resources {
         );
     }
 
-    public boolean enoughToPayGold(int cost) {
-        return gold >= cost;
-    }
 }

@@ -2,26 +2,30 @@ package pl.psi.gui;
 
 import com.google.common.collect.BiMap;
 import javafx.fxml.FXML;
+import javafx.application.Platform;
 import javafx.scene.control.Button;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.paint.Color;
 import pl.psi.GameEngine;
 import pl.psi.Hero;
+import pl.psi.gui.proxy.GameEngineProxy;
 import pl.psi.BattlePoint;
 import pl.psi.SpecialField;
+import pl.psi.BattleResults.BattleResult;
 import pl.psi.creatures.Creature;
 import pl.psi.gui.SpellGUI.SpellCastingManager;
 import pl.psi.gui.SpellGUI.SpellUIManager;
-
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class MainBattleController implements PropertyChangeListener {
-    private final GameEngine gameEngine;
+    private final GameEngineProxy gameEngine;
+    private final Consumer<BattleResult> battleFinishedHandler;
     private final SpellCastingManager spellManager = new SpellCastingManager();
     private SpellUIManager spellUIManager;
 
@@ -32,8 +36,11 @@ public class MainBattleController implements PropertyChangeListener {
     @FXML
     private Button spellButton;
 
-    public MainBattleController(final Hero aHero1, final Hero aHero2, final Map<BattlePoint, Creature> bankEnemy, BiMap<BattlePoint, SpecialField> aSpecialField) {
-        gameEngine = new GameEngine(aHero1, aHero2, aSpecialField, bankEnemy);
+    public MainBattleController(final Hero aHero1, final Hero aHero2, final Map<BattlePoint, Creature> bankEnemy,
+                                final BiMap<BattlePoint, SpecialField> aSpecialField,
+                                final Consumer<BattleResult> aBattleFinishedHandler) {
+        gameEngine = new GameEngineProxy(aHero1, aHero2, aSpecialField, bankEnemy);
+        battleFinishedHandler = aBattleFinishedHandler;
     }
 
     @FXML
@@ -62,6 +69,9 @@ public class MainBattleController implements PropertyChangeListener {
                 if (gameEngine.isCurrentCreature(currentBattlePoint)) {
                     mapTile.setBackground(Color.GREENYELLOW);
                 }
+                if (spellManager.isActive()) {
+                    SpellTargetingUI.attachTargeting(mapTile, currentBattlePoint, spellManager, spellUIManager, gridMap);
+                }
                 if (gameEngine.canMove(currentBattlePoint)) {
                     mapTile.setBackground(Color.GREY);
                     mapTile.addEventHandler(MouseEvent.MOUSE_CLICKED,
@@ -85,10 +95,8 @@ public class MainBattleController implements PropertyChangeListener {
                     });
                 }
 
-                if (spellManager.isActive() && creature.isPresent()) {
-                    mapTile.setBackground(Color.DEEPSKYBLUE);
-                    mapTile.addEventHandler(MouseEvent.MOUSE_CLICKED,
-                            e -> spellUIManager.confirmSpellCast(creature.get(), currentBattlePoint));
+                if (spellManager.isActive()) {
+                    SpellTargetingUI.attachTargeting(mapTile, currentBattlePoint, spellManager, spellUIManager, gridMap);
                 }
 
                 gridMap.add(mapTile, x, y);
@@ -119,6 +127,9 @@ public class MainBattleController implements PropertyChangeListener {
     public void propertyChange(PropertyChangeEvent evt) {
         if ("SPELL_CAST".equals(evt.getPropertyName())) {
             spellUIManager.showSpellCastDialog();
+        } else if (GameEngine.BATTLE_FINISHED.equals(evt.getPropertyName())) {
+            handleBattleFinished();
+            return;
         }
         refreshGui();
     }
@@ -126,5 +137,21 @@ public class MainBattleController implements PropertyChangeListener {
     private void pass() {
         gameEngine.pass();
         refreshGui();
+    }
+
+    private void handleBattleFinished() {
+        if (!gameEngine.isBattleOver()) {
+            return;
+        }
+        gameEngine.getBattleResult().ifPresent(battleFinishedHandler);
+        closeBattleWindow();
+    }
+
+    private void closeBattleWindow() {
+        Platform.runLater(() -> {
+            if (gridMap != null && gridMap.getScene() != null && gridMap.getScene().getWindow() != null) {
+                gridMap.getScene().getWindow().hide();
+            }
+        });
     }
 }

@@ -9,39 +9,39 @@ public enum TownBuilding implements BuildingType {
 
     //TODO ADD WHAT EACH TOWN UPGRADE DOES
 
+    //MISCELLANEOUS BUILDINGS
+    TAVERN(Set.of(), new Resources(500, 5,0,0,0,0,0), Category.MISCELLANEOUS),
+    MARKETPLACE(Set.of(), new Resources(500,5,0,0,0,0,0), Category.MISCELLANEOUS),
+    RESOURCE_SILO(Set.of(MARKETPLACE), new Resources(5000,0,5,0,0,0,0), Category.MISCELLANEOUS),
+    BLACKSMITH(Set.of(),new Resources(1000,5,0,0,0,0,0),Category.MISCELLANEOUS),
+
     //FORTIFICATIONS
-    FORT(Set.of(),new Resources(5000,20,20,0,0,0,0),Category.COMMON),
-    CITADEL(Set.of(FORT), new Resources(2500,0,5,0,0,0,0), Category.COMMON),
-    CASTLE(Set.of(CITADEL), new Resources(5000,10,10,0,0,0,0), Category.COMMON),
+    FORT(Set.of(),new Resources(5000,20,20,0,0,0,0),Category.FORTIFICATIONS),
+    CITADEL(Set.of(FORT), new Resources(2500,0,5,0,0,0,0), Category.FORTIFICATIONS),
+    CASTLE(Set.of(CITADEL), new Resources(5000,10,10,0,0,0,0), Category.FORTIFICATIONS),
 
-    //RESOURCES
-    MARKETPLACE(Set.of(), new Resources(500,5,0,0,0,0,0), Category.RESOURCE),
-    RESOURCE_SILO(Set.of(MARKETPLACE), new Resources(5000,0,5,0,0,0,0), Category.RESOURCE),
-
-    //
+    //MAGE GUILD
     MAGE_GUILD_LVL_1(Set.of(), new Resources(2000, 5,5,0,0,0,0), Category.MAGE_GUILD),
     MAGE_GUILD_LVL_2(Set.of(MAGE_GUILD_LVL_1), new Resources(1000,5,5,4,4,4,4), Category.MAGE_GUILD),
     MAGE_GUILD_LVL_3(Set.of(MAGE_GUILD_LVL_2), new Resources(1000,5,5,6,6,6,6), Category.MAGE_GUILD),
     MAGE_GUILD_LVL_4(Set.of(MAGE_GUILD_LVL_3), new Resources(1000,5,5,8,8,8,8), Category.MAGE_GUILD),
     MAGE_GUILD_LVL_5(Set.of(MAGE_GUILD_LVL_4), new Resources(1000,5,5,10,10,10,10), Category.MAGE_GUILD),
 
+    //HALLS
+    VILLAGE_HALL(Set.of(), new Resources(0,0,0,0,0,0,0),Category.HALLS),
+    TOWN_HALL(Set.of(TAVERN), new Resources(2500,0,0,0,0,0,0), Category.HALLS),
+    CITY_HALL(Set.of(TOWN_HALL, MAGE_GUILD_LVL_1,MARKETPLACE,BLACKSMITH), new Resources(5000,0,0,0,0,0,0), Category.HALLS),
+    CAPITOL(Set.of(CITY_HALL,CASTLE), new Resources(10000,0,0,0,0,0,0), Category.HALLS),
 
-    //COMMON BUILDINGS
-    TAVERN(Set.of(), new Resources(500, 5,0,0,0,0,0), Category.COMMON),
-    TOWN_HALL(Set.of(TAVERN), new Resources(2500,0,0,0,0,0,0), Category.COMMON),
-    BLACKSMITH(Set.of(),new Resources(1000,5,0,0,0,0,0),Category.COMMON),
-    CITY_HALL(Set.of(TOWN_HALL, MAGE_GUILD_LVL_1,MARKETPLACE,BLACKSMITH), new Resources(5000,0,0,0,0,0,0), Category.COMMON),
-    CAPITOL(Set.of(CITY_HALL,CASTLE), new Resources(10000,0,0,0,0,0,0), Category.COMMON),
-
-    NECROMANCY_AMPLIFIER(Set.of(MAGE_GUILD_LVL_1),new Resources(1000,0,0,0,0,0,0) ,Category.TOWN_SPECIFIC );
+    NECROMANCY_AMPLIFIER(Set.of(MAGE_GUILD_LVL_1),new Resources(1000,0,0,0,0,0,0) ,Category.UNIQUE);
 
     public enum Category {
         GRAIL,
-        CREATURE_GENERATOR,
-        COMMON,
-        TOWN_SPECIFIC,
+        HALLS,
+        FORTIFICATIONS,
+        MISCELLANEOUS,
         MAGE_GUILD,
-        RESOURCE
+        UNIQUE
     }
 
     private final Set<BuildingType> prerequisites;
@@ -59,51 +59,62 @@ public enum TownBuilding implements BuildingType {
     }
 
     @Override
-    public void registerInTown(Town town) {
-        town.addTownBuilding(this);
+    public Set<TownCapability> getProvidedCapabilities() {
+        switch (this) {
+            case MAGE_GUILD_LVL_1:
+                return Set.of(TownCapability.SPELL_PURCHASE);
+            case MARKETPLACE:
+                return Set.of(TownCapability.RESOURCE_TRADE);
+            case BLACKSMITH:
+                return Set.of(TownCapability.WARMACHINE_PURCHASE);
+            case FORT:
+                return Set.of(TownCapability.FORT_UPGRADE);
+            case CITADEL:
+                return Set.of(TownCapability.CITADEL_UPGRADE);
+            case CASTLE:
+                return Set.of(TownCapability.CASTLE_UPGRADE);
+            default:
+                return Set.of();
+        }
     }
 
     @Override
-    public void applyEffect(Town town, EconomyHero hero) {
+    public boolean isUpgraded() {
+        return false;
+    }
+
+    @Override
+    public int getGrowth() {
+        return 0;
+    }
+
+    @Override
+    public void generateResources(EconomyHero hero) {
+        if (hero == null) {
+            throw new NullPointerException("EconomyHero argument is null");
+        }
         switch (this){
-            case FORT:
-            case CITADEL:
-            case CASTLE:
-            case MARKETPLACE:
-                //Okienko do wymiany zasobów
-            case RESOURCE_SILO:
-                hero.addResource(new Resources(0,1,1,0,0,0,0));
-            case MAGE_GUILD_LVL_1:
-                //pozwolić kupować spelle
-            case MAGE_GUILD_LVL_2:
-            case MAGE_GUILD_LVL_3:
-            case MAGE_GUILD_LVL_4:
-            case MAGE_GUILD_LVL_5:
-            case TAVERN:
+            case VILLAGE_HALL:
+                hero.addResource(new Resources(500,0,0,0,0,0,0));
+                break;
             case TOWN_HALL:
                 hero.addResource(new Resources(1000,0,0,0,0,0,0));
+                break;
             case CITY_HALL:
                 hero.addResource(new Resources(2000,0,0,0,0,0,0));
+                break;
             case CAPITOL:
                 hero.addResource(new Resources(4000,0,0,0,0,0,0));
-            case BLACKSMITH:
-                //Pozwala kupić first aid tent
-            case NECROMANCY_AMPLIFIER:
+                break;
+            case RESOURCE_SILO:
+                hero.addResource(new Resources(0,1,1,0,0,0,0));
+                break;
         }
     }
 
 
     public Resources getCost() {
         return cost;
-    }
-
-    @Override
-    public boolean isBuiltIn(Town town) {
-        return town.hasBuilt(this);
-    }
-
-    public void buildIn(Town town, EconomyHero hero) {
-        town.buildBuilding(this, hero);
     }
 
     public Category getCategory() {
