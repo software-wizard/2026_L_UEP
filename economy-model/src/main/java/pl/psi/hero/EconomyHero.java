@@ -278,4 +278,12 @@ public class EconomyHero implements PropertyChangeListener
         }
         skills.add( aSkill );
     }
+    public void addSkill(final AbstractSkill aSkill)
+    {
+        if( skills == null )
+        {
+            skills = new ArrayList<>();
+        }
+        skills.add( aSkill );
+    }
 }

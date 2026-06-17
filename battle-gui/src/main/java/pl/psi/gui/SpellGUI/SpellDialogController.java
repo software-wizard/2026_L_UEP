@@ -24,12 +24,20 @@ public class SpellDialogController {
     public void setSpells(List<Spell> spells, Consumer<Spell> onSpellChosen) {
         this.onSpellChosen = onSpellChosen;
 
+        ToggleGroup group = new ToggleGroup();
         for (Spell spell : spells) {
             RadioButton radio = new RadioButton(spell.getName());
-            radio.setToggleGroup(new ToggleGroup());
+            radio.setToggleGroup(group);
             radio.setUserData(spell);
 
-            radio.setOnAction(e -> selectedSpell = (Spell) radio.getUserData());
+            radio.setOnMouseClicked(e -> {
+                if (group.getSelectedToggle() == radio && selectedSpell == spell) {
+                    group.selectToggle(null);
+                    selectedSpell = null;
+                } else {
+                    selectedSpell = spell;
+                }
+            });
             spellList.getChildren().add(radio);
         }
 

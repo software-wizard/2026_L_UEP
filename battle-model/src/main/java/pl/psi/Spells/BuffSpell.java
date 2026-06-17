@@ -12,14 +12,22 @@ public class BuffSpell extends Spell {
     private final CreatureStats buffStats;
 
 
+    public BuffSpell(String name, int spellLevel, int duration, CreatureStats buffStats, SpellSchool school) {
+        super(name, spellLevel, duration, school);
+        this.buffStats = buffStats;
+    }
+
     public BuffSpell(String name, int spellLevel, int duration, CreatureStats buffStats) {
-        super(name, spellLevel, duration);
+        this(name, spellLevel, duration, buffStats, SpellSchool.NONE);
+    }
+
+    public BuffSpell(String name, int spellLevel, int duration, CreatureStats buffStats, SpellAreaIf areaStrategy, SpellSchool school) {
+        super(name, spellLevel, duration, areaStrategy, school);
         this.buffStats = buffStats;
     }
 
     public BuffSpell(String name, int spellLevel, int duration, CreatureStats buffStats, SpellAreaIf areaStrategy) {
-        super(name, spellLevel, duration, areaStrategy);
-        this.buffStats = buffStats;
+        this(name, spellLevel, duration, buffStats, areaStrategy, SpellSchool.NONE);
     }
 
     @Override
@@ -30,19 +38,13 @@ public class BuffSpell extends Spell {
     }
 
     @Override
-    public CreatureStats modifyStats(CreatureStatisticIf base) {
-        return CreatureStats.builder()
-                .attack(base.getAttack() + buffStats.getAttack())
-                .armor(base.getArmor() + buffStats.getArmor())
-                .maxHp(base.getMaxHp() + buffStats.getMaxHp())
-                .moveRange(base.getMoveRange() + buffStats.getMoveRange())
-                .name(base.getName())
-                .description(base.getDescription())
-                .tier(base.getTier())
-                .damage(base.getDamage())
-                .isUpgraded(base.isUpgraded())
-                .build();
-
-
+    public CreatureStatisticIf modifyStats(CreatureStatisticIf base) {
+        return new CreatureStatisticDecorator(
+                base,
+                buffStats.getAttack(),
+                buffStats.getArmor(),
+                buffStats.getMaxHp(),
+                buffStats.getMoveRange()
+        );
     }
 }

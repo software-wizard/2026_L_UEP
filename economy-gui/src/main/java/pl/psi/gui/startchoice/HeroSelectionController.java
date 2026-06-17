@@ -48,37 +48,67 @@ public class HeroSelectionController {
 
     @FXML
     private void onStartGameClicked() {
-        String frac1 = fraction1Combo.getValue();
-        String frac2 = fraction2Combo.getValue();
+        try {
+            System.out.println("Start Game clicked.");
+            String frac1 = fraction1Combo.getValue();
+            String frac2 = fraction2Combo.getValue();
 
-        String hero1 = hero1Combo.getValue();
-        String hero2 = hero2Combo.getValue();
+            String hero1 = hero1Combo.getValue();
+            String hero2 = hero2Combo.getValue();
 
-        EconomyHero aHero1 = createHeroFromSelection(frac1, hero1);
-        EconomyHero aHero2 = createHeroFromSelection(frac2, hero2);
+            System.out.println("Selected Fraction 1: " + frac1 + ", Hero 1: " + hero1);
+            System.out.println("Selected Fraction 2: " + frac2 + ", Hero 2: " + hero2);
 
-        if (onHeroesSelected != null) {
-            onHeroesSelected.accept(aHero1, aHero2);
+            EconomyHero aHero1 = createHeroFromSelection(frac1, hero1);
+            EconomyHero aHero2 = createHeroFromSelection(frac2, hero2);
+
+            if (aHero1 == null || aHero2 == null) {
+                javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+                alert.setTitle("Błąd wyboru");
+                alert.setHeaderText(null);
+                alert.setContentText("Musisz wybrać poprawną frakcję i bohatera dla obu graczy!");
+                alert.showAndWait();
+                return;
+            }
+
+            if (onHeroesSelected != null) {
+                onHeroesSelected.accept(aHero1, aHero2);
+            }
+        } catch (Exception e) {
+            System.err.println("Exception in onStartGameClicked:");
+            e.printStackTrace();
         }
     }
 
     private EconomyHero createHeroFromSelection(String fractionName, String heroName) {
-        EconomyHero.Fraction fraction = EconomyHero.Fraction.valueOf(fractionName.toUpperCase());
-        Resources resources = new Resources(3000, 50, 50, 50, 50, 50, 50); // common starting resources
+        if (fractionName == null || heroName == null) {
+            System.err.println("Fraction or Hero name is null. fractionName=" + fractionName + ", heroName=" + heroName);
+            return null;
+        }
+        try {
+            EconomyHero.Fraction fraction = EconomyHero.Fraction.valueOf(fractionName.toUpperCase());
+            Resources resources = new Resources(3000, 50, 50, 50, 50, 50, 50); // common starting resources
 
-        for (HeroType heroType : HeroType.values()) {
-            if (heroType.displayName.equals(heroName) && heroType.fraction == fraction) {
-                HeroType.HeroData data = heroType.getData();
-                EconomyHero hero = new EconomyHero(fraction, resources, data.getStats());
-                data.getCreatures().forEach(hero::addCreature);
-                return hero;
+            for (HeroType heroType : HeroType.values()) {
+                if (heroType.displayName.equals(heroName) && heroType.fraction == fraction) {
+                    HeroType.HeroData data = heroType.getData();
+                    EconomyHero hero = new EconomyHero(fraction, resources, data.getStats());
+                    data.getCreatures().forEach(hero::addCreature);
+                    return hero;
+                }
             }
+            System.err.println("No HeroType found matching display name: " + heroName + " and fraction: " + fractionName);
+        } catch (IllegalArgumentException e) {
+            System.err.println("Invalid fraction name: " + fractionName);
         }
         return null;
     }
 
 
     private List<String> getHeroNamesForFraction(String fractionName) {
+        if (fractionName == null) {
+            return List.of();
+        }
         // Convert fractionName to enum and fetch the hero names
         try {
             EconomyHero.Fraction fraction = EconomyHero.Fraction.valueOf(fractionName.toUpperCase());

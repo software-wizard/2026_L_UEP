@@ -22,7 +22,18 @@ public class Hero implements java.beans.PropertyChangeListener {
     @Setter
     private int spellPower = 1;
 
+    private final java.util.Map<pl.psi.Spells.SpellSchool, Integer> magicMasteryLevels = new java.util.HashMap<>();
+
+    public int getMagicMasteryLevel(pl.psi.Spells.SpellSchool school) {
+        return magicMasteryLevels.getOrDefault(school, 0);
+    }
+
+    public void setMagicMasteryLevel(pl.psi.Spells.SpellSchool school, int level) {
+        magicMasteryLevels.put(school, level);
+    }
+
     @Getter
+    @com.fasterxml.jackson.annotation.JsonIgnore
     private SpellCastingState spellCastingState = new ReadyToCastState();
 
     public Hero(final List< Creature > aCreatures, List<Spell> aSpells)

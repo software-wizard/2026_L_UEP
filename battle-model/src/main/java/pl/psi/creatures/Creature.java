@@ -19,6 +19,7 @@ import pl.psi.Hero;
 import pl.psi.Spells.ActiveSpellEffect;
 import pl.psi.Spells.BuffSpell;
 import pl.psi.Spells.Spell;
+import pl.psi.Spells.SpellImmunity;
 import pl.psi.TurnQueue;
 
 import com.google.common.collect.Range;
@@ -43,7 +44,17 @@ public class Creature implements PropertyChangeListener {
     @JsonIgnore
     private DamageCalculatorIf calculator;
     private final List<ActiveSpellEffect> activeSpellEffects = new ArrayList<>();
+    @Getter
+    private final List<SpellImmunity> magicImmunities = new ArrayList<>();
     private float reduceDemegeFactor;
+
+    public void addImmunity(SpellImmunity immunity) {
+        magicImmunities.add(immunity);
+    }
+
+    public boolean isImmuneTo(Spell spell) {
+        return magicImmunities.stream().anyMatch(immunity -> immunity.isImmune(spell));
+    }
 
     public Creature() {
     }
@@ -112,6 +123,9 @@ public class Creature implements PropertyChangeListener {
 
 
     public void applySpellEffect(Spell spell, int duration) {
+        if (isImmuneTo(spell)) {
+            return;
+        }
         this.getActiveSpellEffects().add(new ActiveSpellEffect(spell, duration));
 
         CreatureStatisticIf modifiedStats;
@@ -177,6 +191,9 @@ public class Creature implements PropertyChangeListener {
     }
 
     public void applyMagicDamage(Spell aDamageSpell, int aSpellPower) {
+        if (isImmuneTo(aDamageSpell)) {
+            return;
+        }
         if (isAlive()) {
             final int magicDamage = getCalculator().calculateMagicDamage(this, aDamageSpell, aSpellPower);
             applyDamage(this, magicDamage);

@@ -9,6 +9,11 @@ import pl.psi.Spells.BuffSpell;
 import pl.psi.Spells.DamageSpell;
 import pl.psi.Spells.DebuffSpell;
 import pl.psi.Spells.Spell;
+import pl.psi.Spells.SpellFactory;
+import pl.psi.Spells.SpellSchool;
+import pl.psi.Spells.SpellImmunity;
+import pl.psi.Spells.FireMagicImmunity;
+import pl.psi.Spells.FireDebuffImmunity;
 import pl.psi.TurnQueue;
 import pl.psi.creatures.Creature;
 
@@ -56,6 +61,22 @@ public class SpellTest {
         h1.castSpell(debuffspell, c1);
 
         assertThat(c1.getAttack()).isEqualTo(5);
+    }
+
+    @Test
+    void debuffSpellShouldClampStatsToMinimumOfOne(){
+        final Creature c1 = createDummyCreature();
+        final Hero h1 = new Hero(List.of(c1), List.of());
+        pl.psi.creatures.CreatureStats statDebuff = pl.psi.creatures.CreatureStats.builder()
+                .attack(15)
+                .armor(10)
+                .build();
+
+        Spell debuffspell = new DebuffSpell("", 1, 1, statDebuff);
+        h1.castSpell(debuffspell, c1);
+
+        assertThat(c1.getAttack()).isEqualTo(1);
+        assertThat(c1.getArmor()).isEqualTo(1);
     }
 
     @Test
@@ -187,5 +208,77 @@ public class SpellTest {
         // Then
         assertThat(target1.getCurrentHp()).isEqualTo(hpBefore1 - 27);
         assertThat(target2.getCurrentHp()).isEqualTo(hpBefore2 - 27);
+    }
+
+    @Test
+    void spellSchoolShouldBeSetCorrectly() {
+        Spell fireball = pl.psi.Spells.SpellFactory.createSpell("Fireball", 1);
+        assertThat(fireball.getSchool()).isEqualTo(pl.psi.Spells.SpellSchool.FIRE);
+        
+        Spell slow = pl.psi.Spells.SpellFactory.createSpell("Slow", 1);
+        assertThat(slow.getSchool()).isEqualTo(pl.psi.Spells.SpellSchool.EARTH);
+    }
+
+    @Test
+    void creatureShouldIgnoreDamageWhenImmuneToSpellSchool() {
+        Creature c = createDummyCreature();
+        c.addImmunity(new pl.psi.Spells.FireMagicImmunity());
+
+        Spell fireball = pl.psi.Spells.SpellFactory.createSpell("Fireball", 1);
+        c.applyMagicDamage(fireball, 2);
+
+        assertThat(c.getCurrentHp()).isEqualTo(100); // unaffected by fire magic
+    }
+
+    private Creature createDummyCreature(int moveRange) {
+        return new Creature.Builder()
+                .statistic(pl.psi.creatures.CreatureStats.builder()
+                        .maxHp(100)
+                        .damage(Range.closed(5, 10))
+                        .attack(10)
+                        .armor(5)
+                        .moveRange(moveRange)
+                        .build())
+                .build();
+    }
+
+    @Test
+    void creatureShouldIgnoreDebuffsWhenImmuneToFireDebuffs() {
+        Creature c = createDummyCreature(10);
+        c.addImmunity(new pl.psi.Spells.FireDebuffImmunity());
+
+        // Slow II is Earth debuff, so it should affect
+        Spell slow = pl.psi.Spells.SpellFactory.createSpell("Slow II", 1);
+        c.applySpellEffect(slow, 3);
+        assertThat(c.getMoveRange()).isEqualTo(8); // reduced by 2
+
+        // A custom fire debuff
+        Spell fireDebuffReal = new DebuffSpell("Burnt Strength", 1, 3,
+                pl.psi.creatures.CreatureStats.builder().attack(5).build(),
+                pl.psi.Spells.SpellSchool.FIRE);
+        c.applySpellEffect(fireDebuffReal, 3);
+        assertThat(c.getAttack()).isEqualTo(10); // unaffected (still 10)
+    }
+
+    @Test
+    void expertMasteryShouldCastBuffOnAllAllies() {
+        Creature c1 = createDummyCreature(10);
+        Creature c2 = createDummyCreature(10);
+        Creature enemy = createDummyCreature(10);
+
+        Hero hero = new Hero(List.of(c1, c2), List.of());
+        Hero enemyHero = new Hero(List.of(enemy), List.of());
+        hero.setMagicMasteryLevel(pl.psi.Spells.SpellSchool.AIR, 3); // Expert Air Magic
+
+        GameEngine engine = new GameEngine(hero, enemyHero);
+
+        // Haste (Speed Boost I) is an Air BuffSpell
+        Spell haste = pl.psi.Spells.SpellFactory.createSpell("Speed Boost I", 1);
+
+        engine.castSpell(haste, new BattlePoint(0, 1)); // cast on c1
+
+        assertThat(c1.getMoveRange()).isEqualTo(12); // c1 boosted
+        assertThat(c2.getMoveRange()).isEqualTo(12); // c2 boosted!
+        assertThat(enemy.getMoveRange()).isEqualTo(10); // enemy NOT boosted
     }
 }

@@ -7,6 +7,7 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 import pl.psi.*;
 import pl.psi.BattleResults.BattleResult;
+import pl.psi.Spells.Spell;
 import pl.psi.Spells.DamageSpell;
 import pl.psi.converter.rewards.BattleRewardService;
 import pl.psi.creatures.*;
@@ -27,6 +28,13 @@ import static pl.psi.hero.skills.SkillName.ARMORER;
 import static pl.psi.hero.skills.SkillName.OFFENCE;
 
 public class EcoBattleConverter {
+
+    private static final Map<pl.psi.hero.skills.SkillName, pl.psi.Spells.SpellSchool> MAGIC_MAP = Map.of(
+            pl.psi.hero.skills.SkillName.FIRE_MAGIC, pl.psi.Spells.SpellSchool.FIRE,
+            pl.psi.hero.skills.SkillName.WATER_MAGIC, pl.psi.Spells.SpellSchool.WATER,
+            pl.psi.hero.skills.SkillName.EARTH_MAGIC, pl.psi.Spells.SpellSchool.EARTH,
+            pl.psi.hero.skills.SkillName.AIR_MAGIC, pl.psi.Spells.SpellSchool.AIR
+    );
 
     public static void startBattle(final EconomyHero aPlayer1, final EconomyHero aPlayer2) {
         try {
@@ -64,7 +72,21 @@ public class EcoBattleConverter {
         final List<Creature> creatures = new ArrayList<>();
         aPlayer1.getCreatures()
                 .forEach(ecoCreature -> creatures.add(convertCreatureWithEffects(ecoCreature, aPlayer1)));
-        return new Hero(creatures, aPlayer1.getSpells().stream().map(s -> new DamageSpell(s.getName(), 1, 1)).collect(Collectors.toList()));
+        
+        List<Spell> spells = aPlayer1.getSpells().stream()
+                .map(s -> pl.psi.Spells.SpellFactory.createSpell(s.getName(), 1))
+                .collect(Collectors.toList());
+        
+        Hero battleHero = new Hero(creatures, spells);
+        battleHero.setSpellPower(aPlayer1.getPower());
+
+        for (pl.psi.hero.skills.AbstractSkill skill : aPlayer1.getSkills()) {
+            pl.psi.Spells.SpellSchool school = MAGIC_MAP.get(skill.getName());
+            if (school != null) {
+                battleHero.setMagicMasteryLevel(school, (int) skill.getFactor());
+            }
+        }
+        return battleHero;
     }
 
     public static void startBankBattle(final EconomyHero aPlayer1, final Map<Point, EconomyCreature> bankEnemy) {
@@ -120,6 +142,7 @@ public class EcoBattleConverter {
 
         CreatureStatisticIf modifiedStats = new ModifiedCreatureStats(baseStats, totalBonus);
 
+        Creature creature;
         if (!ecoHero.getSkills().isEmpty()) {
             float reduceDamageFactor = 0;
             float bonusDamageFactor = 0;
@@ -133,17 +156,28 @@ public class EcoBattleConverter {
                 }
             }
 
-            return new Creature.Builder()
+            creature = new Creature.Builder()
                     .statistic(modifiedStats)
                     .calculator(new ReducedDamageCalculator(reduceDamageFactor, bonusDamageFactor))
                     .amount(ecoCreature.getAmount())
                     .build();
+        } else {
+            creature = new Creature.Builder()
+                    .statistic(modifiedStats)
+                    .amount(ecoCreature.getAmount())
+                    .build();
         }
 
-        return new Creature.Builder()
-                .statistic(modifiedStats)
-                .amount(ecoCreature.getAmount())
-                .build();
+        // Add immunities from hero's artifacts
+        for (pl.psi.hero.artifacts.Artifact artifact : ecoHero.getArtifacts()) {
+            if (artifact.getType() == pl.psi.hero.artifacts.ArtifactType.BREASTPLATE_OF_BRIMSTONE) {
+                creature.addImmunity(new pl.psi.Spells.FireMagicImmunity());
+            } else if (artifact.getType() == pl.psi.hero.artifacts.ArtifactType.CROWN_OF_THE_SUPREME_MAGI) {
+                creature.addImmunity(new pl.psi.Spells.FireDebuffImmunity());
+            }
+        }
+
+        return creature;
     }
 
     private static void settleBattleExperience(final BattleType battleType,

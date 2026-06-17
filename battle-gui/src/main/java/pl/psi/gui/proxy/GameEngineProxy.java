@@ -126,7 +126,7 @@ public class GameEngineProxy extends GameEngine {
 
         if (targetX != -1) {
             try {
-                String encodedSpell = spell.getName().replace(" ", "%20");
+                String encodedSpell = java.net.URLEncoder.encode(spell.getName(), java.nio.charset.StandardCharsets.UTF_8);
                 String url = BASE_URL + "/castSpell?spellName=" + encodedSpell + "&x=" + targetX + "&y=" + targetY;
                 HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).POST(HttpRequest.BodyPublishers.noBody()).build();
                 httpClient.send(req, HttpResponse.BodyHandlers.ofString());
@@ -136,6 +136,20 @@ public class GameEngineProxy extends GameEngine {
             invalidateCache();
         }
         super.castSpell(spell, targetCreature);
+    }
+
+    @Override
+    public void castSpell(Spell spell, BattlePoint targetPoint) {
+        try {
+            String encodedSpell = java.net.URLEncoder.encode(spell.getName(), java.nio.charset.StandardCharsets.UTF_8);
+            String url = BASE_URL + "/castSpell?spellName=" + encodedSpell + "&x=" + targetPoint.getX() + "&y=" + targetPoint.getY();
+            HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).POST(HttpRequest.BodyPublishers.noBody()).build();
+            httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        invalidateCache();
+        super.castSpell(spell, targetPoint);
     }
 
     private void postAction(String endpoint, int x, int y) {

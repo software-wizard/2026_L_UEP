@@ -230,21 +230,54 @@ public class GameEngine {
         }
     }
 
+    public java.util.List<Creature> getSpellTargets(Spell spell, BattlePoint targetPoint) {
+        Hero caster = getCurrentHero();
+        int mastery = caster.getMagicMasteryLevel(spell.getSchool());
+        if (mastery == 3) {
+            if (spell instanceof pl.psi.Spells.BuffSpell) {
+                return caster.getCreatures();
+            } else if (spell instanceof pl.psi.Spells.DebuffSpell) {
+                Hero enemy = (caster == hero1) ? hero2 : hero1;
+                return enemy.getCreatures();
+            }
+        }
+        java.util.List<BattlePoint> areaPoints = spell.getAreaStrategy().getArea(targetPoint);
+        return board.getCreaturesFromPoints(areaPoints);
+    }
+
     public void castSpell(Spell spell, Creature targetCreature) {
         if (isBattleOver()) {
             return;
         }
-        getCurrentHero().castSpell(spell, targetCreature);
+        Hero caster = getCurrentHero();
+        int mastery = caster.getMagicMasteryLevel(spell.getSchool());
+        if (mastery == 3) {
+            if (spell instanceof pl.psi.Spells.BuffSpell) {
+                caster.castSpell(spell, caster.getCreatures());
+            } else if (spell instanceof pl.psi.Spells.DebuffSpell) {
+                Hero enemy = (caster == hero1) ? hero2 : hero1;
+                caster.castSpell(spell, enemy.getCreatures());
+            } else {
+                caster.castSpell(spell, targetCreature);
+            }
+        } else {
+            caster.castSpell(spell, targetCreature);
+        }
         updateBattleResultIfFinished();
         notifySpellCast(spell);
     }
 
     public void castSpell(Spell spell, BattlePoint targetPoint) {
-        java.util.List<BattlePoint> areaPoints = spell.getAreaStrategy().getArea(targetPoint);
-        java.util.List<Creature> affectedCreatures = board.getCreaturesFromPoints(areaPoints);
-
-        getCurrentHero().castSpell(spell, affectedCreatures);
-
+        if (isBattleOver()) {
+            return;
+        }
+        if (spell instanceof pl.psi.Spells.BoardAffectingSpell) {
+            ((pl.psi.Spells.BoardAffectingSpell) spell).castOnBoard(board, targetPoint, getCurrentHero().getSpellPower());
+        } else {
+            java.util.List<Creature> targets = getSpellTargets(spell, targetPoint);
+            getCurrentHero().castSpell(spell, targets);
+        }
+        updateBattleResultIfFinished();
         notifySpellCast(spell);
     }
 

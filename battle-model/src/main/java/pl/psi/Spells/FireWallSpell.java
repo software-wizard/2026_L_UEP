@@ -3,13 +3,13 @@ package pl.psi.Spells;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import pl.psi.BattlePoint;
+import pl.psi.Board;
 import pl.psi.SpecialField;
 import pl.psi.creatures.Creature;
 
 import static pl.psi.SpecialField.FieldName.FIRE_FIELD;
 
-
-public class FireWallSpell extends Spell {
+public class FireWallSpell extends Spell implements BoardAffectingSpell {
 
     private BattlePoint castPosition;
     private int size;
@@ -18,7 +18,7 @@ public class FireWallSpell extends Spell {
 
 
     public FireWallSpell(String name, int spellLevel, BattlePoint castPosition, double power) {
-        super(name, spellLevel);
+        super(name, spellLevel, SpellSchool.FIRE);
 
         this.duration = 2;
         this.power = power;
@@ -28,23 +28,22 @@ public class FireWallSpell extends Spell {
             this.size = 2;
         } else if (spellLevel == 2) {
             this.size = 3;
+        } else {
+            this.size = 2;
         }
-
-        createFireWall(castPosition, fireWallDamageCalculator());
     }
 
-    private void createFireWall(BattlePoint castPosition, double damage) {
+    @Override
+    public void castOnBoard(Board board, BattlePoint targetPoint, int spellPower) {
+        this.castPosition = targetPoint;
         BiMap<BattlePoint, SpecialField> createdFields = HashBiMap.create();
 
         for (int i = 0; i < size; i++) {
-            BattlePoint currentBattlePoint = new BattlePoint(castPosition.getX(), castPosition.getY() + i);
+            BattlePoint currentBattlePoint = new BattlePoint(targetPoint.getX(), targetPoint.getY() + i);
             createdFields.put(currentBattlePoint, new FireWall(2));
         }
-        //nie wiem jak dostać się do planszy w gameengine
-
+        board.addSpecialFieldOpen(createdFields);
     }
-
-
 
     public double fireWallDamageCalculator() {
         double levelBasedDamageBonus;
@@ -69,14 +68,12 @@ public class FireWallSpell extends Spell {
 
     public class FireWall extends SpecialField {
 
-
         int duration;
 
         public FireWall(int duration) {
             super(Color.RED, FIRE_FIELD);
             this.duration = duration;
         }
-
 
         public void doSomething(Creature targetCreature) {
             cast(targetCreature, 1); // Default spell power for triggered field

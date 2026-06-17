@@ -42,4 +42,22 @@ class SkillTest {
 
         assertThrows(IllegalStateException.class, armorerSkill::upgrade);
     }
+
+    @Test
+    void testMagicSkillUpgrade() {
+        MagicSkill fireMagic = new MagicSkill(SkillName.FIRE_MAGIC);
+
+        assertEquals(SkillLevel.BASIC, fireMagic.getLevel());
+        assertEquals(1.0f, fireMagic.getFactor(), 0.01);
+
+        fireMagic.upgrade();
+        assertEquals(SkillLevel.ADVANCED, fireMagic.getLevel());
+        assertEquals(2.0f, fireMagic.getFactor(), 0.01);
+
+        fireMagic.upgrade();
+        assertEquals(SkillLevel.EXPERT, fireMagic.getLevel());
+        assertEquals(3.0f, fireMagic.getFactor(), 0.01);
+
+        assertThrows(IllegalStateException.class, fireMagic::upgrade);
+    }
 }

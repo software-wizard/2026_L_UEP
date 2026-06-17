@@ -180,12 +180,8 @@ public class BattleController {
                     .findFirst()
                     .orElseThrow(() -> new IllegalArgumentException("Spell not found"));
 
-            Optional<Creature> target = this.gameStateService.getGameEngine().getCreature(new BattlePoint(x, y));
-            if (target.isPresent()) {
-                this.gameStateService.getGameEngine().castSpell(spellToCast, target.get());
-                return ResponseEntity.ok("Spell casted.");
-            }
-            return ResponseEntity.badRequest().body("No target.");
+            this.gameStateService.getGameEngine().castSpell(spellToCast, new BattlePoint(x, y));
+            return ResponseEntity.ok("Spell casted.");
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

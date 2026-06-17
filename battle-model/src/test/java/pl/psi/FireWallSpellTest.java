@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import pl.psi.Spells.FireWallSpell;
@@ -14,7 +13,6 @@ import pl.psi.creatures.Creature;
 import pl.psi.creatures.CreatureStats;
 import pl.psi.creatures.CreatureStatisticIf;
 
-@Disabled
 class FireWallSpellTest {
 
     @Test
@@ -33,10 +31,12 @@ class FireWallSpellTest {
         final Board testBoard = new Board( c1, c2 );
 
         FireWallSpell wall = new FireWallSpell("", 1, new BattlePoint(1,2), 2);
+        wall.castOnBoard(testBoard, new BattlePoint(1,2), 2);
 
-        testBoard.move(creature, new BattlePoint(3,3));
+        // Move directly to the firewall tile so it triggers the doSomething/cast action
+        testBoard.move(creature, new BattlePoint(1,2));
 
-        assertThat(creature.getCurrentHp()).isEqualTo(70);
+        assertThat(creature.getCurrentHp()).isEqualTo(80);
     }
 
     @Test
