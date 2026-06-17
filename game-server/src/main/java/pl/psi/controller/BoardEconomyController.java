@@ -44,7 +44,7 @@ public class BoardEconomyController {
 
     private Map<Point, MapObjectIf> generateMapBlueprint(String mapName, EconomyHero aHero1, EconomyHero aHero2) {
         if ("DefaultMap".equals(mapName)) {
-            return new HashMap<>(Map.ofEntries(
+            return new HashMap<>(Map.ofEntries( //podmien implementacje zeby bylo mozna zmienic jej stan
                     Map.entry(new Point(4,4), new Artifact(ArtifactType.SWORD_OF_HELLFIRE)),
                     Map.entry(new Point(17,1), new Town(aHero1)),
                     Map.entry(new Point(1,7), new Town(aHero2)),
