@@ -52,6 +52,7 @@ public class EcoBattleConverter {
             Scene scene = new Scene(loader.load());
             final Stage aStage = new Stage();
             aStage.setScene(scene);
+            aStage.setTitle("Mapa bitwy");
             aStage.setX(5);
             aStage.setY(5);
             aStage.show();

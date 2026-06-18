@@ -1,6 +1,7 @@
 package pl.psi.gui.startchoice;
 
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.stage.Stage;
 import lombok.Setter;
@@ -15,6 +16,8 @@ import java.util.function.BiConsumer;
 
 public class HeroSelectionController {
 
+    @FXML
+    Button start;
     @FXML private ComboBox<String> fraction1Combo;
     @FXML private ComboBox<String> fraction2Combo;
     @FXML private ComboBox<String> hero1Combo;

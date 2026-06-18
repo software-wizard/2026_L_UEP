@@ -26,6 +26,7 @@
             <ComboBox fx:id="hero2Combo" prefWidth="150" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
             <Button text="Start Game"
+                    fx:id="start"
                     onAction="#onStartGameClicked"
                     GridPane.rowIndex="4" GridPane.columnIndex="1"
                     GridPane.halignment="RIGHT"

@@ -51,6 +51,7 @@ public class EconomyBoardController implements PropertyChangeListener {
             for (int y = 0; y < 9; y++) {
                 Point point = new Point(x, y);
                 EconomyTile tile = new EconomyTile("");
+                tile.setId("tile_" + x + "_" + y);
                 renderTileContent(point, tile);
                 bindTileEvents(point, tile);
                 gridMap.add(tile, x, y);
@@ -62,10 +63,12 @@ public class EconomyBoardController implements PropertyChangeListener {
     private void renderTileContent(Point point, EconomyTile tile) {
         if (gameEngine.isCurrentHero(point)) {
             tile.setImage("/heroes/hero1.png");
+            tile.setId("hero");
         }
 
         if (gameEngine.isHero(point) && !gameEngine.isCurrentHero(point)) {
             tile.setName("Other Hero");
+            tile.setId("otherHero");
         }
         String mapObjectPath = gameEngine.getMapObjectPath(point);
         if (mapObjectPath != null) {

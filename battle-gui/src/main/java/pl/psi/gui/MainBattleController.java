@@ -32,7 +32,7 @@ public class MainBattleController implements PropertyChangeListener {
     @FXML
     private GridPane gridMap;
     @FXML
-    private Button passButton;
+    private Button passButtonBattle;
     @FXML
     private Button spellButton;
 
@@ -50,7 +50,7 @@ public class MainBattleController implements PropertyChangeListener {
         refreshGui();
         gameEngine.addObserver(this);
 
-        passButton.setOnMouseClicked(e -> pass());
+        passButtonBattle.setOnMouseClicked(e -> pass());
 
         if (spellButton != null) {
             spellButton.setOnMouseClicked(e -> spellUIManager.openSpellDialog());
@@ -65,6 +65,7 @@ public class MainBattleController implements PropertyChangeListener {
                 BattlePoint currentBattlePoint = new BattlePoint(x, y);
                 Optional<Creature> creature = gameEngine.getCreature(currentBattlePoint);
                 final MapTile mapTile = new MapTile("");
+                mapTile.setId("battle_tile" + "_" + x + "_" + y );
                 creature.ifPresent(c -> mapTile.setName(c.toString()));
                 if (gameEngine.isCurrentCreature(currentBattlePoint)) {
                     mapTile.setBackground(Color.GREENYELLOW);
