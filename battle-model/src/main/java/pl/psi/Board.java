@@ -106,6 +106,7 @@ public class Board {
         map.inverse().remove(aCreature);
         map.put(aPoint, aCreature);
         aCreature.reduceMovePoints(distance);
+        aCreature.onMove(); // releases root if this creature had one applied
     }
 
     boolean canMove(final Creature aCreature, final BattlePoint aBattlePoint) {

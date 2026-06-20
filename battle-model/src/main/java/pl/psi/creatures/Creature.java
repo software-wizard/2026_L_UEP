@@ -9,9 +9,7 @@ import java.util.Random;
 
 import lombok.AccessLevel;
 import lombok.Setter;
-import pl.psi.Hero;
 import pl.psi.Spells.ActiveSpellEffect;
-import pl.psi.creatures.MovementType;
 import pl.psi.Spells.BuffSpell;
 import pl.psi.Spells.Spell;
 import pl.psi.TurnQueue;
@@ -20,9 +18,6 @@ import com.google.common.collect.Range;
 
 import lombok.Getter;
 
-/**
- * TODO: Describe this class (The first line - until the first dot - will interpret as the brief description).
- */
 @Getter
 public class Creature implements PropertyChangeListener {
     private CreatureStatisticIf stats;
@@ -39,6 +34,10 @@ public class Creature implements PropertyChangeListener {
     private float reduceDemegeFactor;
     private int remainingMovePoints;
 
+    // Rooting: Treeman/Ent tracks which creature it has rooted.
+    // Root lifts when this creature moves or dies.
+    private Creature rootedCreature = null;
+
     Creature() {
     }
 
@@ -54,13 +53,67 @@ public class Creature implements PropertyChangeListener {
     }
 
     public void attack(final Creature aDefender) {
-        if (isAlive()) {
-            final int damage = getCalculator().calculateDamage(this, aDefender);
-            applyDamage(aDefender, damage);
-            if (canCounterAttack(aDefender)) {
-                counterAttack(aDefender);
-            }
+        if (!isAlive()) return;
+
+        performSingleAttack(aDefender);
+
+        // Double attacker (High Elf) strikes again if defender survived.
+        // Ranged units never provoke counter-attack — handled inside canCounterAttack().
+        if (stats.isDoubleAttacker() && aDefender.isAlive()) {
+            performSingleAttack(aDefender);
         }
+    }
+
+    private void performSingleAttack(final Creature aDefender) {
+        final int damage = getCalculator().calculateDamage(this, aDefender);
+        applyDamage(aDefender, damage);
+
+        // Apply root after hit if this is a Treeman/Ent and defender survived
+        if (isRooter() && aDefender.isAlive()) {
+            applyRoot(aDefender);
+        }
+
+        if (canCounterAttack(aDefender)) {
+            counterAttack(aDefender);
+        }
+    }
+
+    // Called by Board when this creature moves — releases the root
+    public void onMove() {
+        releaseRoot();
+    }
+
+    // Called by GameEngine when this creature dies — releases the root
+    public void onDeath() {
+        releaseRoot();
+    }
+
+    private void applyRoot(Creature aTarget) {
+        // Release any previous root before applying a new one
+        releaseRoot();
+        rootedCreature = aTarget;
+        aTarget.remainingMovePoints = 0;
+    }
+
+    private void releaseRoot() {
+        if (rootedCreature != null && rootedCreature.isAlive()) {
+            rootedCreature.remainingMovePoints = rootedCreature.stats.getMoveRange();
+        }
+        rootedCreature = null;
+    }
+
+    // Treeman and Ent are rooters — identified by stat name
+    public boolean isRooter() {
+        String name = stats.getName();
+        return name.equals("Treeman") || name.equals("Ent");
+    }
+
+    public boolean isRanged() {
+        return stats.isRanged();
+    }
+
+    public boolean isDoubleAttacker() {
+        return stats.isDoubleAttacker();
     }
 
     public boolean isAlive() {
@@ -86,6 +139,8 @@ public class Creature implements PropertyChangeListener {
     }
 
     private boolean canCounterAttack(final Creature aDefender) {
+        // Ranged attackers never receive a counter-attack
+        if (isRanged()) return false;
         return aDefender.getCounterAttackCounter() > 0 && aDefender.getCurrentHp() > 0;
     }
 

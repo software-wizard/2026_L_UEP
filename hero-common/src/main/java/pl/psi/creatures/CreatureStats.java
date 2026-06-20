@@ -22,6 +22,16 @@ public class CreatureStats implements CreatureStatisticIf {
     private final boolean isUpgraded;
     @Builder.Default
     private final MovementType movementType = MovementType.WALKING;
+    @Builder.Default
+    private final boolean ranged = false;
+    @Builder.Default
+    private final boolean doubleAttacker = false;
+
+    @Override
+    public boolean isRanged() { return ranged; }
+
+    @Override
+    public boolean isDoubleAttacker() { return doubleAttacker; }
 
     public CreatureStats(CreatureStats other) {
         this.name = other.name;
@@ -34,5 +44,7 @@ public class CreatureStats implements CreatureStatisticIf {
         this.description = other.description;
         this.isUpgraded = other.isUpgraded;
         this.movementType = other.movementType;
+        this.ranged = other.ranged;
+        this.doubleAttacker = other.doubleAttacker;
     }
 }

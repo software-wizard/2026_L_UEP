@@ -9,9 +9,6 @@ import java.beans.PropertyChangeSupport;
 import java.util.Map;
 import java.util.Optional;
 
-/**
- * TODO: Describe this class (The first line - until the first dot - will interpret as the brief description).
- */
 public class GameEngine {
 
     public static final String CREATURE_MOVED = "CREATURE_MOVED";
@@ -41,11 +38,13 @@ public class GameEngine {
                     attacker.attack(defender);
 
                     if (!defender.isAlive()) {
+                        defender.onDeath(); // releases root if defender had rooted someone
                         board.removeCreature(defender);
                         removeDeadCreature(defender);
                     }
 
                     if (!attacker.isAlive()) {
+                        attacker.onDeath(); // releases root if attacker had rooted someone
                         board.removeCreature(attacker);
                         removeDeadCreature(attacker);
                     }
@@ -76,10 +75,6 @@ public class GameEngine {
     public void move(final BattlePoint aBattlePoint) {
         board.move(turnQueue.getCurrentCreature(), aBattlePoint);
         observerSupport.firePropertyChange(CREATURE_MOVED, null, aBattlePoint);
-        // Advance the turn after moving, same as attack() does.
-        // Without this the GUI redraws with the same creature still active but a
-        // reduced remainingMovePoints, so the highlighted reachable area visually
-        // shrinks mid-turn and mismatches what was shown before the click.
         pass();
     }
 
@@ -96,12 +91,25 @@ public class GameEngine {
         turnQueue.addObserver(aObserver);
     }
 
+    // Melee attack: must be adjacent (distance < 2)
     public boolean canAttack(final BattlePoint aBattlePoint) {
-        double distance = board.getPosition(turnQueue.getCurrentCreature())
-                .distance(aBattlePoint);
-        return board.getCreature(aBattlePoint)
-                .isPresent()
+        Creature current = turnQueue.getCurrentCreature();
+        if (current.isRanged()) return false; // ranged units use canShoot instead
+        double distance = board.getPosition(current).distance(aBattlePoint);
+        return board.getCreature(aBattlePoint).isPresent()
                 && distance < 2 && distance > 0;
+    }
+
+    // Ranged attack: any enemy on the board, no distance limit
+    public boolean canShoot(final BattlePoint aBattlePoint) {
+        Creature current = turnQueue.getCurrentCreature();
+        if (!current.isRanged()) return false;
+        Optional<Creature> target = board.getCreature(aBattlePoint);
+        if (target.isEmpty()) return false;
+        // Cannot shoot own creatures — check target belongs to the enemy
+        BattlePoint currentPos = board.getPosition(current);
+        if (currentPos.equals(aBattlePoint)) return false;
+        return true;
     }
 
     public boolean isCurrentCreature(BattlePoint aBattlePoint) {

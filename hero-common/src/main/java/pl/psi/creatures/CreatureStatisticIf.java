@@ -13,4 +13,6 @@ public interface CreatureStatisticIf {
     String getDescription();
     boolean isUpgraded();
     MovementType getMovementType();
+    boolean isRanged();
+    boolean isDoubleAttacker();
 }

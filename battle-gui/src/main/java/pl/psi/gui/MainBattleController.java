@@ -14,7 +14,6 @@ import pl.psi.creatures.Creature;
 import pl.psi.gui.SpellGUI.SpellCastingManager;
 import pl.psi.gui.SpellGUI.SpellUIManager;
 
-
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.Map;
@@ -51,38 +50,41 @@ public class MainBattleController implements PropertyChangeListener {
     }
 
     private void refreshGui() {
-        gridMap.getChildren()
-                .clear();
+        gridMap.getChildren().clear();
         for (int x = 0; x < 15; x++) {
             for (int y = 0; y < 10; y++) {
                 BattlePoint currentBattlePoint = new BattlePoint(x, y);
                 Optional<Creature> creature = gameEngine.getCreature(currentBattlePoint);
                 final MapTile mapTile = new MapTile("");
                 creature.ifPresent(c -> mapTile.setName(c.toString()));
+
                 if (gameEngine.isCurrentCreature(currentBattlePoint)) {
                     mapTile.setBackground(Color.GREENYELLOW);
                 }
                 if (gameEngine.canMove(currentBattlePoint)) {
                     mapTile.setBackground(Color.GREY);
                     mapTile.addEventHandler(MouseEvent.MOUSE_CLICKED,
-                            (e) -> {
-                                gameEngine.move(currentBattlePoint);
-                            });
+                            (e) -> gameEngine.move(currentBattlePoint));
                 }
+                // Melee attack — red
                 if (gameEngine.canAttack(currentBattlePoint)) {
                     mapTile.setBackground(Color.RED);
                     mapTile.addEventHandler(MouseEvent.MOUSE_CLICKED,
-                            (e) -> {
-                                gameEngine.attack(currentBattlePoint);
-                            });
+                            (e) -> gameEngine.attack(currentBattlePoint));
                 }
+                // Ranged attack — orange (distinct from melee red)
+                if (gameEngine.canShoot(currentBattlePoint)) {
+                    mapTile.setBackground(Color.ORANGE);
+                    mapTile.addEventHandler(MouseEvent.MOUSE_CLICKED,
+                            (e) -> gameEngine.attack(currentBattlePoint));
+                }
+
                 SpecialField specialField = gameEngine.getSpecialFields().get(currentBattlePoint);
                 if (specialField != null) {
                     mapTile.setBackground(getColor(specialField));
                     mapTile.setName(getFieldName(specialField).toString());
-                    mapTile.addEventHandler(MouseEvent.MOUSE_CLICKED, (e) -> {
-                        gameEngine.interact(currentBattlePoint);
-                    });
+                    mapTile.addEventHandler(MouseEvent.MOUSE_CLICKED,
+                            (e) -> gameEngine.interact(currentBattlePoint));
                 }
 
                 if (spellManager.isActive() && creature.isPresent()) {
@@ -97,22 +99,16 @@ public class MainBattleController implements PropertyChangeListener {
     }
 
     private Color getColor(SpecialField specialField) {
-        if (specialField.getColor() == SpecialField.Color.BROWN) {
-            return Color.BROWN;
-        } else if (specialField.getColor() == SpecialField.Color.CYAN) {
-            return Color.CYAN;
-        } else if (specialField.getColor() == SpecialField.Color.YELLOW) {
-            return Color.YELLOW;
-        } else if (specialField.getColor() == SpecialField.Color.ORANGE) {
-            return Color.ORANGE;
-        } else if (specialField.getColor() == SpecialField.Color.GRAY) {
-            return Color.GRAY;
-        }
+        if (specialField.getColor() == SpecialField.Color.BROWN) return Color.BROWN;
+        else if (specialField.getColor() == SpecialField.Color.CYAN) return Color.CYAN;
+        else if (specialField.getColor() == SpecialField.Color.YELLOW) return Color.YELLOW;
+        else if (specialField.getColor() == SpecialField.Color.ORANGE) return Color.ORANGE;
+        else if (specialField.getColor() == SpecialField.Color.GRAY) return Color.GRAY;
         return null;
     }
 
     private SpecialField.FieldName getFieldName(SpecialField specialField) {
-       return specialField.getFieldName();
+        return specialField.getFieldName();
     }
 
     @Override

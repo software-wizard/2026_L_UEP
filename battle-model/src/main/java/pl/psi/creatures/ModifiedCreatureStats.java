@@ -61,4 +61,14 @@ public class ModifiedCreatureStats implements CreatureStatisticIf {
     public MovementType getMovementType() {
         return baseStats.getMovementType();
     }
+
+    @Override
+    public boolean isRanged() {
+        return baseStats.isRanged();
+    }
+
+    @Override
+    public boolean isDoubleAttacker() {
+        return baseStats.isDoubleAttacker();
+    }
 }
