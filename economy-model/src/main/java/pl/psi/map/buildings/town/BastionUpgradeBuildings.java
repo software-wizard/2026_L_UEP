@@ -153,14 +153,16 @@ public enum BastionUpgradeBuildings implements BuildingType {
                     // the base dwelling of the SAME tier (same base/upgraded creature pair).
                     if (b.getBaseCreature() == creature) {
                         return b.getPrerequisites().stream()
-                                .noneMatch(p -> p instanceof BastionUpgradeBuildings other
-                                        && other.getBaseCreature() == b.getBaseCreature()
+                                .filter(p -> p instanceof BastionUpgradeBuildings)
+                                .map(p -> (BastionUpgradeBuildings) p)
+                                .noneMatch(other -> other.getBaseCreature() == b.getBaseCreature()
                                         && other.getUpgradedCreature() == b.getUpgradedCreature());
                     }
                     if (b.getUpgradedCreature() == creature) {
                         return b.getPrerequisites().stream()
-                                .anyMatch(p -> p instanceof BastionUpgradeBuildings other
-                                        && other.getBaseCreature() == b.getBaseCreature()
+                                .filter(p -> p instanceof BastionUpgradeBuildings)
+                                .map(p -> (BastionUpgradeBuildings) p)
+                                .anyMatch(other -> other.getBaseCreature() == b.getBaseCreature()
                                         && other.getUpgradedCreature() == b.getUpgradedCreature());
                     }
                     return false;
