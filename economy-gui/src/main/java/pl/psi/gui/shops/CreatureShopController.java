@@ -61,6 +61,7 @@ public class CreatureShopController implements PropertyChangeListener
         heroStateHBox.getChildren()
                 .clear();
 
+
         final VBox creatureShop = new VBox();
 
         if (economyEngine.getHero().getFraction() == EconomyHero.Fraction.BASTION) {
@@ -72,6 +73,13 @@ public class CreatureShopController implements PropertyChangeListener
 
                 CreatureButton baseButton = new CreatureButton(this, factory, false, i);
                 CreatureButton upgradedButton = new CreatureButton(this, factory, true, i);
+
+                System.out.println("Looking up base creature: " + base.getStats());
+                BastionUpgradeBuildings.getBuildingForCreature(base.getStats())
+                        .ifPresentOrElse(
+                                building -> System.out.println("Found building: " + building + ", built? " + town.hasBuilt(building)),
+                                () -> System.out.println("No building found for " + base.getStats())
+                        );
 
                 BastionUpgradeBuildings.getBuildingForCreature(base.getStats())
                         .ifPresentOrElse(
