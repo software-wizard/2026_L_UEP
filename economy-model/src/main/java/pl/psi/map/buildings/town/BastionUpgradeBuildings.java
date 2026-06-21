@@ -147,10 +147,22 @@ public enum BastionUpgradeBuildings implements BuildingType {
         return Arrays.stream(values())
                 .filter(b -> b.getBaseCreature() == creature || b.getUpgradedCreature() == creature)
                 .filter(b -> {
-                    if (b.getBaseCreature() == creature && b.getPrerequisites().stream()
-                            .noneMatch(p -> p instanceof BastionUpgradeBuildings)) return true;
-                    if (b.getUpgradedCreature() == creature && b.getPrerequisites().stream()
-                            .anyMatch(p -> p instanceof BastionUpgradeBuildings)) return true;
+                    // Base creature -> the dwelling whose prerequisites do NOT include
+                    // its own upgraded counterpart (i.e. this is the tier's first building).
+                    // Upgraded creature -> the dwelling that IS prerequisite-chained to
+                    // the base dwelling of the SAME tier (same base/upgraded creature pair).
+                    if (b.getBaseCreature() == creature) {
+                        return b.getPrerequisites().stream()
+                                .noneMatch(p -> p instanceof BastionUpgradeBuildings other
+                                        && other.getBaseCreature() == b.getBaseCreature()
+                                        && other.getUpgradedCreature() == b.getUpgradedCreature());
+                    }
+                    if (b.getUpgradedCreature() == creature) {
+                        return b.getPrerequisites().stream()
+                                .anyMatch(p -> p instanceof BastionUpgradeBuildings other
+                                        && other.getBaseCreature() == b.getBaseCreature()
+                                        && other.getUpgradedCreature() == b.getUpgradedCreature());
+                    }
                     return false;
                 })
                 .findFirst();
