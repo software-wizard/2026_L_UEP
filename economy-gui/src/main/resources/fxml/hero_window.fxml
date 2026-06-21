@@ -5,7 +5,7 @@
 <?import javafx.geometry.Insets?>
 
 <VBox spacing="10" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1"
-      fx:controller="pl.psi.gui.hero.HeroWindowController" prefWidth="300" prefHeight="400">
+      fx:controller="pl.psi.gui.hero.HeroWindowController" prefWidth="380" prefHeight="620">
     <padding>
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
@@ -36,13 +36,26 @@
         <Label text="Knowledge:" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
         <Label fx:id="knowledgeLabel" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
 
-        <Label text="Movement:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
-        <Label fx:id="movementLabel" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+        <Label text="Base movement:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+        <Label fx:id="baseMovementLabel" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+        <Label text="Effective movement:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+        <Label fx:id="effectiveMovementLabel" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+
+        <Label text="Remaining moves:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+        <Label fx:id="remainingMovesLabel" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+
+        <Label text="Base exp reward:" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+        <Label fx:id="baseExpRewardLabel" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+
+        <Label text="Effective exp reward:" GridPane.rowIndex="10" GridPane.columnIndex="0"/>
+        <Label fx:id="effectiveExpRewardLabel" GridPane.rowIndex="10" GridPane.columnIndex="1"/>
     </GridPane>
 
     <Separator/>
 
-    <Label text="Skills" style="-fx-font-weight: bold;"/>
+    <Label text="Secondary skills" style="-fx-font-weight: bold;"/>
     <ListView fx:id="skillsListView" VBox.vgrow="ALWAYS"/>
 
+    <Button fx:id="testLevelUpButton" text="Test level up" onAction="#onTestLevelUpClicked"/>
 </VBox>

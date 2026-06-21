@@ -15,9 +15,15 @@ public class SkillChoiceController {
 
     private EconomyHero hero;
     private List<AbstractSkill> options;
+    private Runnable onSkillSelected;
 
     public void init(EconomyHero hero) {
+        init(hero, null);
+    }
+
+    public void init(EconomyHero hero, Runnable onSkillSelected) {
         this.hero = hero;
+        this.onSkillSelected = onSkillSelected;
         this.options = hero.getPossibleSkills();
 
         if (options.size() >= 1) {
@@ -53,13 +59,21 @@ public class SkillChoiceController {
     @FXML
     private void onSkill1Clicked() {
         hero.upgradeSkill(options.get(0));
+        notifySkillSelected();
         close();
     }
 
     @FXML
     private void onSkill2Clicked() {
         hero.upgradeSkill(options.get(1));
+        notifySkillSelected();
         close();
+    }
+
+    private void notifySkillSelected() {
+        if (onSkillSelected != null) {
+            onSkillSelected.run();
+        }
     }
 
     private void close() {

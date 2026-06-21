@@ -13,7 +13,7 @@ import pl.psi.creatures.*;
 import pl.psi.economy.Point;
 import pl.psi.gui.MainBattleController;
 import pl.psi.hero.EconomyHero;
-import pl.psi.hero.skills.AbstractSkill;
+import pl.psi.hero.skills.HeroStatModifierManager;
 import pl.psi.converter.rewards.BattleType;
 
 import java.io.IOException;
@@ -23,10 +23,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static pl.psi.hero.skills.SkillName.ARMORER;
-import static pl.psi.hero.skills.SkillName.OFFENCE;
-
 public class EcoBattleConverter {
+    private static final HeroStatModifierManager HERO_STAT_MODIFIER_MANAGER = new HeroStatModifierManager();
 
     public static void startBattle(final EconomyHero aPlayer1, final EconomyHero aPlayer2) {
         try {
@@ -120,28 +118,11 @@ public class EcoBattleConverter {
 
         CreatureStatisticIf modifiedStats = new ModifiedCreatureStats(baseStats, totalBonus);
 
-        if (!ecoHero.getSkills().isEmpty()) {
-            float reduceDamageFactor = 0;
-            float bonusDamageFactor = 0;
-            ArrayList<AbstractSkill> skills = new ArrayList<>(ecoHero.getSkills());
-
-            for (AbstractSkill skill : skills) {
-                if (skill.getName() == ARMORER) {
-                    reduceDamageFactor = skill.getFactor();
-                } else if (skill.getName() == OFFENCE) {
-                    bonusDamageFactor = skill.getFactor();
-                }
-            }
-
-            return new Creature.Builder()
-                    .statistic(modifiedStats)
-                    .calculator(new ReducedDamageCalculator(reduceDamageFactor, bonusDamageFactor))
-                    .amount(ecoCreature.getAmount())
-                    .build();
-        }
-
+        float reduceDamageFactor = HERO_STAT_MODIFIER_MANAGER.getDamageReductionFactor(ecoHero);
+        float bonusDamageFactor = HERO_STAT_MODIFIER_MANAGER.getDamageBonusFactor(ecoHero);
         return new Creature.Builder()
                 .statistic(modifiedStats)
+                .calculator(new ReducedDamageCalculator(reduceDamageFactor, bonusDamageFactor))
                 .amount(ecoCreature.getAmount())
                 .build();
     }

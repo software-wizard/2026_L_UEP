@@ -1,16 +1,20 @@
 package pl.psi.hero;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
+import java.lang.reflect.Field;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
 
 import pl.psi.converter.EcoBattleConverter;
 import pl.psi.creatures.Creature;
+import pl.psi.creatures.DamageCalculatorIf;
 import pl.psi.creatures.EconomyNecropolisFactory;
-import pl.psi.hero.artifacts.Artifact;
-import pl.psi.hero.artifacts.ArtifactType;
+import pl.psi.creatures.ReducedDamageCalculator;
+import pl.psi.hero.skills.impl.ArmorerSkill;
+import pl.psi.hero.skills.impl.OffenceSkill;
 import pl.psi.map.MapObjectIf;
 import pl.psi.map.resources.Resources;
 
@@ -71,16 +75,10 @@ class EcoBattleConverterTest {
     }
 
     @Test
-    void shouldConvertArtifactEffectsToCreatureBonuses() {
+    void shouldAddHeroAttackAndDefenseToCreatureStatistics() {
         var hero = new EconomyHero(EconomyHero.Fraction.NECROPOLIS,
                 new Resources(100, 100, 100, 100, 100, 100, 100),
-                new Statistics(1, 1, 1, 1));
-
-        Artifact artifact = new Artifact(ArtifactType.SWORD_OF_HELLFIRE);
-        hero.addArtifact(artifact);
-
-        assertEquals(3, hero.getTotalStatistics().getAttack());
-        assertEquals(4, hero.getTotalStatistics().getDefense());
+                new Statistics(3, 4, 1, 1));
 
         EconomyNecropolisFactory factory = new EconomyNecropolisFactory();
         var ecoCreature = factory.create(false, 1, 10);
@@ -94,11 +92,33 @@ class EcoBattleConverterTest {
                 ecoCreature, hero
         );
 
-        int expectedAttack = baseCreature.getAttack() + hero.getTotalStatistics().getAttack();
-        int expectedDefense = baseCreature.getArmor() + hero.getTotalStatistics().getDefense();
-
-        assertEquals(expectedAttack, creatureWithBonuses.getAttack());
-        assertEquals(expectedDefense, creatureWithBonuses.getArmor());
+        assertEquals(8, creatureWithBonuses.getAttack());
+        assertEquals(8, creatureWithBonuses.getArmor());
     }
 
+    @Test
+    void convertedCreatureUsesCombatSkillFactorsFromManager() throws Exception {
+        EconomyHero hero = new EconomyHero(
+                EconomyHero.Fraction.NECROPOLIS,
+                new Resources(0, 0, 0, 0, 0, 0, 0),
+                new Statistics(0, 0, 0, 0)
+        );
+        hero.upgradeSkill(new OffenceSkill());
+        hero.upgradeSkill(new ArmorerSkill());
+
+        EconomyNecropolisFactory factory = new EconomyNecropolisFactory();
+        var economyCreature = factory.create(false, 1, 1);
+        Creature converted = EcoBattleConverter.convertCreatureWithEffects(economyCreature, hero);
+        DamageCalculatorIf calculator = converted.getCalculator();
+
+        assertTrue(calculator instanceof ReducedDamageCalculator);
+        assertEquals(0.1f, readFactor(calculator, "reduceDamageFactor"), 0.0001f);
+        assertEquals(0.1f, readFactor(calculator, "bonusAttackFactor"), 0.0001f);
+    }
+
+    private float readFactor(DamageCalculatorIf calculator, String fieldName) throws Exception {
+        Field field = ReducedDamageCalculator.class.getDeclaredField(fieldName);
+        field.setAccessible(true);
+        return field.getFloat(calculator);
+    }
 }

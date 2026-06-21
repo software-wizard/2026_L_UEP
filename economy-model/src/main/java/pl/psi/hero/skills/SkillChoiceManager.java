@@ -51,21 +51,14 @@ public class SkillChoiceManager {
 
         for (AbstractSkill skill : heroSkills) {
             learnedSkillNames.add(skill.getName());
+            if (skill.getLevel() != SkillLevel.EXPERT && upgradeCandidateNames.add(skill.getName())) {
+                int weight = probabilityTable.getWeight(heroClass, skill.getName());
+                upgradeCandidates.add(new WeightedSkillCandidate(skill.getName(), Math.max(weight, 1)));
+            }
         }
 
         for (SkillName skillName : skillRegistry.getAvailableSkillNames()) {
-            Optional<AbstractSkill> existing = heroSkills.stream()
-                    .filter(skill -> skill.getName().equals(skillName))
-                    .findFirst();
-
-            if (existing.isPresent()) {
-                if (existing.get().getLevel() != SkillLevel.EXPERT) {
-                    if (upgradeCandidateNames.add(skillName)) {
-                        int weight = probabilityTable.getWeight(heroClass, skillName);
-                        upgradeCandidates.add(new WeightedSkillCandidate(skillName, Math.max(weight, 1)));
-                    }
-                }
-            } else if (learnedSkillNames.size() < MAX_SKILLS) {
+            if (!learnedSkillNames.contains(skillName) && learnedSkillNames.size() < MAX_SKILLS) {
                 int weight = probabilityTable.getWeight(heroClass, skillName);
                 if (weight > 0 && newCandidateNames.add(skillName)) {
                     newCandidates.add(new WeightedSkillCandidate(skillName, weight));
@@ -76,9 +69,22 @@ public class SkillChoiceManager {
         List<SkillName> selectedSkillNames = selectSkillNames(upgradeCandidates, newCandidates);
         List<AbstractSkill> choices = new ArrayList<>();
         for (SkillName skillName : selectedSkillNames) {
-            choices.add(skillFactory.create(skillName));
+            Optional<AbstractSkill> existing = heroSkills.stream()
+                    .filter(skill -> skill.getName().equals(skillName))
+                    .findFirst();
+            SkillLevel choiceLevel = existing
+                    .map(skill -> getNextLevel(skill.getLevel()))
+                    .orElse(SkillLevel.BASIC);
+            choices.add(skillFactory.create(skillName, choiceLevel));
         }
         return choices;
+    }
+
+    private SkillLevel getNextLevel(SkillLevel currentLevel) {
+        if (currentLevel == SkillLevel.BASIC) {
+            return SkillLevel.ADVANCED;
+        }
+        return SkillLevel.EXPERT;
     }
 
     private List<SkillName> selectSkillNames(List<WeightedSkillCandidate> upgradeCandidates, List<WeightedSkillCandidate> newCandidates) {

@@ -64,14 +64,6 @@ public class EconomyBoardController implements PropertyChangeListener {
     }
 
     private void renderTileContent(Point point, EconomyTile tile) {
-        if (gameEngine.isCurrentHero(point)) {
-            tile.setImage("/heroes/hero1.png");
-        }
-
-        if (gameEngine.isHero(point) && !gameEngine.isCurrentHero(point)) {
-            tile.setName("Other Hero");
-        }
-
         gameEngine.getMapObject(point).ifPresent(mapObject -> {tile.setImage(mapObject.getPath());});
 
         if (gameEngine.canMove(point)) {
@@ -80,6 +72,10 @@ public class EconomyBoardController implements PropertyChangeListener {
             tile.setBackground(Color.RED);
         } else if (gameEngine.canInteract(point)) {
             tile.setBackground(Color.YELLOW);
+        }
+
+        if (gameEngine.isHero(point)) {
+            tile.setHero(gameEngine.isCurrentHero(point));
         }
     }
 
@@ -117,6 +113,15 @@ public class EconomyBoardController implements PropertyChangeListener {
             });
         }
 
+        if (gameEngine.isCurrentHero(point)
+                && !gameEngine.canInteract(point)
+                && !gameEngine.canEnter(point)) {
+            tile.setOnMouseClicked(e -> {
+                if (e.getButton() == MouseButton.PRIMARY) {
+                    showHeroWindow();
+                }
+            });
+        }
     }
 
     private void updateDisplay(){

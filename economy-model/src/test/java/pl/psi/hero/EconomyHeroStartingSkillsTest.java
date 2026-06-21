@@ -59,6 +59,31 @@ class EconomyHeroStartingSkillsTest {
     }
 
     @Test
+    void namedStartingSkillCanUpgradeFromAdvancedToExpert() {
+        EconomyHero hero = heroWithStartingSkills(List.of(
+                new HeroStartingSkill(SkillName.NECROMANCY, SkillLevel.BASIC)
+        ));
+
+        hero.upgradeSkill(new NamedSkill(SkillName.NECROMANCY, SkillLevel.BASIC));
+        hero.upgradeSkill(new NamedSkill(SkillName.NECROMANCY, SkillLevel.BASIC));
+
+        assertEquals(1, hero.getSkills().size());
+        assertEquals(SkillLevel.EXPERT, getSkillLevel(hero, SkillName.NECROMANCY));
+    }
+
+    @Test
+    void addingExpertNamedSkillAgainDoesNotCreateDuplicate() {
+        EconomyHero hero = heroWithStartingSkills(List.of(
+                new HeroStartingSkill(SkillName.NECROMANCY, SkillLevel.EXPERT)
+        ));
+
+        hero.upgradeSkill(new NamedSkill(SkillName.NECROMANCY, SkillLevel.BASIC));
+
+        assertEquals(1, hero.getSkills().size());
+        assertEquals(SkillLevel.EXPERT, getSkillLevel(hero, SkillName.NECROMANCY));
+    }
+
+    @Test
     void startingSkillsCountTowardEightSkillLimit() {
         EconomyHero hero = heroWithStartingSkills(eightStartingSkills());
 

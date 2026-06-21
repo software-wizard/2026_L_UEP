@@ -34,4 +34,13 @@ class SkillFactoryTest {
         assertTrue(skill instanceof OffenceSkill);
         assertEquals(SkillLevel.ADVANCED, skill.getLevel());
     }
+
+    @Test
+    void createsNamedSkillAtSelectedLevel() {
+        AbstractSkill skill = skillFactory.create(SkillName.NECROMANCY, SkillLevel.ADVANCED);
+
+        assertTrue(skill instanceof NamedSkill);
+        assertEquals(SkillName.NECROMANCY, skill.getName());
+        assertEquals(SkillLevel.ADVANCED, skill.getLevel());
+    }
 }

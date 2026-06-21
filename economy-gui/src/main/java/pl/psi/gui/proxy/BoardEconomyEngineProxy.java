@@ -22,6 +22,7 @@ public class BoardEconomyEngineProxy extends BoardEconomyEngine {
     private final ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
     private Map<String, Map<String, Object>> cachedBoardState = null;
+    private boolean remoteBoardAvailable;
 
     public BoardEconomyEngineProxy(EconomyHero hero1, EconomyHero hero2, Map<Point, MapObjectIf> map) {
         super(hero1, hero2, map);
@@ -32,11 +33,17 @@ public class BoardEconomyEngineProxy extends BoardEconomyEngine {
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
-            httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) { e.printStackTrace(); }
+            HttpResponse<String> response = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            remoteBoardAvailable = response.statusCode() >= 200 && response.statusCode() < 300;
+        } catch (Exception e) {
+            remoteBoardAvailable = false;
+        }
     }
 
     private Map<String, Object> getTileState(int x, int y) {
+        if (!remoteBoardAvailable) {
+            return Map.of();
+        }
         if (cachedBoardState == null) {
             try {
                 HttpRequest req = HttpRequest.newBuilder().uri(URI.create(BASE_URL + "/boardState")).GET().build();
@@ -44,7 +51,10 @@ public class BoardEconomyEngineProxy extends BoardEconomyEngine {
                 if (res.statusCode() == 200) {
                     cachedBoardState = objectMapper.readValue(res.body(), new com.fasterxml.jackson.core.type.TypeReference<>() {});
                 }
-            } catch (Exception e) { e.printStackTrace(); }
+            } catch (Exception e) {
+                remoteBoardAvailable = false;
+                return Map.of();
+            }
         }
         if (cachedBoardState != null) {
             return cachedBoardState.getOrDefault(x + "," + y, Map.of());
@@ -58,27 +68,42 @@ public class BoardEconomyEngineProxy extends BoardEconomyEngine {
 
     @Override
     public boolean isCurrentHero(Point point) {
-        return Boolean.TRUE.equals(getTileState(point.getX(), point.getY()).get("isCurrentHero"));
+        Map<String, Object> tile = getTileState(point.getX(), point.getY());
+        return tile.containsKey("isCurrentHero")
+                ? Boolean.TRUE.equals(tile.get("isCurrentHero"))
+                : super.isCurrentHero(point);
     }
 
     @Override
     public boolean isHero(Point point) {
-        return Boolean.TRUE.equals(getTileState(point.getX(), point.getY()).get("isHero"));
+        Map<String, Object> tile = getTileState(point.getX(), point.getY());
+        return tile.containsKey("isHero")
+                ? Boolean.TRUE.equals(tile.get("isHero"))
+                : super.isHero(point);
     }
 
     @Override
     public boolean canMove(Point point) {
-        return Boolean.TRUE.equals(getTileState(point.getX(), point.getY()).get("canMove"));
+        Map<String, Object> tile = getTileState(point.getX(), point.getY());
+        return tile.containsKey("canMove")
+                ? Boolean.TRUE.equals(tile.get("canMove"))
+                : super.canMove(point);
     }
 
     @Override
     public boolean canInteract(Point point) {
-        return Boolean.TRUE.equals(getTileState(point.getX(), point.getY()).get("canInteract"));
+        Map<String, Object> tile = getTileState(point.getX(), point.getY());
+        return tile.containsKey("canInteract")
+                ? Boolean.TRUE.equals(tile.get("canInteract"))
+                : super.canInteract(point);
     }
 
     @Override
     public boolean canEnter(Point point) {
-        return Boolean.TRUE.equals(getTileState(point.getX(), point.getY()).get("canEnter"));
+        Map<String, Object> tile = getTileState(point.getX(), point.getY());
+        return tile.containsKey("canEnter")
+                ? Boolean.TRUE.equals(tile.get("canEnter"))
+                : super.canEnter(point);
     }
 
     @Override
@@ -124,6 +149,9 @@ public class BoardEconomyEngineProxy extends BoardEconomyEngine {
     @Override
     public Optional<MapObjectIf> getMapObject(Point point) {
         Map<String, Object> tile = getTileState(point.getX(), point.getY());
+        if (!tile.containsKey("hasMapObject")) {
+            return super.getMapObject(point);
+        }
         if (Boolean.TRUE.equals(tile.get("hasMapObject"))) {
             Optional<MapObjectIf> localObj = super.getMapObject(point);
             if (localObj.isPresent()) {
@@ -159,10 +187,15 @@ public class BoardEconomyEngineProxy extends BoardEconomyEngine {
     }
 
     private void postAction(String endpoint, int x, int y) {
+        if (!remoteBoardAvailable) {
+            return;
+        }
         try {
             String url = x >= 0 ? BASE_URL + endpoint + "?x=" + x + "&y=" + y : BASE_URL + endpoint;
             HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).POST(HttpRequest.BodyPublishers.noBody()).build();
             httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) { e.printStackTrace(); }
+        } catch (Exception e) {
+            remoteBoardAvailable = false;
+        }
     }
 }

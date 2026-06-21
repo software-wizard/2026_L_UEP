@@ -2,13 +2,26 @@ package pl.psi.hero.skills;
 
 import pl.psi.hero.EconomyHero;
 import pl.psi.hero.skills.modifiers.DamageModifierIf;
+import pl.psi.hero.skills.modifiers.DamageReductionModifierIf;
+import pl.psi.hero.skills.modifiers.ExpModifierIf;
 import pl.psi.hero.skills.modifiers.LuckModifierIf;
 import pl.psi.hero.skills.modifiers.MoraleModifierIf;
 import pl.psi.hero.skills.modifiers.MovementModifierIf;
 import pl.psi.hero.skills.modifiers.SpellModifierIf;
 import pl.psi.hero.skills.modifiers.TacticsModifierIf;
+import pl.psi.hero.skills.modifiers.TerrainPenaltyModifierIf;
 
-public class SkillManager {
+public class HeroStatModifierManager {
+    public int applyExperience(EconomyHero hero, int baseExperience) {
+        double totalMultiplier = 1.0;
+        for (AbstractSkill skill : hero.getSkills()) {
+            if (skill instanceof ExpModifierIf) {
+                totalMultiplier *= ((ExpModifierIf) skill).getExpMultiplier();
+            }
+        }
+        return (int) Math.round(baseExperience * totalMultiplier);
+    }
+
     public int applyMovement(EconomyHero hero, int baseMove) {
         int currentMove = baseMove;
         for (AbstractSkill skill : hero.getSkills()) {
@@ -19,6 +32,16 @@ public class SkillManager {
         return currentMove;
     }
 
+    public int applyTerrainPenalty(EconomyHero hero, int basePenalty) {
+        int currentPenalty = Math.max(0, basePenalty);
+        for (AbstractSkill skill : hero.getSkills()) {
+            if (skill instanceof TerrainPenaltyModifierIf) {
+                currentPenalty = ((TerrainPenaltyModifierIf) skill).changeTerrainPenalty(currentPenalty);
+            }
+        }
+        return Math.max(0, currentPenalty);
+    }
+
     public int applyDamage(EconomyHero hero, int baseDamage) {
         int currentDamage = baseDamage;
         for (AbstractSkill skill : hero.getSkills()) {
@@ -27,6 +50,27 @@ public class SkillManager {
             }
         }
         return currentDamage;
+    }
+
+    public float getDamageBonusFactor(EconomyHero hero) {
+        float damageMultiplier = 1.0f;
+        for (AbstractSkill skill : hero.getSkills()) {
+            if (skill instanceof DamageModifierIf) {
+                damageMultiplier *= 1.0f + ((DamageModifierIf) skill).getDamageBonusFactor();
+            }
+        }
+        return damageMultiplier - 1.0f;
+    }
+
+    public float getDamageReductionFactor(EconomyHero hero) {
+        float remainingDamageFactor = 1.0f;
+        for (AbstractSkill skill : hero.getSkills()) {
+            if (skill instanceof DamageReductionModifierIf) {
+                remainingDamageFactor *= 1.0f
+                        - ((DamageReductionModifierIf) skill).getDamageReductionFactor();
+            }
+        }
+        return 1.0f - remainingDamageFactor;
     }
 
     public int applySpellPower(EconomyHero hero, SkillName spellSchool, int baseSpellPower) {

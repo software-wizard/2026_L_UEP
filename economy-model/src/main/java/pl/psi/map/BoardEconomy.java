@@ -11,6 +11,8 @@ import pl.psi.economy.Point;
 import static pl.psi.map.MapObjectIf.typeOfObject.PICKUPABLE;
 
 public class BoardEconomy {
+    private static final int MOVE_POINTS_PER_DISTANCE_UNIT = 100;
+
     private final BiMap<Point, EconomyHero> map;
     private final BiMap<Point, MapObjectIf> interactionMap;
 
@@ -45,31 +47,25 @@ public class BoardEconomy {
 
 
     public boolean canMove(final EconomyHero hero, final Point targetPoint) {
-        Object obj = map.get(targetPoint);
-        Object objOnInteractionMap = interactionMap.get(targetPoint);
-
-        if (objOnInteractionMap != null) {
-            return true;
-        }
-        if (obj != null) {
+        if (map.get(targetPoint) != null) {
             return false;
         }
         final Point oldPosition = getPosition(hero);
-        double distance = targetPoint.distance(oldPosition.getX(), oldPosition.getY());
-        return distance <= hero.getRemainingMoveRange();
-
+        return hero.canMoveTo(calculateMoveCost(oldPosition, targetPoint));
     }
 
     public void move(final EconomyHero hero, final Point targetPoint) {
         if (canMove(hero, targetPoint)) {
             Point oldPosition = getPosition(hero);
-            double distance = oldPosition.distance(targetPoint);
-            if (hero.canMoveTo(distance)) {
-                map.inverse().remove(hero);
-                map.put(targetPoint, hero);
-                hero.deductMove(distance);
-            }
+            int moveCost = calculateMoveCost(oldPosition, targetPoint);
+            map.inverse().remove(hero);
+            map.put(targetPoint, hero);
+            hero.deductMove(moveCost);
         }
+    }
+
+    private int calculateMoveCost(Point start, Point target) {
+        return (int) Math.ceil(start.distance(target) * MOVE_POINTS_PER_DISTANCE_UNIT);
     }
 
 

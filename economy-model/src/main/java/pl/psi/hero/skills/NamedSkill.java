@@ -19,8 +19,6 @@ public class NamedSkill extends AbstractSkill {
             this.level = SkillLevel.ADVANCED;
         } else if (this.level.equals(SkillLevel.ADVANCED)) {
             this.level = SkillLevel.EXPERT;
-        } else {
-            throw new IllegalStateException("Cannot upgrade from Expert level.");
         }
     }
 

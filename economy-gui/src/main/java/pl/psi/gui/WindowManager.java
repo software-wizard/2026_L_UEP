@@ -152,11 +152,15 @@ public class WindowManager {
         }
     }
     public static void openSkillChoice(EconomyHero hero) {
+        openSkillChoice(hero, null);
+    }
+
+    public static void openSkillChoice(EconomyHero hero, Runnable onSkillSelected) {
         try {
             FXMLLoader loader = new FXMLLoader(WindowManager.class.getResource("/fxml/skill_choice.fxml"));
             Parent root = loader.load();
             pl.psi.gui.hero.SkillChoiceController controller = loader.getController();
-            controller.init(hero);
+            controller.init(hero, onSkillSelected);
 
             Stage stage = new Stage();
             stage.setScene(new Scene(root));

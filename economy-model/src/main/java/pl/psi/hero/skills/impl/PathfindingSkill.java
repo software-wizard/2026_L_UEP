@@ -3,8 +3,9 @@ package pl.psi.hero.skills.impl;
 import pl.psi.hero.skills.AbstractSkill;
 import pl.psi.hero.skills.SkillLevel;
 import pl.psi.hero.skills.SkillName;
+import pl.psi.hero.skills.modifiers.TerrainPenaltyModifierIf;
 
-public class PathfindingSkill extends AbstractSkill {
+public class PathfindingSkill extends AbstractSkill implements TerrainPenaltyModifierIf {
     private float terrainPenaltyReduction;
 
     public PathfindingSkill() {
@@ -33,5 +34,13 @@ public class PathfindingSkill extends AbstractSkill {
     @Override
     public float getFactor() {
         return terrainPenaltyReduction;
+    }
+
+    @Override
+    public int changeTerrainPenalty(int currentPenalty) {
+        if (currentPenalty <= 0) {
+            return 0;
+        }
+        return Math.max(0, Math.round(currentPenalty * (1 - terrainPenaltyReduction)));
     }
 }

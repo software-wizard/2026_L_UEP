@@ -63,6 +63,49 @@ class BoardEconomyTest
     }
 
     @Test
+    void heroCanMoveTenStraightTilesWithOneThousandMovePoints() {
+        BoardEconomy board = BoardEconomy.builder()
+                .addHero(hero1, new Point(0, 0))
+                .addHero(hero2, new Point(17, 8))
+                .build();
+
+        board.move(hero1, new Point(10, 0));
+
+        assertThat(board.getHero(new Point(10, 0)).isPresent()).isTrue();
+        assertThat(hero1.getRemainingMoveRange()).isEqualTo(0);
+    }
+
+    @Test
+    void heroCannotMoveElevenStraightTilesWithOneThousandMovePoints() {
+        BoardEconomy board = BoardEconomy.builder()
+                .addHero(hero1, new Point(0, 0))
+                .addHero(hero2, new Point(17, 8))
+                .build();
+
+        board.move(hero1, new Point(11, 0));
+
+        assertThat(board.getHero(new Point(0, 0)).isPresent()).isTrue();
+        assertThat(board.getHero(new Point(11, 0)).isPresent()).isFalse();
+        assertThat(hero1.getRemainingMoveRange()).isEqualTo(1000);
+    }
+
+    @Test
+    void distantMapObjectDoesNotBypassMovementCost() {
+        Map<Point, MapObjectIf> interactables = new HashMap<>();
+        interactables.put(new Point(11, 0), new Gold(new Resources(500, 0, 0, 0, 0, 0, 0)));
+        BoardEconomy board = BoardEconomy.builder()
+                .addHero(hero1, new Point(0, 0))
+                .addHero(hero2, new Point(17, 8))
+                .addInteractables(interactables)
+                .build();
+
+        board.move(hero1, new Point(11, 0));
+
+        assertThat(board.getHero(new Point(0, 0)).isPresent()).isTrue();
+        assertThat(hero1.getRemainingMoveRange()).isEqualTo(1000);
+    }
+
+    @Test
     void setterSetsGoldCorrectly(){
 
 

@@ -3,8 +3,9 @@ package pl.psi.hero.skills.impl;
 import pl.psi.hero.skills.AbstractSkill;
 import pl.psi.hero.skills.SkillLevel;
 import pl.psi.hero.skills.SkillName;
+import pl.psi.hero.skills.modifiers.DamageReductionModifierIf;
 
-public class ArmorerSkill extends AbstractSkill {
+public class ArmorerSkill extends AbstractSkill implements DamageReductionModifierIf {
     private float reducedDamageFactor;
 
     public ArmorerSkill()
@@ -36,4 +37,9 @@ public class ArmorerSkill extends AbstractSkill {
 
     @Override
     public float getFactor() { return reducedDamageFactor;}
+
+    @Override
+    public float getDamageReductionFactor() {
+        return reducedDamageFactor;
+    }
 }

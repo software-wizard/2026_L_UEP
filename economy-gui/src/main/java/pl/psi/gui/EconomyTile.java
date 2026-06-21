@@ -29,10 +29,20 @@ public class EconomyTile extends StackPane
             ImageView imageView = new ImageView(image);
             imageView.setFitWidth(59);
             imageView.setFitHeight(59);
+            imageView.setMouseTransparent(true);
             getChildren().add(imageView);
+            label.toFront();
         } catch (Exception e) {
             setName("Obj");
         }
+    }
+
+    void setHero(boolean currentHero) {
+        setImage("/heroes/hero1.png");
+        label.setText(currentHero ? "Hero" : "Enemy");
+        label.setTextFill(currentHero ? Color.LIMEGREEN : Color.RED);
+        label.setStyle("-fx-font-size: 10px; -fx-font-weight: bold; -fx-background-color: rgba(0,0,0,0.65);");
+        label.toFront();
     }
 
     void setName( final String aName )

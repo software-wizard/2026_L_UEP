@@ -42,4 +42,9 @@ public class OffenceSkill extends AbstractSkill implements DamageModifierIf {
         return Math.round(currentDamage * (1 + attackBonus));
     }
 
+    @Override
+    public float getDamageBonusFactor() {
+        return attackBonus;
+    }
+
 }

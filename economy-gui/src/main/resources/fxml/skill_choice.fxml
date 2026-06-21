@@ -10,7 +10,7 @@
         <Insets top="20" right="20" bottom="20" left="20"/>
     </padding>
 
-    <Label text="Level Up! Choose a skill:" style="-fx-font-weight: bold; -fx-font-size: 18px;"/>
+    <Label text="Choose secondary skill" style="-fx-font-weight: bold; -fx-font-size: 18px;"/>
 
     <HBox spacing="20" alignment="CENTER">
         <Button fx:id="skill1Button" onAction="#onSkill1Clicked" prefWidth="150" prefHeight="100" wrapText="true" textAlignment="CENTER"/>

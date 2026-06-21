@@ -16,11 +16,12 @@ import pl.psi.creatures.EconomyCreature;
 import pl.psi.hero.artifacts.Artifact;
 import pl.psi.hero.artifacts.EconomySpell;
 import pl.psi.hero.skills.AbstractSkill;
+import pl.psi.hero.skills.HeroStatModifierManager;
 import pl.psi.hero.skills.HeroStartingSkill;
 import pl.psi.hero.skills.SkillChoiceManager;
 import pl.psi.hero.skills.SkillFactory;
+import pl.psi.hero.skills.SkillLevel;
 import pl.psi.hero.skills.SkillRegistry;
-import pl.psi.hero.skills.modifiers.ExpModifierIf;
 import pl.psi.map.resources.Resources;
 
 @Getter
@@ -36,7 +37,7 @@ public class EconomyHero implements PropertyChangeListener
     private final HeroClass heroClass;
     private final List< EconomyCreature > creatureList;
     private Resources resources;
-    private final int moveRange = 10;
+    private final int moveRange = 1000;
     private int remainingMoves;
     @Getter
     private int experience;
@@ -50,7 +51,7 @@ public class EconomyHero implements PropertyChangeListener
     private final SkillFactory skillFactory = new SkillFactory();
     private final SkillRegistry skillRegistry = new SkillRegistry(skillFactory);
     private final SkillChoiceManager skillChoiceManager = new SkillChoiceManager(skillRegistry, skillFactory, new Random());
-    protected List<ExpModifierIf> expModifiers = new ArrayList<>();
+    private final HeroStatModifierManager heroStatModifierManager = new HeroStatModifierManager();
 
     public EconomyHero( final Fraction aFraction, final Resources aResources, final Statistics aStats)
     {
@@ -108,7 +109,7 @@ public class EconomyHero implements PropertyChangeListener
     }
 
     public int getEffectiveMoveRange() {
-        return moveRange;
+        return heroStatModifierManager.applyMovement(this, moveRange);
     }
 
     public void addCreature(final EconomyCreature aCreature)
@@ -164,16 +165,14 @@ public class EconomyHero implements PropertyChangeListener
                 .findFirst();
 
         if (existing.isPresent()) {
-            existing.get().upgrade();
+            if (existing.get().getLevel() != SkillLevel.EXPERT) {
+                existing.get().upgrade();
+            }
         } else {
             if (skills.size() >= MAX_SKILLS) {
                 throw new IllegalStateException("Hero cannot learn more than " + MAX_SKILLS + " skills.");
             }
             skills.add(aSelectedSkill);
-
-            if (aSelectedSkill instanceof ExpModifierIf) {
-                addExpModifier((ExpModifierIf) aSelectedSkill);
-            }
         }
     }
 
@@ -190,10 +189,6 @@ public class EconomyHero implements PropertyChangeListener
             }
             AbstractSkill skill = skillFactory.create(startingSkill.getName(), startingSkill.getLevel());
             skills.add(skill);
-
-            if (skill instanceof ExpModifierIf) {
-                addExpModifier((ExpModifierIf) skill);
-            }
         }
     }
 
@@ -211,27 +206,12 @@ public class EconomyHero implements PropertyChangeListener
         NECROPOLIS
     }
 
-    protected void addExpModifier(ExpModifierIf modifier){
-        expModifiers.add(modifier);
-    }
-
-    protected void removeExpModifier(ExpModifierIf modifier){
-        expModifiers.remove(modifier);
-    }
-
     public void addExperience(final int baseExperienceToAdd) {
         if (baseExperienceToAdd <= 0) {
             return;
         }
 
-        // Experience gain still uses ExpModifierIf so existing exp modifiers keep their behavior.
-        double totalMultiplier = expModifiers.stream()
-                .map(ExpModifierIf::getExpMultiplier)
-                .reduce(1.0, (a, b) -> a * b);
-
-        // Alternatywa: Jeśli wolisz dodawać bonusy (np. +5% i +10% daje +15%, a nie 1.05 * 1.10):
-        // 2. Aplikowanie zmian i zaokrąglanie
-        int actualExperienceToAdd = (int) Math.round(baseExperienceToAdd * totalMultiplier);
+        int actualExperienceToAdd = heroStatModifierManager.applyExperience(this, baseExperienceToAdd);
 
         int oldLevel = this.level;
         this.experience += actualExperienceToAdd;

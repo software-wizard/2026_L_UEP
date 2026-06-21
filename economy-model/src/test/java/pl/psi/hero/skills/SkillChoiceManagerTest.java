@@ -66,6 +66,46 @@ class SkillChoiceManagerTest {
     }
 
     @Test
+    void proposesAdvancedUpgradeForBasicNamedSkill() {
+        SkillChoiceManager manager = managerFor(List.of(SkillName.NECROMANCY));
+        List<AbstractSkill> heroSkills = List.of(
+                new NamedSkill(SkillName.NECROMANCY, SkillLevel.BASIC)
+        );
+
+        List<AbstractSkill> choices = manager.getPossibleSkills(HeroClass.NECROMANCER, heroSkills);
+
+        assertEquals(1, choices.size());
+        assertEquals(SkillName.NECROMANCY, choices.get(0).getName());
+        assertEquals(SkillLevel.ADVANCED, choices.get(0).getLevel());
+    }
+
+    @Test
+    void proposesExpertUpgradeForAdvancedNamedSkill() {
+        SkillChoiceManager manager = managerFor(List.of(SkillName.NECROMANCY));
+        List<AbstractSkill> heroSkills = List.of(
+                new NamedSkill(SkillName.NECROMANCY, SkillLevel.ADVANCED)
+        );
+
+        List<AbstractSkill> choices = manager.getPossibleSkills(HeroClass.NECROMANCER, heroSkills);
+
+        assertEquals(1, choices.size());
+        assertEquals(SkillName.NECROMANCY, choices.get(0).getName());
+        assertEquals(SkillLevel.EXPERT, choices.get(0).getLevel());
+    }
+
+    @Test
+    void doesNotProposeExpertNamedSkillForUpgrade() {
+        SkillChoiceManager manager = managerFor(List.of(SkillName.NECROMANCY));
+        List<AbstractSkill> heroSkills = List.of(
+                new NamedSkill(SkillName.NECROMANCY, SkillLevel.EXPERT)
+        );
+
+        List<AbstractSkill> choices = manager.getPossibleSkills(HeroClass.NECROMANCER, heroSkills);
+
+        assertTrue(choices.isEmpty());
+    }
+
+    @Test
     void doesNotReturnDuplicateSkillNames() {
         SkillChoiceManager manager = managerFor(List.of(SkillName.OFFENCE, SkillName.OFFENCE, SkillName.ARMORER));
 
