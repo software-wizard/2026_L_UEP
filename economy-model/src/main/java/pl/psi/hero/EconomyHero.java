@@ -42,6 +42,20 @@ public class EconomyHero implements PropertyChangeListener
     private final List<EconomySpell> spells = new ArrayList<>();
     protected List<ExpModifierIf> expModifiers = new ArrayList<>();
 
+
+    // ===============
+    private boolean hasBallista = false;
+
+    public boolean hasBallista() {
+        return hasBallista;
+    }
+
+    public void setHasBallista(boolean hasBallista) {
+        this.hasBallista = hasBallista;
+    }
+    // ===========
+
+
     public EconomyHero( final Fraction aFraction, final Resources aResources, final Statistics aStats)
     {
         fraction = aFraction;

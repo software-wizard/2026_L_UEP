@@ -15,6 +15,7 @@ import pl.psi.gui.MainBattleController;
 import pl.psi.hero.EconomyHero;
 import pl.psi.hero.skills.AbstractSkill;
 import pl.psi.converter.rewards.BattleType;
+import pl.psi.warmachines.WarMachineDecorator;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -41,12 +42,35 @@ public class EcoBattleConverter {
             Hero convertedHero1 = convert(aPlayer1);
             Hero convertedHero2 = convert(aPlayer2);
 
+            // ====================================================================
+            // 1. PRZYGOTOWANIE DEKORATORÓW BALIST
+            // ====================================================================
+            List<WarMachineDecorator> player1Machines = new ArrayList<>();
+            if (convertedHero1.hasBallista()) {
+                pl.psi.warmachines.WarMachineFactory factory = new pl.psi.warmachines.WarMachineFactory();
+                player1Machines.add(factory.create(pl.psi.warmachines.WarMachineType.BALLISTA, new pl.psi.warmachines.RandomTargetStrategy()));
+            }
+
+            List<WarMachineDecorator> player2Machines = new ArrayList<>();
+            if (convertedHero2.hasBallista()) {
+                pl.psi.warmachines.WarMachineFactory factory = new pl.psi.warmachines.WarMachineFactory();
+                player2Machines.add(factory.create(pl.psi.warmachines.WarMachineType.BALLISTA, new pl.psi.warmachines.RandomTargetStrategy()));
+            }
+
+            // ====================================================================
+            // 2. WYWOŁANIE METODY FABRYKUJĄCEJ I ZAPISANIE NOWEGO SILNIKA DO ZMIENNEJ
+            // ====================================================================
+            GameEngine customEngine = GameEngine.createWithWarMachines(convertedHero1, convertedHero2, player1Machines, player2Machines);
+
+            // ====================================================================
+            // 3. UTWORZENIE KONTROLERA Z BOHATERAMI, KTÓRZY MAJĄ JUŻ WSTRZYKNIĘTE BALISTY
+            // ====================================================================
             loader.setController(new MainBattleController(
-                    convertedHero1,
-                    convertedHero2,
+                    customEngine.getHero1(), // Wyciągamy pierwszego bohatera z nowo utworzonego silnika!
+                    customEngine.getHero2(), // Wyciągamy drugiego bohatera z nowo utworzonego silnika!
                     new HashMap<>(),
                     specialFields,
-                    battleResult -> settleBattleExperience(BattleType.HERO_VS_HERO, battleResult, aPlayer1, aPlayer2, convertedHero1, convertedHero2)
+                    battleResult -> settleBattleExperience(BattleType.HERO_VS_HERO, battleResult, aPlayer1, aPlayer2, customEngine.getHero1(), customEngine.getHero2())
             ));
 
             Scene scene = new Scene(loader.load());
@@ -64,7 +88,14 @@ public class EcoBattleConverter {
         final List<Creature> creatures = new ArrayList<>();
         aPlayer1.getCreatures()
                 .forEach(ecoCreature -> creatures.add(convertCreatureWithEffects(ecoCreature, aPlayer1)));
-        return new Hero(creatures, aPlayer1.getSpells().stream().map(s -> new DamageSpell(s.getName(), 1, 1)).collect(Collectors.toList()));
+        // 1. Tworzymy obiekt bohatera bitewnego
+        Hero convertedHero = new Hero(creatures, aPlayer1.getSpells().stream().map(s -> new DamageSpell(s.getName(), 1, 1)).collect(Collectors.toList()));
+
+        // 2. Przypisujemy flagę Balisty bez dotykania list ani potworów
+        convertedHero.setHasBallista(aPlayer1.hasBallista());
+
+        // 3. Zwracamy gotowego herosa
+        return convertedHero;
     }
 
     public static void startBankBattle(final EconomyHero aPlayer1, final Map<Point, EconomyCreature> bankEnemy) {

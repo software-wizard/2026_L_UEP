@@ -9,10 +9,8 @@ import pl.psi.Spells.Spell;
 import pl.psi.creatures.Creature;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.IdentityHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+
 import pl.psi.warmachines.WarMachineDecorator; //dodane
 /**
  * TODO: Describe this class (The first line - until the first dot - will interpret as the brief description).
@@ -50,21 +48,32 @@ public class GameEngine {
         }
     }
 
-    // ==========================================
-    // 3. NOWA METODA DLA MASZYN WOJENNYCH (Bezkonfliktowa)
-    // ==========================================
+    // ====================================================================
+    // BEZPIECZNA METODA DLA MASZYN WOJENNYCH
+    // ====================================================================
     public static GameEngine createWithWarMachines(final Hero aHero1, final Hero aHero2,
                                                    final List<pl.psi.warmachines.WarMachineDecorator> aHero1WarMachines,
                                                    final List<pl.psi.warmachines.WarMachineDecorator> aHero2WarMachines) {
-        if (aHero1WarMachines != null && aHero1 != null) {
-            aHero1.getCreatures().addAll(aHero1WarMachines);
+
+        // 1. Tworzymy nowe, otwarte listy na bazie stworzeń bohatera
+        List<Creature> player1Creatures = new ArrayList<>(aHero1.getCreatures());
+        List<Creature> player2Creatures = new ArrayList<>(aHero2.getCreatures());
+
+        // 2. Bezpiecznie dokładamy maszyny do list bitewnych
+        if (aHero1WarMachines != null) {
+            player1Creatures.addAll(aHero1WarMachines);
         }
-        if (aHero2WarMachines != null && aHero2 != null) {
-            aHero2.getCreatures().addAll(aHero2WarMachines);
+        if (aHero2WarMachines != null) {
+            player2Creatures.addAll(aHero2WarMachines);
         }
 
-        GameEngine engine = new GameEngine(aHero1, aHero2);
+        // 3. Tworzymy silnik gry ze zmodyfikowanymi herosami i ich armiami
+        GameEngine engine = new GameEngine(
+                new Hero(player1Creatures, aHero1.getSpells()),
+                new Hero(player2Creatures, aHero2.getSpells())
+        );
 
+        // 4. Przypisujemy właścicieli maszyn wojennych
         if (aHero1WarMachines != null) {
             for (pl.psi.warmachines.WarMachineDecorator machine : aHero1WarMachines) {
                 engine.customOwners.put(machine, aHero1);
@@ -283,4 +292,16 @@ public class GameEngine {
 
     public static class BuffField {
     }
+
+    // ==========================================
+    public Hero getHero1() {
+        return hero1;
+    }
+
+    public Hero getHero2() {
+        return hero2;
+    }
+    // ======
+
+
 }
