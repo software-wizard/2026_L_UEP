@@ -12,8 +12,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 import pl.psi.creatures.EconomyCreature;
-import pl.psi.hero.artifacts.Artifact;
-import pl.psi.hero.artifacts.EconomySpell;
+import pl.psi.hero.artifacts.*;
 import pl.psi.hero.skills.AbstractSkill;
 import pl.psi.hero.skills.ArmorerSkill;
 import pl.psi.hero.skills.OffenceSkill;
@@ -41,6 +40,7 @@ public class EconomyHero implements PropertyChangeListener
     private final List<Artifact> artifacts = new ArrayList<>();
     private final List<EconomySpell> spells = new ArrayList<>();
     protected List<ExpModifierIf> expModifiers = new ArrayList<>();
+    private HeroEquipment equipment = new HeroEquipment();
 
     public EconomyHero( final Fraction aFraction, final Resources aResources, final Statistics aStats)
     {
@@ -232,6 +232,37 @@ public class EconomyHero implements PropertyChangeListener
         return List.copyOf(artifacts);
     }
 
+    public HeroEquipment getEquipment() {
+        return equipment;
+    }
+
+    public void equipArtifact(Artifact artifact, ArtifactSlot slot) {
+
+        if (artifact == null) {
+            throw new IllegalArgumentException("Artifact cannot be null");
+        }
+
+        if (!artifacts.contains(artifact)) {
+            throw new IllegalArgumentException(
+                    "Hero does not own artifact: "
+                            + artifact.getType().name());
+        }
+
+        if (artifact.getType().getSlot() != slot) {
+            throw new IllegalArgumentException(
+                    "Artifact "
+                            + artifact.getType().name()
+                            + " cannot be equipped in slot "
+                            + slot);
+        }
+
+        equipment.equip(slot, artifact);
+    }
+
+    public Artifact unequipArtifact(ArtifactSlot slot) {
+        return equipment.unequip(slot);
+    }
+
     @JsonIgnore
     public Statistics getTotalStatistics() {
         Statistics total = new Statistics(
@@ -240,8 +271,17 @@ public class EconomyHero implements PropertyChangeListener
                 baseStatistics.getPower(),
                 baseStatistics.getKnowledge()
         );
-        for (Artifact artifact : artifacts) {
+        for (Artifact artifact : equipment.getEquippedArtifacts()) {
             total.increase(artifact.getType().getStatistics());
+        }
+        if (DragonSetService.hasFullDragonSet(this)) {
+
+            total.increase(
+                    new Statistics(
+                            6,
+                            6,
+                            6,
+                            6));
         }
         return total;
     }
@@ -278,4 +318,15 @@ public class EconomyHero implements PropertyChangeListener
         }
         skills.add( aSkill );
     }
+    public boolean hasSpellBook() {
+
+        return equipment
+                .getEquippedArtifacts()
+                .stream()
+                .anyMatch(
+                        a ->
+                                a.getType()
+                                        == ArtifactType.SPELL_BOOK);
+    }
 }
+
