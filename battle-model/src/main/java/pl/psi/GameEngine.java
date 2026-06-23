@@ -302,6 +302,9 @@ public class GameEngine {
         return hero2;
     }
     // ======
-
+//dodalem zeby pblsuzyc logike w battlegui dlabalsity np
+    public boolean isCurrentCreatureWarMachine() {
+        return turnQueue.getCurrentCreature() instanceof pl.psi.warmachines.WarMachineDecorator;
+    }
 
 }

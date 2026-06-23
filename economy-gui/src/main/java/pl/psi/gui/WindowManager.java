@@ -154,7 +154,11 @@ public class WindowManager {
             if (type == buyBallista) {
                 if (aHero.canAffordGold(2500)) {
                     aHero.payGold(2500);
-                    // TODO: Tutaj w kolejnym kroku dodamy maszynę do armii bohatera
+                    // ========================================================
+                    // TUTAJ DZIEJE SIĘ PRAWDZIWE PRZYPISANIE PO ZAKUPIE!
+                    // ========================================================
+                    aHero.setHasBallista(true);
+                    // ========================================================
                     System.out.println("Kupiono Balistę!");
                 } else {
                     showError("Masz za mało złota!");

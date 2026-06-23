@@ -5,7 +5,7 @@ import pl.psi.creatures.CreatureStatisticIf;
 
 public enum WarMachineStats implements CreatureStatisticIf {
 
-    BALLISTA("Ballista", 20, 5, 250, 0, Range.closed(20, 30), 1, "Shoots enemies.", false),
+    BALLISTA("Ballista", 120, 5, 250, 0, Range.closed(20, 30), 1, "Shoots enemies.", false),
     MEDIC_TENT("First Aid Tent", 0, 0, 75, 0, Range.closed(0, 0), 1, "Heals allies.", false),
     AMMO_CART("Ammo Cart", 0, 0, 50, 0, Range.closed(0, 0), 1, "Provides endless ammo.", false);
 

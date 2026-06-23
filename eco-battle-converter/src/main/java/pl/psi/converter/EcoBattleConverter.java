@@ -86,15 +86,17 @@ public class EcoBattleConverter {
 
     public static Hero convert(final EconomyHero aPlayer1) {
         final List<Creature> creatures = new ArrayList<>();
-        aPlayer1.getCreatures()
-                .forEach(ecoCreature -> creatures.add(convertCreatureWithEffects(ecoCreature, aPlayer1)));
-        // 1. Tworzymy obiekt bohatera bitewnego
+
+        if (aPlayer1.getCreatures() != null) {
+            aPlayer1.getCreatures()
+                    .forEach(ecoCreature -> creatures.add(convertCreatureWithEffects(ecoCreature, aPlayer1)));
+        }
+
         Hero convertedHero = new Hero(creatures, aPlayer1.getSpells().stream().map(s -> new DamageSpell(s.getName(), 1, 1)).collect(Collectors.toList()));
 
-        // 2. Przypisujemy flagę Balisty bez dotykania list ani potworów
+        // Przepisujemy dokładnie to, co bohater kupił na mapie
         convertedHero.setHasBallista(aPlayer1.hasBallista());
 
-        // 3. Zwracamy gotowego herosa
         return convertedHero;
     }
 
