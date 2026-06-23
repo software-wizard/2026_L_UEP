@@ -178,6 +178,13 @@ public class EconomyBoardController implements PropertyChangeListener {
                 Map<Point, EconomyCreature> enemies = bank.getEnemies();
                 EcoBattleConverter.startBankBattle(hero2, enemies);
                 break;
+
+            case "OPEN_FORGE":
+                Object[] forgeData = (Object[]) evt.getNewValue();
+                EconomyHero forgeHero = (EconomyHero) forgeData[0];
+                // Wywołujemy okienko zakupu maszyn wojennych przez WindowManager
+                WindowManager.openForge(forgeHero);
+                break;
         }
     }
 }

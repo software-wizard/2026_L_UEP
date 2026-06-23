@@ -23,6 +23,7 @@ import pl.psi.creatures.EconomyCreature;
 import pl.psi.map.BoardEconomyEngine;
 import pl.psi.map.buildings.town.CreatureBuildings;
 import pl.psi.service.GameStateService;
+import pl.psi.map.buildings.forge.Forge; //ddoany rofge
 
 import java.util.HashMap;
 import java.util.List;
@@ -59,7 +60,8 @@ public class BoardEconomyController {
                     Map.entry(new Point(10,6), new Gold(new Resources(1000,0,0,0,0,0,0))),
                     Map.entry(new Point(2,2), new Bank(BankStatistics.CASTLE_1)),
                     Map.entry(new Point(8,8), new Bank(BankStatistics.CASTLE_2)),
-                    Map.entry(new Point(8,5), new EconomySpell("Default"))
+                    Map.entry(new Point(8,5), new EconomySpell("Default")),
+                    Map.entry(new Point(11,2), new Forge()) // <--- dodane forge
             ));
         }
         return new HashMap<>();

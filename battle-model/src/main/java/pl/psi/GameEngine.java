@@ -10,9 +10,10 @@ import pl.psi.creatures.Creature;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.IdentityHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-
+import pl.psi.warmachines.WarMachineDecorator; //dodane
 /**
  * TODO: Describe this class (The first line - until the first dot - will interpret as the brief description).
  */
@@ -41,7 +42,6 @@ public class GameEngine {
         turnQueue.addObserver(hero2);
         customOwners = new IdentityHashMap<>();
     }
-
     public GameEngine(final Hero aHero1, final Hero aHero2, final BiMap<BattlePoint, SpecialField> specialFields, Map<BattlePoint, Creature> aBankEnemy) {
         this(aHero1, aHero2);
         board = new Board(aHero1.getCreatures(), aHero2.getCreatures(), specialFields, aBankEnemy);
@@ -49,6 +49,35 @@ public class GameEngine {
             customOwners.put(creature, hero2);
         }
     }
+
+    // ==========================================
+    // 3. NOWA METODA DLA MASZYN WOJENNYCH (Bezkonfliktowa)
+    // ==========================================
+    public static GameEngine createWithWarMachines(final Hero aHero1, final Hero aHero2,
+                                                   final List<pl.psi.warmachines.WarMachineDecorator> aHero1WarMachines,
+                                                   final List<pl.psi.warmachines.WarMachineDecorator> aHero2WarMachines) {
+        if (aHero1WarMachines != null && aHero1 != null) {
+            aHero1.getCreatures().addAll(aHero1WarMachines);
+        }
+        if (aHero2WarMachines != null && aHero2 != null) {
+            aHero2.getCreatures().addAll(aHero2WarMachines);
+        }
+
+        GameEngine engine = new GameEngine(aHero1, aHero2);
+
+        if (aHero1WarMachines != null) {
+            for (pl.psi.warmachines.WarMachineDecorator machine : aHero1WarMachines) {
+                engine.customOwners.put(machine, aHero1);
+            }
+        }
+        if (aHero2WarMachines != null) {
+            for (pl.psi.warmachines.WarMachineDecorator machine : aHero2WarMachines) {
+                engine.customOwners.put(machine, aHero2);
+            }
+        }
+        return engine;
+    }
+
 
     public void attack(final BattlePoint aBattlePoint) {
         if (isBattleOver()) {

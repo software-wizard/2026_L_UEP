@@ -16,6 +16,7 @@ import pl.psi.map.buildings.bank.BankStatistics;
 import pl.psi.map.resources.Gold;
 import pl.psi.map.resources.Resources;
 import pl.psi.map.resources.generators.*;
+import pl.psi.map.buildings.forge.Forge; // dodalem zeby kuxnie na mapie pokazac itd
 
 import java.io.IOException;
 import java.util.Map;
@@ -69,7 +70,8 @@ public class EconomyBoardStart extends Application {
                 Map.entry(new pl.psi.economy.Point(10,6), new Gold(new Resources(1000,0,0,0,0,0,0))),
                 Map.entry(new pl.psi.economy.Point(2,2), new Bank(BankStatistics.CASTLE_1)),
                 Map.entry(new pl.psi.economy.Point(8,8), new Bank(BankStatistics.CASTLE_2)),
-                Map.entry(new pl.psi.economy.Point(8,5), new EconomySpell(SPELL_NAME))
+                Map.entry(new pl.psi.economy.Point(8,5), new EconomySpell(SPELL_NAME)),
+                Map.entry(new pl.psi.economy.Point(11,2), new Forge()) // <-   KUŹNIA DODAAN
         );
     }
 }

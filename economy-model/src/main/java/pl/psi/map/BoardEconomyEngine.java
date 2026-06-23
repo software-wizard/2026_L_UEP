@@ -81,6 +81,10 @@ public class BoardEconomyEngine {
                 enterBank(action.getBuilding());
                 break;
             }
+            case OPEN_FORGE: {  // open forge dodane reż
+                openForge(action.getBuilding());
+                break;
+            }
         }
     }
 
@@ -193,6 +197,11 @@ public class BoardEconomyEngine {
 
     public void enterBank(BuildingIf building){
         observerSupport.firePropertyChange("ENTER_BANK", null, new Object[]{getCurrentHero(), building});
+    }
+
+    //DODANE DLA ROFGE
+    public void openForge(BuildingIf building) {
+        observerSupport.firePropertyChange("OPEN_FORGE", null, new Object[]{getCurrentHero(), building});
     }
 
     public Optional<Town> getTownUnderHero(EconomyHero aCurrentHero) {
