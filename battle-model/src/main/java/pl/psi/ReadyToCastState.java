@@ -2,7 +2,7 @@ package pl.psi;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
-@JsonIgnoreProperties(ignoreUnknown = true) // <-- TA LINIJKA
+@JsonIgnoreProperties(ignoreUnknown = true)  // poprawka na szybko dal testow brzydka
 
 public class ReadyToCastState implements SpellCastingState {
     @Override

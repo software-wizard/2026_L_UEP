@@ -42,9 +42,6 @@ public class EcoBattleConverter {
             Hero convertedHero1 = convert(aPlayer1);
             Hero convertedHero2 = convert(aPlayer2);
 
-            // ====================================================================
-            // 1. PRZYGOTOWANIE DEKORATORÓW BALIST
-            // ====================================================================
             List<WarMachineDecorator> player1Machines = new ArrayList<>();
             if (convertedHero1.hasBallista()) {
                 pl.psi.warmachines.WarMachineFactory factory = new pl.psi.warmachines.WarMachineFactory();
@@ -57,17 +54,12 @@ public class EcoBattleConverter {
                 player2Machines.add(factory.create(pl.psi.warmachines.WarMachineType.BALLISTA, new pl.psi.warmachines.RandomTargetStrategy()));
             }
 
-            // ====================================================================
-            // 2. WYWOŁANIE METODY FABRYKUJĄCEJ I ZAPISANIE NOWEGO SILNIKA DO ZMIENNEJ
-            // ====================================================================
             GameEngine customEngine = GameEngine.createWithWarMachines(convertedHero1, convertedHero2, player1Machines, player2Machines);
 
-            // ====================================================================
-            // 3. UTWORZENIE KONTROLERA Z BOHATERAMI, KTÓRZY MAJĄ JUŻ WSTRZYKNIĘTE BALISTY
-            // ====================================================================
+
             loader.setController(new MainBattleController(
-                    customEngine.getHero1(), // Wyciągamy pierwszego bohatera z nowo utworzonego silnika!
-                    customEngine.getHero2(), // Wyciągamy drugiego bohatera z nowo utworzonego silnika!
+                    customEngine.getHero1(),
+                    customEngine.getHero2(),
                     new HashMap<>(),
                     specialFields,
                     battleResult -> settleBattleExperience(BattleType.HERO_VS_HERO, battleResult, aPlayer1, aPlayer2, customEngine.getHero1(), customEngine.getHero2())
@@ -94,7 +86,6 @@ public class EcoBattleConverter {
 
         Hero convertedHero = new Hero(creatures, aPlayer1.getSpells().stream().map(s -> new DamageSpell(s.getName(), 1, 1)).collect(Collectors.toList()));
 
-        // Przepisujemy dokładnie to, co bohater kupił na mapie
         convertedHero.setHasBallista(aPlayer1.hasBallista());
 
         return convertedHero;

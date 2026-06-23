@@ -138,7 +138,7 @@ public class WindowManager {
     public static void openForge(EconomyHero aHero) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
         alert.setTitle("Kuźnia Maszyn Wojennych");
-        alert.setHeaderText("Witaj w Kuźni, potężny bohaterze!");
+        alert.setHeaderText("Kuźnia");
         alert.setContentText("Wybierz maszynę wojenną, którą chcesz zakupić do swojej armii:");
 
         ButtonType buyBallista = new ButtonType("Balista (2500 Gold)");
@@ -154,11 +154,9 @@ public class WindowManager {
             if (type == buyBallista) {
                 if (aHero.canAffordGold(2500)) {
                     aHero.payGold(2500);
-                    // ========================================================
-                    // TUTAJ DZIEJE SIĘ PRAWDZIWE PRZYPISANIE PO ZAKUPIE!
-                    // ========================================================
+
                     aHero.setHasBallista(true);
-                    // ========================================================
+
                     System.out.println("Kupiono Balistę!");
                 } else {
                     showError("Masz za mało złota!");

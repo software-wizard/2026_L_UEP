@@ -25,17 +25,14 @@ public class Hero implements java.beans.PropertyChangeListener {
     @Getter
     private SpellCastingState spellCastingState = new ReadyToCastState();
 
-    // ==========================================
-    // W pliku Hero.java podmień ten fragment:
-    // ==========================================
     @Setter
     private boolean hasBallista = false;
 
-    // TEN GETTER ROZWIĄŻE TWÓJ BŁĄD KOMPILACJI:
+
     public boolean hasBallista() {
         return hasBallista;
     }
-    // ==========================================
+
 
     public Hero(final List< Creature > aCreatures, List<Spell> aSpells)
     {

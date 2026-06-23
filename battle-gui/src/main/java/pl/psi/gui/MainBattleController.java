@@ -60,7 +60,6 @@ public class MainBattleController implements PropertyChangeListener {
     private void refreshGui() {
         gridMap.getChildren().clear();
 
-        // Bezpieczne pobranie list, na wypadek gdyby silnik zwrócił null
         java.util.List<pl.psi.creatures.Creature> h1Creatures =
                 (gameEngine.getHero1() != null) ? gameEngine.getHero1().getCreatures() : new java.util.ArrayList<>();
         java.util.List<pl.psi.creatures.Creature> h2Creatures =
@@ -74,7 +73,6 @@ public class MainBattleController implements PropertyChangeListener {
                 final MapTile mapTile = new MapTile("");
                 StringBuilder tileText = new StringBuilder();
 
-                // 1. Sprawdzenie standardowe z silnika bitwy
                 if (creature.isPresent()) {
                     Creature c = creature.get();
                     try {
@@ -84,9 +82,8 @@ public class MainBattleController implements PropertyChangeListener {
                     }
                 }
 
-                // 2. Przypisanie awaryjne tylko dla ŻYWYCH indeksów
                 if (tileText.toString().isEmpty()) {
-                    // --- NASZ BOHATER (LEWA STRONA) ---
+
                     if (x == 0) {
                         if (y == 9) {
                             if (gameEngine.getHero1() != null && gameEngine.getHero1().hasBallista()) {
@@ -98,7 +95,7 @@ public class MainBattleController implements PropertyChangeListener {
                             mapTile.setBackground(Color.LIGHTBLUE);
                         }
                     }
-                    // --- PRZECIWNIK (PRAWA STRONA) ---
+
                     else if (x == 14) {
                         if (y == 9) {
                             if (gameEngine.getHero2() != null && gameEngine.getHero2().hasBallista()) {
@@ -116,7 +113,6 @@ public class MainBattleController implements PropertyChangeListener {
                     mapTile.setName(tileText.toString());
                 }
 
-                // Bezpieczne sprawdzanie akcji (otoczone blokiem try-catch, aby żaden pojedynczy kafelek nie wysadził całej planszy)
                 try {
                     if (gameEngine.isCurrentCreature(currentBattlePoint)) {
                         mapTile.setBackground(Color.GREENYELLOW);
@@ -139,10 +135,9 @@ public class MainBattleController implements PropertyChangeListener {
                         });
                     }
                 } catch (Exception e) {
-                    // Ignorujemy błędy sprawdzania zasięgu dla maszyn wojennych, które nie stoją fizycznie na planszy
+
                 }
 
-                // Pola specjalne
                 if (gameEngine.getSpecialFields() != null) {
                     SpecialField specialField = gameEngine.getSpecialFields().get(currentBattlePoint);
                     if (specialField != null) {
@@ -193,28 +188,24 @@ public class MainBattleController implements PropertyChangeListener {
     }
 
     private void pass() {
-        // 1. Sprawdzamy, czy jednostka mająca teraz ruch to maszyna wojenna
+
         boolean isWarMachine = gameEngine.isCurrentCreatureWarMachine();
 
-        // 2. Przekazujemy turę w silniku bitwy
         gameEngine.pass();
 
-        // 3. Logika bezpiecznego, symetrycznego ostrzału
         if (isWarMachine) {
-            System.out.println("====== SYSTEM MASZYN WOJENNYCH: Aktywacja ostrzału ======");
+            System.out.println("Aktywacja ostrzału");
 
             try {
                 java.util.List<pl.psi.creatures.Creature> h1Creatures = gameEngine.getHero1().getCreatures();
                 java.util.List<pl.psi.creatures.Creature> h2Creatures = gameEngine.getHero2().getCreatures();
 
-                // Sprawdzamy fizyczną obecność Balisty na listach armii zamiast metodą hasBallista()
                 boolean hero1PosiadaBaliste = h1Creatures.stream()
                         .anyMatch(c -> c instanceof pl.psi.warmachines.WarMachineDecorator);
 
                 boolean hero2PosiadaBaliste = h2Creatures.stream()
                         .anyMatch(c -> c instanceof pl.psi.warmachines.WarMachineDecorator);
 
-                // Filtrujemy listy, aby celować tylko w prawdziwe potwory (Szkielety itp.)
                 java.util.List<pl.psi.creatures.Creature> h1Targets = h1Creatures.stream()
                         .filter(c -> !(c instanceof pl.psi.warmachines.WarMachineDecorator))
                         .filter(c -> c.getAmount() > 0)

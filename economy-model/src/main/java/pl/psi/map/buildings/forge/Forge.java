@@ -9,13 +9,11 @@ public class Forge implements BuildingIf {
 
     @Override
     public String getPath() {
-        // Ścieżka do grafiki Kuźni w Waszych zasobach (możesz potem podmienić na własny plik)
         return "/objects/forge.png";
     }
 
     @Override
     public EnterAction firstInteraction() {
-        // To uruchomi nasze okienko zakupu maszyn wojennych!
         return new EnterAction(EnterActionType.OPEN_FORGE, this);
     }
 

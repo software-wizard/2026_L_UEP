@@ -5,7 +5,7 @@ import pl.psi.BattlePoint;
 
 import java.util.List;
 
-@JsonIgnoreProperties(ignoreUnknown = true) // <-- TA JEDNA LINIJKA NAPRAWIA CAŁY PROBLEM
+@JsonIgnoreProperties(ignoreUnknown = true) // poprawka na szybko dal testow brzydka
 public class SingleTargetArea implements SpellAreaIf {
     @Override
     public List<BattlePoint> getArea(BattlePoint centerPoint) {

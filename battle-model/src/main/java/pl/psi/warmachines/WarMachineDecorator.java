@@ -8,8 +8,7 @@ public abstract class WarMachineDecorator extends Creature {
     private final Creature decorated;
 
     protected WarMachineDecorator(final Creature aDecorated) {
-        // Nie wywołujemy pustego super(), tylko przekazujemy parametry wyżej jeśli to możliwe,
-        // ale skoro rozszerzamy Creature, Java i tak wywoła konstruktor domyślny.
+
         super();
         this.decorated = aDecorated;
     }
