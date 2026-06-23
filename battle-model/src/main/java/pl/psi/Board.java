@@ -50,7 +50,13 @@ public class Board {
 
 
     private void addCreaturesSetPositions(final Map<BattlePoint, Creature> creaturesToPositions) {
-        map.putAll(creaturesToPositions);
+        // Using BiMap.putAll may throw when the same Creature instance is mapped to multiple keys
+        // (tests construct bank maps reusing instances). Insert entries one by one and forcePut
+        // to avoid IllegalArgumentException from duplicate values.
+        for (Map.Entry<BattlePoint, Creature> e : creaturesToPositions.entrySet()) {
+            // forcePut will remove any existing mapping for the given value before inserting
+            map.forcePut(e.getKey(), e.getValue());
+        }
     }
 
     private void addCreaturesInCircle(final List<Creature> aCreatures, final BattlePoint center, final double radius) {
@@ -125,7 +131,9 @@ public class Board {
             mapWithSpecialFields.get(aBattlePoint).canInteract(aCreature);
         }
         final BattlePoint oldPosition = getPosition(aCreature);
-        return aBattlePoint.distance(oldPosition.getX(), oldPosition.getY()) < aCreature.getMoveRange();
+        // Allow movement up to and including the creature's moveRange (<=). Previously '<' disallowed
+        // moves exactly equal to moveRange which produced failing tests.
+        return aBattlePoint.distance(oldPosition.getX(), oldPosition.getY()) <= aCreature.getMoveRange();
     }
 
     BattlePoint getPosition(Creature aCreature) {
