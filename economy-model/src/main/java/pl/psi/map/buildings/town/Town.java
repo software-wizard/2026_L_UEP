@@ -59,6 +59,13 @@ public class Town implements BuildingIf {
             throw new IllegalStateException("Prerequisites not met for " + building);
         }
 
+        if (building == TownBuilding.STRUCTURE_OF_THE_GRAIL) {
+            if (!hero.isHasGrail()) {
+                throw new IllegalStateException("Hero does not have the Grail to build this!");
+            }
+            hero.setHasGrail(false); // consume the Grail
+        }
+
         if (!hero.canAfford(building.getCost())) {
             throw new IllegalStateException("Can't afford " + building);
         }
@@ -87,6 +94,7 @@ public class Town implements BuildingIf {
                 this.build(prereq, owner);
             }
         }
+        resetBuildingOption();
     }
 
     //Jednostki
@@ -102,13 +110,26 @@ public class Town implements BuildingIf {
     }
 
     private double getGrowthModifier() {
+        double modifier = 1.0;
         if (hasCapability(TownCapability.CASTLE_UPGRADE)){
-            return 2;
+            modifier = 2.0;
         } else if (hasCapability(TownCapability.CITADEL_UPGRADE)) {
-            return 1.5;
-        }else{
-            return 1;
+            modifier = 1.5;
         }
+
+        if (hasBuilt(TownBuilding.STRUCTURE_OF_THE_GRAIL)) {
+            modifier += 0.5; // +50% growth from Grail
+        }
+
+        if (owner != null && owner.getArtifacts() != null) {
+            for (pl.psi.hero.artifacts.Artifact art : owner.getArtifacts()) {
+                if (art.getType().name().equals("LEGS_OF_LEGION")) {
+                    modifier += 0.5;
+                    break;
+                }
+            }
+        }
+        return modifier;
     }
 
     public int getAvailableUnits(CreatureBuildings building) {

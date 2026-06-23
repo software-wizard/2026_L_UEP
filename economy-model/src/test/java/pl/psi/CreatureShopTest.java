@@ -50,6 +50,7 @@ public class CreatureShopTest {
     @Test
     void upgradedDwellingShouldSharePoolWithBase() {
         town.build(CreatureBuildings.GRAVEYARD, hero1);
+        town.resetBuildingOption();
         town.build(CreatureBuildings.GRAVEYARD_UPGRADED, hero1);
 
         // Both refer to the same "Base Building" (Graveyard)
@@ -108,6 +109,7 @@ public class CreatureShopTest {
         town.build(TownBuilding.MAGE_GUILD_LVL_1, hero1);
         assertTrue(town.hasCapability(TownCapability.SPELL_PURCHASE));
 
+        town.resetBuildingOption();
         town.build(TownBuilding.MAGE_GUILD_LVL_2, hero1);
         assertTrue(town.hasCapability(TownCapability.SPELL_PURCHASE)); // Still exists
     }

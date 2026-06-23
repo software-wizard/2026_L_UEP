@@ -13,6 +13,7 @@ import lombok.Getter;
 import lombok.Setter;
 import pl.psi.creatures.EconomyCreature;
 import pl.psi.hero.artifacts.Artifact;
+import pl.psi.hero.artifacts.ArtifactType;
 import pl.psi.hero.artifacts.EconomySpell;
 import pl.psi.hero.skills.AbstractSkill;
 import pl.psi.hero.skills.ArmorerSkill;
@@ -41,15 +42,18 @@ public class EconomyHero implements PropertyChangeListener
     private final List<Artifact> artifacts = new ArrayList<>();
     private final List<EconomySpell> spells = new ArrayList<>();
     protected List<ExpModifierIf> expModifiers = new ArrayList<>();
+    private boolean hasGrail;
+    private boolean hasDugThisTurn;
 
     public EconomyHero( final Fraction aFraction, final Resources aResources, final Statistics aStats)
     {
         fraction = aFraction;
         creatureList = new ArrayList<>();
-        remainingMoves = moveRange;
         resources = aResources;
         baseStatistics = aStats;
         skills = new ArrayList<>();
+        this.level = 1;
+        remainingMoves = getMaxMoveRange();
         experience = ThreadLocalRandom.current().nextInt(MIN_INITIAL_EXPERIENCE, MAX_INITIAL_EXPERIENCE + 1);
     }
     public EconomyHero() {
@@ -58,11 +62,12 @@ public class EconomyHero implements PropertyChangeListener
         this.resources = new Resources(0, 0, 0, 0, 0, 0, 0);
         this.baseStatistics = new Statistics(0, 0, 0, 0);
         this.skills = new ArrayList<>();
-        this.remainingMoves = moveRange;
+        this.level = 1;
+        this.remainingMoves = getMaxMoveRange();
     }
 
     public void resetMoveRange() {
-        this.remainingMoves = moveRange;
+        this.remainingMoves = getMaxMoveRange();
     }
 
     public boolean canMoveTo(double distance) {
@@ -84,6 +89,7 @@ public class EconomyHero implements PropertyChangeListener
             throw new IllegalStateException( "Hero has not empty slot for creature" );
         }
         creatureList.add( aCreature );
+        resetMoveRange(); // Recalculate move range after adding a creature (which could be the slowest)
     }
 
     public void addResource(final Resources changedResources) {
@@ -126,6 +132,10 @@ public class EconomyHero implements PropertyChangeListener
 
     public void upgradeSkill(AbstractSkill aSelectedSkill) {
         skills.add(aSelectedSkill);
+        if (aSelectedSkill instanceof ExpModifierIf) {
+            addExpModifier((ExpModifierIf) aSelectedSkill);
+        }
+        resetMoveRange(); // Logistics or Scouting might have changed
     }
 
     public void addSpell(EconomySpell aPickableSpell) {
@@ -277,5 +287,99 @@ public class EconomyHero implements PropertyChangeListener
             skills = new ArrayList<>();
         }
         skills.add( aSkill );
+    }
+
+    public void addSkill(final AbstractSkill aSkill) {
+        if (skills == null) {
+            skills = new ArrayList<>();
+        }
+        skills.add(aSkill);
+        if (aSkill instanceof ExpModifierIf) {
+            addExpModifier((ExpModifierIf) aSkill);
+        }
+        resetMoveRange();
+    }
+
+    public int getSlowestCreatureSpeed() {
+        if (creatureList.isEmpty()) {
+            return 6; // default
+        }
+        return creatureList.stream()
+                .mapToInt(c -> c.getStats().getMoveRange())
+                .min()
+                .orElse(6);
+    }
+
+    public int getMaxMoveRange() {
+        int slowestSpeed = getSlowestCreatureSpeed();
+        int base = 10;
+        if (slowestSpeed < 6) {
+            base = 10 - (6 - slowestSpeed);
+        } else {
+            base = 10 + (slowestSpeed - 6) / 2;
+        }
+
+        double logisticsMultiplier = 1.0;
+        if (skills != null) {
+            for (AbstractSkill skill : skills) {
+                if (skill.getName().name().equals("LOGISTICS")) {
+                    logisticsMultiplier += skill.getFactor();
+                }
+            }
+        }
+
+        int artifactBonus = 0;
+        if (artifacts != null) {
+            for (Artifact art : artifacts) {
+                if (art.getType() == ArtifactType.BOOTS_OF_SPEED) {
+                    artifactBonus += 2;
+                } else if (art.getType() == ArtifactType.EQUESTRIANS_GLOVES) {
+                    artifactBonus += 3;
+                }
+            }
+        }
+
+        return (int) Math.round(base * logisticsMultiplier) + artifactBonus;
+    }
+
+    public int getVisibilityRadius() {
+        int radius = 4;
+        if (skills != null) {
+            for (AbstractSkill skill : skills) {
+                if (skill.getName().name().equals("SCOUTING")) {
+                    radius += (int) skill.getFactor();
+                }
+            }
+        }
+        if (artifacts != null) {
+            for (Artifact art : artifacts) {
+                if (art.getType() == ArtifactType.SPYGLASS) {
+                    radius += 1;
+                } else if (art.getType() == ArtifactType.SPECULUM) {
+                    radius += 2;
+                }
+            }
+        }
+        return radius;
+    }
+
+    public void generateResourcesFromArtifacts() {
+        if (artifacts != null) {
+            for (Artifact art : artifacts) {
+                if (art.getType() == ArtifactType.ENDLESS_BAG_OF_GOLD) {
+                    addResource(new Resources(750, 0, 0, 0, 0, 0, 0));
+                } else if (art.getType() == ArtifactType.CHARCOAL_CART) {
+                    addResource(new Resources(0, 0, 1, 0, 0, 0, 0));
+                }
+            }
+        }
+    }
+
+    public boolean isHasGrail() {
+        return hasGrail;
+    }
+
+    public void setHasGrail(boolean hasGrail) {
+        this.hasGrail = hasGrail;
     }
 }

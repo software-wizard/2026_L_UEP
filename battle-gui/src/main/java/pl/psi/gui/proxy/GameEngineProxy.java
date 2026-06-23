@@ -2,6 +2,7 @@ package pl.psi.gui.proxy;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.google.common.collect.BiMap;
 import pl.psi.BattlePoint;
 import pl.psi.GameEngine;
@@ -21,7 +22,9 @@ import java.util.Optional;
 public class GameEngineProxy extends GameEngine {
     private static final String BASE_URL = "http://localhost:8080/api/battle";
     private final HttpClient httpClient = HttpClient.newHttpClient();
-    private final ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    private final ObjectMapper objectMapper = new ObjectMapper()
+            .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+            .configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
 
     private Map<String, Map<String, Object>> cachedBoardState = null;
 

@@ -27,8 +27,13 @@ public enum ArtifactType {
     TITANS_THUNDER("Titan's Thunder", "/objects/Artifact_Titan's_Thunder.gif", new Statistics(9, 9, 8, 8), 40000),
     TUNIC_OF_THE_CYCLOPS_KING("Tunic of the Cyclops King", "/objects/Artifact_Tunic_of_the_Cyclops_King.gif", new Statistics(4, 0, 0, 0), 4000),
 
-    // Add more artifacts as needed
-
+    BOOTS_OF_SPEED("Boots of Speed", "/objects/Artifact_Boots_of_Speed.gif", new Statistics(0, 0, 0, 0), 2000),
+    EQUESTRIANS_GLOVES("Equestrian's Gloves", "/objects/Artifact_Equestrian's_Gloves.gif", new Statistics(0, 0, 0, 0), 3000),
+    ENDLESS_BAG_OF_GOLD("Endless Bag of Gold", "/objects/Artifact_Endless_Bag_of_Gold.gif", new Statistics(0, 0, 0, 0), 5000),
+    CHARCOAL_CART("Charcoal Cart", "/objects/Artifact_Charcoal_Cart.gif", new Statistics(0, 0, 0, 0), 2000),
+    LEGS_OF_LEGION("Legs of Legion", "/objects/Artifact_Legs_of_Legion.gif", new Statistics(0, 0, 0, 0), 5000),
+    SPYGLASS("Spyglass", "/objects/Artifact_Spyglass.gif", new Statistics(0, 0, 0, 0), 1000),
+    SPECULUM("Speculum", "/objects/Artifact_Speculum.gif", new Statistics(0, 0, 0, 0), 1000)
     ;
 
 

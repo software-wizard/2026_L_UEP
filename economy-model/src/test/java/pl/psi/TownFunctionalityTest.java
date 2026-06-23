@@ -54,6 +54,7 @@ public class TownFunctionalityTest {
     void shouldAddResourcesDailyFromCityHallAndSilo() {
         // Setup: Build prerequisites for Resource Silo
         town.build(TownBuilding.MARKETPLACE, hero1);
+        town.resetBuildingOption();
         town.build(TownBuilding.RESOURCE_SILO, hero1);
 
         Resources resourcesBefore = new Resources(
@@ -111,6 +112,7 @@ public class TownFunctionalityTest {
         Town town = new Town(hero1);
 
         town.build(TownBuilding.MAGE_GUILD_LVL_1, hero1);
+        town.resetBuildingOption();
         town.build(TownBuilding.MAGE_GUILD_LVL_2, hero1);
 
         assertTrue(town.hasCapability(TownCapability.SPELL_PURCHASE));
@@ -125,6 +127,7 @@ public class TownFunctionalityTest {
 
         // Upgrade to Town Hall (Prerequisite: Tavern)
         town.build(TownBuilding.TAVERN, hero1);
+        town.resetBuildingOption();
         town.build(TownBuilding.TOWN_HALL, hero1);
 
         goldStart = hero1.getResources().getGold();
@@ -132,9 +135,13 @@ public class TownFunctionalityTest {
         assertEquals(1500, hero1.getResources().getGold() - goldStart); // Town Hall gives 1000
 
         // Upgrade to City Hall
+        town.resetBuildingOption();
         town.build(TownBuilding.MARKETPLACE, hero1);
+        town.resetBuildingOption();
         town.build(TownBuilding.BLACKSMITH, hero1);
+        town.resetBuildingOption();
         town.build(TownBuilding.MAGE_GUILD_LVL_1, hero1);
+        town.resetBuildingOption();
         town.build(TownBuilding.CITY_HALL, hero1);
 
         goldStart = hero1.getResources().getGold();

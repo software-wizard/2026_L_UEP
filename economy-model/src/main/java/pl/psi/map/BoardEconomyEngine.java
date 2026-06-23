@@ -11,6 +11,9 @@ import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.HashMap;
 
 public class BoardEconomyEngine {
 
@@ -22,6 +25,8 @@ public class BoardEconomyEngine {
     Map<Point, MapObjectIf> interactables;
     private int turnCounter;
     private int dayCounter;
+    @JsonIgnore
+    private final Map<EconomyHero, Set<Point>> revealedPoints = new HashMap<>();
 
 
     public BoardEconomyEngine(final EconomyHero hero1, final EconomyHero hero2, Map<Point, MapObjectIf> map) {
@@ -32,6 +37,8 @@ public class BoardEconomyEngine {
                 .addHero(hero2,new Point(17,8))
                 .addInteractables(map)
                 .build();
+        updateVisibility(hero1);
+        updateVisibility(hero2);
     }
 
     public boolean canMove(final Point point) {
@@ -46,31 +53,48 @@ public class BoardEconomyEngine {
     }
 
     public boolean canEnter(final Point point) {
-        // Allow entering if there is a building AND (no hero OR it's the current hero)
         if (isEnterable(point)) {
-            return !isHero(point) || isCurrentHero(point);
+            return isCurrentHero(point) || (!isHero(point) && canMove(point));
         }
         return false;
     }
 
     public boolean canInteract(Point point) {
-        // Allow interaction if it's interactable AND (no hero OR it's the current hero)
         if (getInteractable(point).isPresent()) {
-            return !isHero(point) || isCurrentHero(point);
+            return isCurrentHero(point) || (!isHero(point) && canMove(point));
         }
         return false;
     }
 
     public void move(final Point point) {
         board.move(turnQueue.getCurrentHero(), point);
+        updateVisibility(turnQueue.getCurrentHero());
         observerSupport.firePropertyChange(HERO_MOVED, null, point);
     }
 
     public void interact(final Point point) {
-        board.interact(turnQueue.getCurrentHero(), point);
+        if (isCurrentHero(point)) {
+            board.interact(turnQueue.getCurrentHero(), point);
+        } else if (canMove(point)) {
+            move(point);
+            if (isCurrentHero(point)) {
+                board.interact(turnQueue.getCurrentHero(), point);
+            }
+        }
     }
 
     public void enter(final Point point) {
+        if (isCurrentHero(point)) {
+            executeEnter(point);
+        } else if (canMove(point)) {
+            move(point);
+            if (isCurrentHero(point)) {
+                executeEnter(point);
+            }
+        }
+    }
+
+    private void executeEnter(final Point point) {
         EnterAction action = board.enter(point);
         switch (action.getType()) {
             case OPEN_SHOP: {
@@ -85,6 +109,17 @@ public class BoardEconomyEngine {
     }
 
     public void secondInteraction(final Point point) {
+        if (isCurrentHero(point)) {
+            executeSecondInteraction(point);
+        } else if (canMove(point)) {
+            move(point);
+            if (isCurrentHero(point)) {
+                executeSecondInteraction(point);
+            }
+        }
+    }
+
+    private void executeSecondInteraction(final Point point) {
         EnterAction action = board.secondInteraction(point);
         switch (action.getType()) {
             case OPEN_UPGRADE:{
@@ -113,8 +148,29 @@ public class BoardEconomyEngine {
 
     public void pass() {
         getCurrentHero().resetMoveRange();
+        getCurrentHero().setHasDugThisTurn(false);
         endOfTurn();
         turnQueue.next();
+        updateVisibility(getCurrentHero());
+    }
+
+    public void dig() {
+        EconomyHero hero = getCurrentHero();
+        if (hero.isHasDugThisTurn()) {
+            throw new IllegalStateException("You can only dig once per turn!");
+        }
+        hero.setHasDugThisTurn(true);
+        Point heroPos = board.getPosition(hero);
+        if (heroPos != null) {
+            Optional<MapObjectIf> objOpt = board.getObjectAt(heroPos);
+            if (objOpt.isPresent() && objOpt.get() instanceof pl.psi.map.Grail) {
+                board.interact(hero, heroPos);
+            } else {
+                throw new IllegalStateException("There is nothing buried here!");
+            }
+        } else {
+            throw new IllegalStateException("Hero position is not set!");
+        }
     }
 
     private void endOfTurn() { // called after each click of the pass button
@@ -157,8 +213,11 @@ public class BoardEconomyEngine {
     private void generateResourcesEndDay(){
         for (MapObjectIf interactable : interactables.values()) {
             interactable.generateResource();
-            }
         }
+        for (EconomyHero hero : board.getHeroes()) {
+            hero.generateResourcesFromArtifacts();
+        }
+    }
 
     public void addObserver(final PropertyChangeListener aObserver) {
         observerSupport.addPropertyChangeListener(aObserver);
@@ -200,6 +259,42 @@ public class BoardEconomyEngine {
         return board.getBuildingAt(pos)
                 .filter(Town.class::isInstance)
                 .map(Town.class::cast);
+    }
+
+    public boolean isTileVisible(Point point) {
+        EconomyHero currentHero = getCurrentHero();
+        if (currentHero == null) {
+            return true;
+        }
+        Set<Point> revealed = revealedPoints.get(currentHero);
+        return revealed != null && revealed.contains(point);
+    }
+
+    public void updateVisibility(EconomyHero hero) {
+        if (hero == null) return;
+        Set<Point> revealed = revealedPoints.computeIfAbsent(hero, h -> new HashSet<>());
+        Point heroPos = board.getPosition(hero);
+        if (heroPos != null) {
+            int radius = hero.getVisibilityRadius();
+            revealArea(heroPos, radius, revealed);
+        }
+        for (Map.Entry<Point, MapObjectIf> entry : interactables.entrySet()) {
+            MapObjectIf obj = entry.getValue();
+            if (obj instanceof Town && ((Town) obj).getOwner() == hero) {
+                Point townPos = entry.getKey();
+                revealArea(townPos, 3, revealed);
+            }
+        }
+    }
+
+    private void revealArea(Point center, int radius, Set<Point> revealed) {
+        for (int dx = -radius; dx <= radius; dx++) {
+            for (int dy = -radius; dy <= radius; dy++) {
+                if (Math.max(Math.abs(dx), Math.abs(dy)) <= radius) {
+                    revealed.add(new Point(center.getX() + dx, center.getY() + dy));
+                }
+            }
+        }
     }
 }
 

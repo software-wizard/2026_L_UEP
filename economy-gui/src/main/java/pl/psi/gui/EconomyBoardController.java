@@ -25,7 +25,7 @@ import java.util.Map;
 public class EconomyBoardController implements PropertyChangeListener {
     private final BoardEconomyEngine gameEngine;
     @FXML private GridPane gridMap;
-    @FXML private Button passButton,equipmentButton;
+    @FXML private Button passButton,equipmentButton,digButton;
     @FXML private Label expLabel,lvlLabel, goldLabel, woodLabel, oreLabel, mercuryLabel, sulphurLabel, crystalLabel, gemsLabel,attackLabel,defenceLabel,powerLabel,knowledgeLabel;
 
     private final EconomyHero battleHero1;
@@ -44,6 +44,7 @@ public class EconomyBoardController implements PropertyChangeListener {
         gameEngine.addObserver(this);
         passButton.setOnMouseClicked(e -> gameEngine.pass());
         equipmentButton.setOnMouseClicked(e -> showEquipment());
+        digButton.setOnMouseClicked(e -> handleDig());
     }
 
     private void refreshGui() {
@@ -61,6 +62,13 @@ public class EconomyBoardController implements PropertyChangeListener {
     }
 
     private void renderTileContent(Point point, EconomyTile tile) {
+        if (!gameEngine.isTileVisible(point)) {
+            tile.setBackground(Color.BLACK);
+            tile.setName("");
+            tile.setImage(null);
+            return;
+        }
+
         if (gameEngine.isCurrentHero(point)) {
             tile.setImage("/heroes/hero1.png");
         }
@@ -87,6 +95,10 @@ public class EconomyBoardController implements PropertyChangeListener {
                     gameEngine.move(point);
                 }
             });
+        }
+
+        if (!gameEngine.isTileVisible(point)) {
+            return;
         }
 
         if (gameEngine.canInteract(point)) {
@@ -151,6 +163,24 @@ public class EconomyBoardController implements PropertyChangeListener {
 
     private void showEquipment() {
         WindowManager.openEquipment(gameEngine.getCurrentHero());
+    }
+
+    private void handleDig() {
+        try {
+            gameEngine.dig();
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.INFORMATION);
+            alert.setTitle("Grail Found!");
+            alert.setHeaderText(null);
+            alert.setContentText("Congratulations! You have successfully dug up the Grail!");
+            alert.showAndWait();
+            refreshGui();
+        } catch (IllegalStateException ex) {
+            javafx.scene.control.Alert alert = new javafx.scene.control.Alert(javafx.scene.control.Alert.AlertType.WARNING);
+            alert.setTitle("Digging failed");
+            alert.setHeaderText(null);
+            alert.setContentText(ex.getMessage());
+            alert.showAndWait();
+        }
     }
 
     @Override

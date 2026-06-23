@@ -33,7 +33,8 @@ public enum TownBuilding implements BuildingType {
     CITY_HALL(Set.of(TOWN_HALL, MAGE_GUILD_LVL_1,MARKETPLACE,BLACKSMITH), new Resources(5000,0,0,0,0,0,0), Category.HALLS),
     CAPITOL(Set.of(CITY_HALL,CASTLE), new Resources(10000,0,0,0,0,0,0), Category.HALLS),
 
-    NECROMANCY_AMPLIFIER(Set.of(MAGE_GUILD_LVL_1),new Resources(1000,0,0,0,0,0,0) ,Category.UNIQUE);
+    NECROMANCY_AMPLIFIER(Set.of(MAGE_GUILD_LVL_1),new Resources(1000,0,0,0,0,0,0) ,Category.UNIQUE),
+    STRUCTURE_OF_THE_GRAIL(Set.of(), new Resources(0,0,0,0,0,0,0), Category.GRAIL);
 
     public enum Category {
         GRAIL,
@@ -108,6 +109,9 @@ public enum TownBuilding implements BuildingType {
                 break;
             case RESOURCE_SILO:
                 hero.addResource(new Resources(0,1,1,0,0,0,0));
+                break;
+            case STRUCTURE_OF_THE_GRAIL:
+                hero.addResource(new Resources(5000,0,0,0,0,0,0));
                 break;
         }
     }

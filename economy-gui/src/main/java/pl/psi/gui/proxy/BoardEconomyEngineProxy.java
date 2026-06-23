@@ -82,6 +82,16 @@ public class BoardEconomyEngineProxy extends BoardEconomyEngine {
     }
 
     @Override
+    public boolean canAttack(Point point) {
+        return Boolean.TRUE.equals(getTileState(point.getX(), point.getY()).get("canAttack"));
+    }
+
+    @Override
+    public boolean isTileVisible(Point point) {
+        return Boolean.TRUE.equals(getTileState(point.getX(), point.getY()).get("isTileVisible"));
+    }
+
+    @Override
     public void move(Point point) {
         postAction("/move", point.getX(), point.getY());
         invalidateCache();
@@ -156,6 +166,26 @@ public class BoardEconomyEngineProxy extends BoardEconomyEngine {
             });
         }
         return Optional.empty();
+    }
+
+    @Override
+    public void dig() {
+        try {
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create(BASE_URL + "/dig"))
+                    .POST(HttpRequest.BodyPublishers.noBody())
+                    .build();
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() != 200) {
+                throw new IllegalStateException(res.body());
+            }
+            invalidateCache();
+            super.dig();
+        } catch (IllegalStateException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new IllegalStateException("Dig request failed: " + e.getMessage());
+        }
     }
 
     private void postAction(String endpoint, int x, int y) {

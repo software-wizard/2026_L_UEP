@@ -46,8 +46,8 @@ public class BoardEconomyController {
         if ("DefaultMap".equals(mapName)) {
             return new HashMap<>(Map.ofEntries(
                     Map.entry(new Point(4,4), new Artifact(ArtifactType.SWORD_OF_HELLFIRE)),
-                    Map.entry(new Point(17,1), new Town(aHero1)),
-                    Map.entry(new Point(1,7), new Town(aHero2)),
+                    Map.entry(new Point(1,1), new Town(aHero1)),
+                    Map.entry(new Point(17,7), new Town(aHero2)),
                     Map.entry(new Point(3,2), new ResourceGenerator(ResourceGenType.GEM)),
                     Map.entry(new Point(5,6), new ResourceGenerator(ResourceGenType.GOLD)),
                     Map.entry(new Point(8,1), new ResourceGenerator(ResourceGenType.MERCURY)),
@@ -59,7 +59,8 @@ public class BoardEconomyController {
                     Map.entry(new Point(10,6), new Gold(new Resources(1000,0,0,0,0,0,0))),
                     Map.entry(new Point(2,2), new Bank(BankStatistics.CASTLE_1)),
                     Map.entry(new Point(8,8), new Bank(BankStatistics.CASTLE_2)),
-                    Map.entry(new Point(8,5), new EconomySpell("Default"))
+                    Map.entry(new Point(8,5), new EconomySpell("Default")),
+                    Map.entry(new Point(2,3), new pl.psi.map.Grail())
             ));
         }
         return new HashMap<>();
@@ -78,7 +79,7 @@ public class BoardEconomyController {
                     tile.put("isHero", this.gameStateService.getBoardEconomyEngine().isHero(p));
 
                     Optional<MapObjectIf> obj = this.gameStateService.getBoardEconomyEngine().getMapObject(p);
-                    if (obj.isPresent()) {
+                    if (obj.isPresent() && !(obj.get() instanceof pl.psi.map.Grail)) {
                         tile.put("hasMapObject", true);
                         tile.put("mapObjectPath", obj.get().getPath());
                     } else {
@@ -89,6 +90,7 @@ public class BoardEconomyController {
                     tile.put("canAttack", this.gameStateService.getBoardEconomyEngine().canAttack(p));
                     tile.put("canInteract", this.gameStateService.getBoardEconomyEngine().canInteract(p));
                     tile.put("canEnter", this.gameStateService.getBoardEconomyEngine().canEnter(p));
+                    tile.put("isTileVisible", this.gameStateService.getBoardEconomyEngine().isTileVisible(p));
 
                     state.put(x + "," + y, tile);
                 } catch (Exception e) {
@@ -99,6 +101,7 @@ public class BoardEconomyController {
                     tile.put("canAttack", false);
                     tile.put("canInteract", false);
                     tile.put("canEnter", false);
+                    tile.put("isTileVisible", false);
                     state.put(x + "," + y, tile);
                 }
             }
@@ -238,6 +241,51 @@ public class BoardEconomyController {
         try {
             this.gameStateService.getBoardEconomyEngine().secondInteraction(new Point(x, y));
             return ResponseEntity.ok("Hero performed second interaction.");
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/buildBuilding")
+    public ResponseEntity<String> buildBuilding(@RequestParam String buildingName) {
+        try {
+            BoardEconomyEngine engine = this.gameStateService.getBoardEconomyEngine();
+            if (engine == null) {
+                return ResponseEntity.badRequest().body("Board economy not started");
+            }
+            Optional<Town> townOpt = engine.getTownUnderHero(engine.getCurrentHero());
+            if (townOpt.isEmpty()) {
+                return ResponseEntity.badRequest().body("Current hero is not on a town tile");
+            }
+            Town town = townOpt.get();
+            pl.psi.map.buildings.town.BuildingType selected;
+            try {
+                selected = pl.psi.map.buildings.town.TownBuilding.valueOf(buildingName);
+            } catch (IllegalArgumentException e) {
+                selected = pl.psi.map.buildings.town.CreatureBuildings.valueOf(buildingName);
+            }
+            town.build(selected, engine.getCurrentHero());
+            return ResponseEntity.ok("Building constructed.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body("Invalid building: " + e.getMessage());
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    @PostMapping("/dig")
+    public ResponseEntity<String> dig() {
+        try {
+            BoardEconomyEngine engine = this.gameStateService.getBoardEconomyEngine();
+            if (engine == null) {
+                return ResponseEntity.badRequest().body("Board economy not started");
+            }
+            engine.dig();
+            return ResponseEntity.ok("Grail dug up successfully.");
+        } catch (IllegalStateException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }

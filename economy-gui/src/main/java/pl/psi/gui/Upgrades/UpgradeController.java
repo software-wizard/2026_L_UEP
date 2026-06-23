@@ -63,6 +63,18 @@ public class UpgradeController {
                 selected = CreatureBuildings.valueOf(buildingName);
             }
 
+            // Sync with server first
+            java.net.http.HttpClient httpClient = java.net.http.HttpClient.newHttpClient();
+            String url = "http://localhost:8080/api/board/buildBuilding?buildingName=" + selected.toString();
+            java.net.http.HttpRequest req = java.net.http.HttpRequest.newBuilder()
+                    .uri(java.net.URI.create(url))
+                    .POST(java.net.http.HttpRequest.BodyPublishers.noBody())
+                    .build();
+            java.net.http.HttpResponse<String> res = httpClient.send(req, java.net.http.HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() != 200) {
+                throw new IllegalStateException(res.body());
+            }
+
             town.build(selected, hero);
             showAlert(Alert.AlertType.INFORMATION, "Upgrade Purchased", selected + " unlocked!");
             refreshUpgrades();
@@ -71,6 +83,8 @@ public class UpgradeController {
             showAlert(Alert.AlertType.ERROR, "Error", "Selected upgrade is invalid.");
         } catch (IllegalStateException e) {
             showAlert(Alert.AlertType.ERROR, "Cannot Purchase", e.getMessage());
+        } catch (Exception e) {
+            showAlert(Alert.AlertType.ERROR, "Cannot Purchase", "Network error: " + e.getMessage());
         }
     }
 

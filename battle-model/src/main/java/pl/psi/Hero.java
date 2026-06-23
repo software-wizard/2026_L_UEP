@@ -3,6 +3,8 @@ package pl.psi;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
 import pl.psi.Spells.ActiveSpellEffect;
 import pl.psi.Spells.Spell;
 import pl.psi.creatures.Creature;
@@ -23,6 +25,7 @@ public class Hero implements java.beans.PropertyChangeListener {
     private int spellPower = 1;
 
     @Getter
+    @JsonIgnore
     private SpellCastingState spellCastingState = new ReadyToCastState();
 
     public Hero(final List< Creature > aCreatures, List<Spell> aSpells)

@@ -56,8 +56,8 @@ public class EconomyBoardStart extends Application {
     private Map<pl.psi.economy.Point, MapObjectIf> map() {
         return Map.ofEntries(
                 Map.entry(new pl.psi.economy.Point(4,4), new Artifact(ArtifactType.SWORD_OF_HELLFIRE)),
-                Map.entry(new pl.psi.economy.Point(17,1), new Town(hero1)),
-                Map.entry(new pl.psi.economy.Point(1,7), new Town(hero2)),
+                Map.entry(new pl.psi.economy.Point(1,1), new Town(hero1)),
+                Map.entry(new pl.psi.economy.Point(10,7), new Town(hero2)),
                 Map.entry(new pl.psi.economy.Point(3,2), new ResourceGenerator(ResourceGenType.GEM)),
                 Map.entry(new pl.psi.economy.Point(5,6), new ResourceGenerator(ResourceGenType.GOLD)),
                 Map.entry(new pl.psi.economy.Point(8,1), new ResourceGenerator(ResourceGenType.MERCURY)),

@@ -23,6 +23,10 @@ public class BoardEconomy {
         return Optional.ofNullable(map.get(point));
     }
 
+    public java.util.Collection<EconomyHero> getHeroes() {
+        return map.values();
+    }
+
     public Optional<MapObjectIf> getObjectAt(final Point point) {
         return Optional.ofNullable(interactionMap.get(point));
     }
@@ -46,18 +50,12 @@ public class BoardEconomy {
 
     public boolean canMove(final EconomyHero hero, final Point targetPoint) {
         Object obj = map.get(targetPoint);
-        Object objOnInteractionMap = interactionMap.get(targetPoint);
-
-        if (objOnInteractionMap != null) {
-            return true;
-        }
         if (obj != null) {
             return false;
         }
         final Point oldPosition = getPosition(hero);
         double distance = targetPoint.distance(oldPosition.getX(), oldPosition.getY());
         return distance <= hero.getRemainingMoveRange();
-
     }
 
     public void move(final EconomyHero hero, final Point targetPoint) {

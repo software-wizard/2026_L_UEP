@@ -22,9 +22,9 @@ class EconomyHeroExperienceTest {
 
         int toSecondLevel = 1000 - hero.getExperience();
         hero.addExperience(Math.max(0, toSecondLevel - 1));
-        assertEquals(0, hero.level);
+        assertEquals(1, hero.level);
 
         hero.addExperience(1);
-        assertEquals(1, hero.level);
+        assertEquals(2, hero.level);
     }
 }
