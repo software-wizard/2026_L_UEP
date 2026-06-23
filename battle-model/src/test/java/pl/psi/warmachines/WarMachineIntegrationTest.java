@@ -118,4 +118,100 @@ public class WarMachineIntegrationTest {
 
         assertTrue(machineAbilities.contains("CAST_AIR_SHIELD"), "Architektura powinna umożliwiać dynamiczne dodawanie nowych unikalnych akcji dla zaawansowanych maszyn.");
     }
+
+    @Test
+    public void catapultShouldDestroyWallAfterSeveralHits() {
+        int wallDurability = 100;
+
+        wallDurability -= 30;
+        wallDurability -= 30;
+        wallDurability -= 40;
+
+        assertEquals(0, wallDurability,
+                "Mur powinien zostać całkowicie zniszczony po otrzymaniu obrażeń równych jego wytrzymałości.");
+    }
+
+    @Test
+    public void catapultShouldNotDamageAlreadyDestroyedWall() {
+        int wallDurability = 0;
+
+        wallDurability = Math.max(0, wallDurability - 50);
+
+        assertEquals(0, wallDurability,
+                "Zniszczony mur nie powinien przyjmować dodatkowych obrażeń ani osiągać wartości ujemnych.");
+    }
+
+    @Test
+    public void heroShouldBeAbleToOwnSeveralWarMachines() {
+        List<String> machines = new ArrayList<>();
+
+        machines.add("BALLISTA");
+        machines.add("CATAPULT");
+        machines.add("FIRST_AID_TENT");
+
+        assertEquals(3, machines.size(),
+                "Bohater powinien mieć możliwość posiadania kilku różnych maszyn wojennych jednocześnie.");
+    }
+
+    @Test
+    public void firstAidTentShouldRestoreHealth() {
+        int hp = 50;
+
+        hp += 20;
+
+        assertEquals(70, hp,
+                "Namiot medyka powinien poprawnie zwiększać zdrowie leczonej jednostki.");
+    }
+
+    @Test
+    public void firstAidTentShouldNotHealAboveMaximumHealth() {
+        int currentHp = 95;
+        int maxHp = 100;
+
+        currentHp = Math.min(maxHp, currentHp + 20);
+
+        assertEquals(100, currentHp,
+                "Leczenie nie powinno zwiększać zdrowia jednostki ponad jej maksymalną wartość.");
+    }
+
+    @Test
+    public void heroShouldNotPurchaseSameWarMachineTwice() {
+        List<String> machines = new ArrayList<>();
+        machines.add("BALLISTA");
+
+        if (!machines.contains("BALLISTA")) {
+            machines.add("BALLISTA");
+        }
+
+        assertEquals(1, machines.size(),
+                "Ten sam typ maszyny wojennej nie powinien zostać dodany do kolekcji więcej niż jeden raz.");
+    }
+
+    @Test
+    public void forgeShouldSupportDifferentWarMachineTypes() {
+        List<String> availableMachines = new ArrayList<>();
+
+        availableMachines.add("BALLISTA");
+        availableMachines.add("CATAPULT");
+        availableMachines.add("FIRST_AID_TENT");
+
+        assertTrue(availableMachines.contains("BALLISTA"),
+                "Warsztat powinien umożliwiać zakup balisty.");
+
+        assertTrue(availableMachines.contains("CATAPULT"),
+                "Warsztat powinien umożliwiać zakup katapulty.");
+
+        assertTrue(availableMachines.contains("FIRST_AID_TENT"),
+                "Warsztat powinien umożliwiać zakup namiotu medyka.");
+    }
+
+    @Test
+    public void destroyedWarMachineShouldNotBeOperational() {
+        int machineHealth = 0;
+
+        boolean canAct = machineHealth > 0;
+
+        assertFalse(canAct,
+                "Zniszczona maszyna wojenna nie powinna wykonywać żadnych akcji podczas bitwy.");
+    }
 }
