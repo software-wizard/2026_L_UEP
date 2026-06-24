@@ -18,6 +18,7 @@ import pl.psi.map.resources.Resources;
 import pl.psi.map.resources.generators.*;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 public class EconomyBoardStart extends Application {
@@ -54,22 +55,24 @@ public class EconomyBoardStart extends Application {
     }
 
     private Map<pl.psi.economy.Point, MapObjectIf> map() {
-        return Map.ofEntries(
-                Map.entry(new pl.psi.economy.Point(4,4), new Artifact(ArtifactType.SWORD_OF_HELLFIRE)),
-                Map.entry(new pl.psi.economy.Point(17,1), new Town(hero1)),
-                Map.entry(new pl.psi.economy.Point(1,7), new Town(hero2)),
-                Map.entry(new pl.psi.economy.Point(3,2), new ResourceGenerator(ResourceGenType.GEM)),
-                Map.entry(new pl.psi.economy.Point(5,6), new ResourceGenerator(ResourceGenType.GOLD)),
-                Map.entry(new pl.psi.economy.Point(8,1), new ResourceGenerator(ResourceGenType.MERCURY)),
-                Map.entry(new pl.psi.economy.Point(10,4), new ResourceGenerator(ResourceGenType.WOOD)),
-                Map.entry(new pl.psi.economy.Point(13,7), new ResourceGenerator(ResourceGenType.SULFUR)),
-                Map.entry(new pl.psi.economy.Point(15,2), new ResourceGenerator(ResourceGenType.CRYSTAL)),
-                Map.entry(new pl.psi.economy.Point(6,8), new ResourceGenerator(ResourceGenType.ORE)),
-                Map.entry(new pl.psi.economy.Point(9,3), new Gold(new Resources(1000,0,0,0,0,0,0))),
-                Map.entry(new pl.psi.economy.Point(10,6), new Gold(new Resources(1000,0,0,0,0,0,0))),
-                Map.entry(new pl.psi.economy.Point(2,2), new Bank(BankStatistics.CASTLE_1)),
-                Map.entry(new pl.psi.economy.Point(8,8), new Bank(BankStatistics.CASTLE_2)),
-                Map.entry(new pl.psi.economy.Point(8,5), new EconomySpell(SPELL_NAME))
-        );
+        Map<pl.psi.economy.Point, MapObjectIf> map = new HashMap<>();
+
+        map.put(new pl.psi.economy.Point(4,4), new Artifact(ArtifactType.SWORD_OF_HELLFIRE));
+        map.put(new pl.psi.economy.Point(17,1), new Town(hero1));
+        map.put(new pl.psi.economy.Point(1,7), new Town(hero2));
+        map.put(new pl.psi.economy.Point(3,2), new ResourceGenerator(ResourceGenType.GEM));
+        map.put(new pl.psi.economy.Point(5,6), new ResourceGenerator(ResourceGenType.GOLD));
+        map.put(new pl.psi.economy.Point(8,1), new ResourceGenerator(ResourceGenType.MERCURY));
+        map.put(new pl.psi.economy.Point(10,4), new ResourceGenerator(ResourceGenType.WOOD));
+        map.put(new pl.psi.economy.Point(13,7), new ResourceGenerator(ResourceGenType.SULFUR));
+        map.put(new pl.psi.economy.Point(15,2), new ResourceGenerator(ResourceGenType.CRYSTAL));
+        map.put(new pl.psi.economy.Point(6,8), new ResourceGenerator(ResourceGenType.ORE));
+        // map.put(new pl.psi.economy.Point(9,3), new Gold(new Resources(1000,0,0,0,0,0,0)));
+        // map.put(new pl.psi.economy.Point(10,6), new Gold(new Resources(1000,0,0,0,0,0,0)));
+        map.put(new pl.psi.economy.Point(2,2), new Bank(BankStatistics.CASTLE_1));
+        map.put(new pl.psi.economy.Point(8,8), new Bank(BankStatistics.CASTLE_2));
+        // map.put(new pl.psi.economy.Point(8,5), new EconomySpell(SPELL_NAME));
+
+        return map;
     }
 }
