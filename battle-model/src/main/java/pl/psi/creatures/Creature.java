@@ -13,6 +13,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AccessLevel;
 import lombok.Setter;
 import pl.psi.Hero;
@@ -28,6 +29,7 @@ import lombok.Getter;
 /**
  * TODO: Describe this class (The first line - until the first dot - will interpret as the brief description).
  */
+@JsonIgnoreProperties(ignoreUnknown = true)
 @Getter
 public class Creature implements PropertyChangeListener {
     private CreatureStatisticIf stats;

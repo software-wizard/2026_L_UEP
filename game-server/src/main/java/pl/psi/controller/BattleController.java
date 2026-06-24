@@ -75,13 +75,27 @@ public class BattleController {
     public ResponseEntity<String> startBattle(
             @RequestBody List<Hero> heroes,
             @RequestParam(defaultValue = "DefaultBattleMap") String mapName) {
+        try {
+            if (heroes == null) {
+                return ResponseEntity.badRequest().body("Invalid battle start request: heroes list is null.");
+            }
+            if (heroes.size() < 2) {
+                return ResponseEntity.badRequest().body("Invalid battle start request: expected 2 heroes, got " + heroes.size() + ".");
+            }
 
-        Hero hero1 = heroes.get(0);
-        Hero hero2 = heroes.get(1);
+            if (!"DefaultBattleMap".equals(mapName)) {
+                return ResponseEntity.badRequest().body("Unknown battle map name: '" + mapName + "'. Only 'DefaultBattleMap' is supported.");
+            }
 
-        this.gameStateService.startBattle(hero1, hero2);
+            Hero hero1 = heroes.get(0);
+            Hero hero2 = heroes.get(1);
 
-        return ResponseEntity.ok("Battle engine started successfully.");
+            this.gameStateService.startBattle(hero1, hero2);
+
+            return ResponseEntity.ok("Battle engine started successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to start battle: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
     @PostMapping("/pass")

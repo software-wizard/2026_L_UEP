@@ -33,8 +33,6 @@ import java.util.Optional;
 @RequestMapping("/api/board")
 public class BoardEconomyController {
 
-    private static final String SPELL_NAME = "Default";
-
     private final GameStateService gameStateService;
 
     @Autowired
@@ -110,14 +108,27 @@ public class BoardEconomyController {
     public ResponseEntity<String> startBoardEconomy(
             @RequestBody List<EconomyHero> heroes,
             @RequestParam(defaultValue = "DefaultMap") String mapName) {
+        try {
+            if (heroes == null) {
+                return ResponseEntity.badRequest().body("Invalid economy start request: heroes list is null.");
+            }
+            if (heroes.size() < 2) {
+                return ResponseEntity.badRequest().body("Invalid economy start request: expected 2 heroes, got " + heroes.size() + ".");
+            }
 
-        EconomyHero hero1 = heroes.get(0);
-        EconomyHero hero2 = heroes.get(1);
+            EconomyHero hero1 = heroes.get(0);
+            EconomyHero hero2 = heroes.get(1);
 
-        Map<Point, MapObjectIf> boardMap = generateMapBlueprint(mapName, hero1, hero2);
+            Map<Point, MapObjectIf> boardMap = generateMapBlueprint(mapName, hero1, hero2);
+            if (boardMap.isEmpty()) {
+                return ResponseEntity.badRequest().body("Unknown economy map name: '" + mapName + "'. Only 'DefaultMap' is supported.");
+            }
 
-        this.gameStateService.startBoardEconomy(hero1, hero2, boardMap);
-        return ResponseEntity.ok("Economy Board engine started successfully.");
+            this.gameStateService.startBoardEconomy(hero1, hero2, boardMap);
+            return ResponseEntity.ok("Economy Board engine started successfully.");
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().body("Failed to start economy board: " + e.getClass().getSimpleName() + ": " + e.getMessage());
+        }
     }
 
     @PostMapping("/pass")
@@ -277,9 +288,9 @@ public class BoardEconomyController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body("Invalid creature stats: " + e.getMessage());
         } catch (IllegalStateException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.badRequest().body("Cannot buy creature: " + e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
+            return ResponseEntity.internalServerError().body("Unexpected error while buying creature: " + e.getClass().getSimpleName() + ": " + e.getMessage());
         }
     }
 }
