@@ -1,4 +1,5 @@
 package pl.psi.economyAI;
+
 import pl.psi.economy.Point;
 import pl.psi.hero.EconomyHero;
 import pl.psi.map.BoardEconomyEngine;
@@ -12,19 +13,19 @@ public class EconomyAIController implements PropertyChangeListener {
     private final EconomyHero aiHero;
     private final EconomyAI ai;
 
+    // PAMIĘĆ AI: Przechowuje pozycję, zanim AI zniknie z mapy wchodząc do budynku
+    private Point lastKnownPosition;
+
     public EconomyAIController(BoardEconomyEngine engine, EconomyHero aiHero, EconomyAI ai) {
         this.engine = engine;
         this.aiHero = aiHero;
         this.ai = ai;
-        engine.addObserver(this); // Podpinamy nasłuchiwanie do nienaruszonego silnika
+        engine.addObserver(this);
     }
 
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        // Gdy zmienia się tura (używamy zmiennej statycznej, z Twojego TurnQueueEconomy)
         if (TurnQueueEconomy.NEXT_HERO.equals(evt.getPropertyName())) {
-
-            // Sprawdzamy czy to w ogóle nasza tura
             if (engine.getCurrentHero() == aiHero) {
                 makeMoves();
             }
@@ -33,11 +34,19 @@ public class EconomyAIController implements PropertyChangeListener {
 
     private void makeMoves() {
         boolean isTurnActive = true;
-        // Zabezpieczenie przed nieskończoną pętlą na wypadek błędu logicznego
-        int maxActions = 20;
+        int maxActions = 10; // Mniej akcji, by uniknąć chaotycznego biegania po całej mapie
 
         while (isTurnActive && engine.getCurrentHero() == aiHero && maxActions > 0) {
             Point currentPos = findHeroPosition();
+
+            // LOGIKA OPUSZCZANIA BUDYNKU:
+            if (currentPos != null) {
+                lastKnownPosition = currentPos; // Zapisz pozycję dopóki jesteśmy na mapie
+            } else if (lastKnownPosition != null) {
+                // Zniknęliśmy z mapy (jesteśmy w mieście). Używamy bramy miasta jako punktu startowego!
+                currentPos = lastKnownPosition;
+            }
+
             EconomyAction action = ai.decide(engine, aiHero, currentPos);
 
             if (action instanceof EconomyPassAction) {
@@ -48,20 +57,18 @@ public class EconomyAIController implements PropertyChangeListener {
                 if (engine.canMove(target)) {
                     engine.move(target);
                 } else {
-                    engine.pass(); // Fallback w razie dziwnego błędu
+                    engine.pass();
                     isTurnActive = false;
                 }
             }
             maxActions--;
         }
 
-        // Jeśli wykorzystaliśmy wszystkie akcje zabezpieczające i wciąż jest tura AI, pasujemy ostatecznie
         if (engine.getCurrentHero() == aiHero) {
             engine.pass();
         }
     }
 
-    // Metoda pomocnicza szukająca bohatera na rozsądnej wielkości planszy
     private Point findHeroPosition() {
         for (int x = 0; x <= 30; x++) {
             for (int y = 0; y <= 30; y++) {
