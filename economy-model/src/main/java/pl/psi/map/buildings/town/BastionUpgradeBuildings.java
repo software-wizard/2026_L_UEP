@@ -4,7 +4,6 @@ import pl.psi.creatures.CreatureStatistic;
 import pl.psi.hero.EconomyHero;
 import pl.psi.map.resources.Resources;
 
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.Set;
 
@@ -143,30 +142,50 @@ public enum BastionUpgradeBuildings implements BuildingType {
         return upgradedCreature;
     }
 
+    // Rewritten as a plain loop (no streams) for clarity and easy debugging.
+    // For each tier, exactly two buildings share the same base/upgraded creature pair:
+    // the base dwelling (no same-tier prerequisite) and the upgraded one (whose single
+    // prerequisite IS the base dwelling of the same tier).
     public static Optional<BastionUpgradeBuildings> getBuildingForCreature(CreatureStatistic creature) {
-        return Arrays.stream(values())
-                .filter(b -> b.getBaseCreature() == creature || b.getUpgradedCreature() == creature)
-                .filter(b -> {
-                    // Base creature -> the dwelling whose prerequisites do NOT include
-                    // its own upgraded counterpart (i.e. this is the tier's first building).
-                    // Upgraded creature -> the dwelling that IS prerequisite-chained to
-                    // the base dwelling of the SAME tier (same base/upgraded creature pair).
-                    if (b.getBaseCreature() == creature) {
-                        return b.getPrerequisites().stream()
-                                .filter(p -> p instanceof BastionUpgradeBuildings)
-                                .map(p -> (BastionUpgradeBuildings) p)
-                                .noneMatch(other -> other.getBaseCreature() == b.getBaseCreature()
-                                        && other.getUpgradedCreature() == b.getUpgradedCreature());
+        BastionUpgradeBuildings baseDwelling = null;
+        BastionUpgradeBuildings upgradedDwelling = null;
+
+        for (BastionUpgradeBuildings b : values()) {
+            boolean sameTier = (b.getBaseCreature() == creature || b.getUpgradedCreature() == creature);
+            if (!sameTier) {
+                continue;
+            }
+
+            boolean prerequisiteIsSameTierBuilding = false;
+            for (BuildingType p : b.getPrerequisites()) {
+                if (p instanceof BastionUpgradeBuildings) {
+                    BastionUpgradeBuildings other = (BastionUpgradeBuildings) p;
+                    if (other.getBaseCreature() == b.getBaseCreature()
+                            && other.getUpgradedCreature() == b.getUpgradedCreature()) {
+                        prerequisiteIsSameTierBuilding = true;
+                        break;
                     }
-                    if (b.getUpgradedCreature() == creature) {
-                        return b.getPrerequisites().stream()
-                                .filter(p -> p instanceof BastionUpgradeBuildings)
-                                .map(p -> (BastionUpgradeBuildings) p)
-                                .anyMatch(other -> other.getBaseCreature() == b.getBaseCreature()
-                                        && other.getUpgradedCreature() == b.getUpgradedCreature());
-                    }
-                    return false;
-                })
-                .findFirst();
+                }
+            }
+
+            if (prerequisiteIsSameTierBuilding) {
+                upgradedDwelling = b;
+            } else {
+                baseDwelling = b;
+            }
+        }
+
+        if (creature == null) {
+            return Optional.empty();
+        }
+
+        // Decide which of the two dwellings actually corresponds to the requested creature
+        if (baseDwelling != null && baseDwelling.getBaseCreature() == creature) {
+            return Optional.of(baseDwelling);
+        }
+        if (upgradedDwelling != null && upgradedDwelling.getUpgradedCreature() == creature) {
+            return Optional.of(upgradedDwelling);
+        }
+        return Optional.empty();
     }
 }

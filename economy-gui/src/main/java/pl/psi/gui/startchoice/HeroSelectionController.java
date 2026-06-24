@@ -64,7 +64,7 @@ public class HeroSelectionController {
 
     private EconomyHero createHeroFromSelection(String fractionName, String heroName) {
         EconomyHero.Fraction fraction = EconomyHero.Fraction.valueOf(fractionName.toUpperCase());
-        Resources resources = new Resources(3000, 50, 50, 50, 50, 50, 50); // common starting resources
+        Resources resources = new Resources(50000, 50, 500, 500, 500, 500, 500); // common starting resources
 
         for (HeroType heroType : HeroType.values()) {
             if (heroType.displayName.equals(heroName) && heroType.fraction == fraction) {

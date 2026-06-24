@@ -121,17 +121,19 @@ public class Creature implements PropertyChangeListener {
     }
 
     public void applyDamage(final Creature aDefender, final int aDamage) {
-        int hpToSubstract = aDamage % aDefender.getMaxHp();
-        int amountToSubstract = Math.round(aDamage / aDefender.getMaxHp());
+        int totalHp = (aDefender.getAmount() - 1) * aDefender.getMaxHp() + aDefender.getCurrentHp();
+        int remainingHp = totalHp - aDamage;
 
-        int hp = aDefender.getCurrentHp() - hpToSubstract;
-        if (hp <= 0) {
-            aDefender.setCurrentHp(aDefender.getMaxHp() - hp);
-            aDefender.setAmount(aDefender.getAmount() - 1);
-        } else {
-            aDefender.setCurrentHp(hp);
+        if (remainingHp <= 0) {
+            aDefender.setAmount(0);
+            aDefender.setCurrentHp(0);
+            return;
         }
-        aDefender.setAmount(aDefender.getAmount() - amountToSubstract * (int) Math.ceil(1 - reduceDemegeFactor));
+
+        int newAmount = (remainingHp - 1) / aDefender.getMaxHp() + 1;
+        int newCurrentHp = remainingHp - (newAmount - 1) * aDefender.getMaxHp();
+        aDefender.setAmount(newAmount);
+        aDefender.setCurrentHp(newCurrentHp);
     }
 
     public int getMaxHp() {

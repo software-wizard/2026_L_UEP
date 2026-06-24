@@ -2,9 +2,12 @@ package pl.psi.gui.shops;
 
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.HashMap;
+import java.util.Map;
 
 import lombok.Setter;
 import pl.psi.EconomyEngine;
+import pl.psi.creatures.CreatureStatistic;
 import pl.psi.creatures.EconomyCreature;
 import pl.psi.creatures.EconomyBastionFactory;
 import pl.psi.creatures.EconomyNecropolisFactory;
@@ -36,6 +39,33 @@ public class CreatureShopController implements PropertyChangeListener
     @FXML
     Label currentGoldLabel;
 
+    // Explicit hardcoded creature -> dwelling mapping for Bastion.
+    // No stream/lambda matching, no ambiguity — just a direct table.
+    private static final Map<CreatureStatistic, BastionUpgradeBuildings> BASTION_BASE_DWELLING = new HashMap<>();
+    private static final Map<CreatureStatistic, BastionUpgradeBuildings> BASTION_UPGRADED_DWELLING = new HashMap<>();
+    static {
+        BASTION_BASE_DWELLING.put(CreatureStatistic.CENTAUR, BastionUpgradeBuildings.CENTAUR_STABLES);
+        BASTION_UPGRADED_DWELLING.put(CreatureStatistic.BATTLE_CENTAUR, BastionUpgradeBuildings.CENTAUR_STABLES_UPGRADED);
+
+        BASTION_BASE_DWELLING.put(CreatureStatistic.DWARF, BastionUpgradeBuildings.DWARF_COTTAGE);
+        BASTION_UPGRADED_DWELLING.put(CreatureStatistic.DWARF_WARRIOR, BastionUpgradeBuildings.DWARF_COTTAGE_UPGRADED);
+
+        BASTION_BASE_DWELLING.put(CreatureStatistic.ELF, BastionUpgradeBuildings.HOMESTEAD);
+        BASTION_UPGRADED_DWELLING.put(CreatureStatistic.HIGH_ELF, BastionUpgradeBuildings.HOMESTEAD_UPGRADED);
+
+        BASTION_BASE_DWELLING.put(CreatureStatistic.PEGASUS, BastionUpgradeBuildings.PEGASUS_NEST);
+        BASTION_UPGRADED_DWELLING.put(CreatureStatistic.SILVER_PEGASUS, BastionUpgradeBuildings.PEGASUS_NEST_UPGRADED);
+
+        BASTION_BASE_DWELLING.put(CreatureStatistic.TREEMAN, BastionUpgradeBuildings.DENDROID_ARCHES);
+        BASTION_UPGRADED_DWELLING.put(CreatureStatistic.ENT, BastionUpgradeBuildings.DENDROID_ARCHES_UPGRADED);
+
+        BASTION_BASE_DWELLING.put(CreatureStatistic.UNICORN, BastionUpgradeBuildings.UNICORN_GLADE);
+        BASTION_UPGRADED_DWELLING.put(CreatureStatistic.BATTLE_UNICORN, BastionUpgradeBuildings.UNICORN_GLADE_UPGRADED);
+
+        BASTION_BASE_DWELLING.put(CreatureStatistic.GREEN_DRAGON, BastionUpgradeBuildings.DRAGON_CLIFFS);
+        BASTION_UPGRADED_DWELLING.put(CreatureStatistic.GOLD_DRAGON, BastionUpgradeBuildings.DRAGON_CLIFFS_UPGRADED);
+    }
+
 
     public CreatureShopController(final EconomyHero aHero1, final Town town) {
         economyEngine = new EconomyEngine(aHero1);
@@ -61,7 +91,6 @@ public class CreatureShopController implements PropertyChangeListener
         heroStateHBox.getChildren()
                 .clear();
 
-
         final VBox creatureShop = new VBox();
 
         if (economyEngine.getHero().getFraction() == EconomyHero.Fraction.BASTION) {
@@ -74,32 +103,15 @@ public class CreatureShopController implements PropertyChangeListener
                 CreatureButton baseButton = new CreatureButton(this, factory, false, i);
                 CreatureButton upgradedButton = new CreatureButton(this, factory, true, i);
 
-                System.out.println("Looking up base creature: " + base.getStats());
-                BastionUpgradeBuildings.getBuildingForCreature(base.getStats())
-                        .ifPresentOrElse(
-                                building -> System.out.println("Found building: " + building + ", built? " + town.hasBuilt(building)),
-                                () -> System.out.println("No building found for " + base.getStats())
-                        );
+                BastionUpgradeBuildings baseDwelling = BASTION_BASE_DWELLING.get(base.getStats());
+                if (baseDwelling == null || !town.hasBuilt(baseDwelling)) {
+                    baseButton.setDisable(true);
+                }
 
-                BastionUpgradeBuildings.getBuildingForCreature(base.getStats())
-                        .ifPresentOrElse(
-                                building -> {
-                                    if (!town.hasBuilt(building)) {
-                                        baseButton.setDisable(true);
-                                    }
-                                },
-                                () -> baseButton.setDisable(true)
-                        );
-
-                BastionUpgradeBuildings.getBuildingForCreature(upgraded.getStats())
-                        .ifPresentOrElse(
-                                building -> {
-                                    if (!town.hasBuilt(building)) {
-                                        upgradedButton.setDisable(true);
-                                    }
-                                },
-                                () -> upgradedButton.setDisable(true)
-                        );
+                BastionUpgradeBuildings upgradedDwelling = BASTION_UPGRADED_DWELLING.get(upgraded.getStats());
+                if (upgradedDwelling == null || !town.hasBuilt(upgradedDwelling)) {
+                    upgradedButton.setDisable(true);
+                }
 
                 creatureShop.getChildren().addAll(baseButton, upgradedButton);
             }
