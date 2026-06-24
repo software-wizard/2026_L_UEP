@@ -1,5 +1,8 @@
 package pl.psi;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"empty"})
 public class ReadyToCastState implements SpellCastingState {
     @Override
     public boolean canCast() {

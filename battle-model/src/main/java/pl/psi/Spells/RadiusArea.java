@@ -1,10 +1,11 @@
 package pl.psi.Spells;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import pl.psi.BattlePoint;
 
 import java.util.ArrayList;
 import java.util.List;
-
+@JsonIgnoreProperties(ignoreUnknown = true, value = {"empty"})
 public class RadiusArea implements SpellAreaIf {
 
     private final double radius;
