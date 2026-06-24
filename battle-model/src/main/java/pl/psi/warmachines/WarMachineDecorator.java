@@ -57,7 +57,7 @@ public abstract class WarMachineDecorator extends Creature {
         return decorated.getName();
     }
 
-    // Krytyczne dla maszyn wojennych: wymuszamy 0, aby maszyna nie mogła chodzić po hexach!
+    // Dla maszyn wojennych: wymuszamy 0, aby maszyna nie mogła chodzić
     @Override
     public int getMoveRange() {
         return 0;

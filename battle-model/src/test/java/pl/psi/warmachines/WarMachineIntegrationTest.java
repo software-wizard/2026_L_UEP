@@ -2,121 +2,107 @@ package pl.psi.warmachines;
 
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.Test;
+import pl.psi.creatures.Creature;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class WarMachineIntegrationTest {
 
+
     @Test
-    public void shouldLoadHighDamageStatsFromEnum() {
-        assertNotNull(WarMachineStats.values(), "Enum WarMachineStats powinien poprawnie istnieć.");
+    public void factoryShouldCreateBallistaOfCorrectType() {
+        WarMachineFactory factory = new WarMachineFactory();
+
+        WarMachineDecorator result = factory.create(
+                WarMachineType.BALLISTA,
+                new RandomTargetStrategy()
+        );
+
+        assertNotNull(result);
+        assertTrue(result instanceof BallistaCreature);
     }
 
     @Test
-    public void ballistaShotShouldDecreaseEnemyCreatureAmount() {
-        int startingAmount = 40;
-        int damageAmountReduction = 5;
+    public void ballistaShouldHaveZeroMoveRange() {
+        WarMachineFactory factory = new WarMachineFactory();
+        WarMachineDecorator ballista = factory.create(
+                WarMachineType.BALLISTA,
+                new RandomTargetStrategy()
+        );
 
-        int finalAmount = Math.max(0, startingAmount - damageAmountReduction);
+        int moveRange = ballista.getMoveRange();
 
-        assertEquals(35, finalAmount, "Logika redukcji oddziału o 5 sztuk powinna zwrócić 35.");
+        assertEquals(0, moveRange);
     }
 
     @Test
-    public void ballistaShouldNotDamageFriendlyArmyIfEnemyDoesNotHaveOne() {
-        boolean hero1HasBallista = true;
-        boolean hero2HasBallista = false;
+    public void randomStrategyShouldReturnEmptyWhenNoEnemiesAlive() {
+        BallistaTargetStrategy strategy = new RandomTargetStrategy();
+        List<Creature> emptyEnemyList = List.of();
 
-        int friendlyArmyAmount = 40;
+        Optional<Creature> target = strategy.selectTarget(emptyEnemyList, null);
 
-        if (hero2HasBallista) {
-            friendlyArmyAmount -= 5;
-        }
-
-        assertEquals(40, friendlyArmyAmount, "Twoja armia musi pozostać nienaruszona, jeśli wróg nie posiada maszyny.");
+        assertTrue(target.isEmpty());
     }
 
     @Test
-    public void creatureShouldBeRemovedFromArmyListWhenAmountReachesZero() {
-        List<String> mockArmyList = new ArrayList<>();
-        mockArmyList.add("Target Creature");
+    public void playerChoiceStrategyShouldReturnChosenTarget() {
+        Creature target = new Creature.Builder()
+                .statistic(WarMachineStats.BALLISTA)
+                .amount(1)
+                .build();
+        BallistaTargetStrategy strategy = new PlayerChoiceTargetStrategy();
 
-        int currentAmount = 5;
-        int damage = 5;
-        currentAmount -= damage;
+        Optional<Creature> result = strategy.selectTarget(List.of(target), target);
 
-        if (currentAmount <= 0) {
-            mockArmyList.remove("Target Creature");
-        }
-
-        assertTrue(mockArmyList.isEmpty(), "Lista armii powinna zostać wyczyszczona, gdy liczebność spadnie do zera.");
+        assertTrue(result.isPresent());
+        assertEquals(target, result.get());
     }
 
     @Test
-    public void streamFilterShouldDistinguishRegularCreatures() {
-        List<String> mixedArmy = new ArrayList<>();
-        mixedArmy.add("Skeleton");
-        mixedArmy.add("Ballista");
+    public void medicTentShouldNotHealDeadCreature() {
+        Creature deadCreature = new Creature.Builder()
+                .statistic(WarMachineStats.MEDIC_TENT)
+                .amount(0)
+                .build();
 
-        long regularCreaturesCount = mixedArmy.stream()
-                .filter(name -> !name.contains("Ballista"))
-                .count();
+        WarMachineFactory factory = new WarMachineFactory();
+        MedicTentCreature tent = (MedicTentCreature) factory.create(
+                WarMachineType.MEDIC_TENT, null
+        );
 
-        assertEquals(1, regularCreaturesCount, "Mechanizm filtrowania musi odrzucić maszyny i wskazać tylko zwykłe potwory.");
+        int hpBefore = deadCreature.getCurrentHp();
+        tent.heal(deadCreature, 1.0);
+
+        assertEquals(hpBefore, deadCreature.getCurrentHp());
     }
 
     @Test
-    public void forgeShouldDeductGoldAndAddWarMachineToHero() {
-        int heroGoldBeforePurchase = 5000;
-        int ballistaCost = 2500;
-        List<String> heroWarMachines = new ArrayList<>();
+    public void factoryShouldCreateMedicTentOfCorrectType() {
+        WarMachineFactory factory = new WarMachineFactory();
 
-        if (heroGoldBeforePurchase >= ballistaCost) {
-            heroGoldBeforePurchase -= ballistaCost;
-            heroWarMachines.add("BALLISTA");
-        }
+        WarMachineDecorator result = factory.create(WarMachineType.MEDIC_TENT, null);
 
-        assertEquals(2500, heroGoldBeforePurchase, "Po zakupie Balisty za 2500, bohaterowi powinno zostać dokładnie 2500 złota.");
-        assertTrue(heroWarMachines.contains("BALLISTA"), "Zakupiona Balista musi znaleźć się w ekwipunku/armii bohatera.");
+        assertTrue(result instanceof MedicTentCreature);
     }
 
     @Test
-    public void forgeShouldRejectPurchaseIfHeroHasNotEnoughGold() {
-        int heroGoldBeforePurchase = 1000;
-        int ballistaCost = 2500;
-        List<String> heroWarMachines = new ArrayList<>();
+    public void playerChoiceStrategyShouldRejectTargetNotInEnemyList() {
+        Creature validEnemy = new Creature.Builder()
+                .statistic(WarMachineStats.BALLISTA)
+                .amount(1)
+                .build();
+        Creature impostor = new Creature.Builder()
+                .statistic(WarMachineStats.BALLISTA)
+                .amount(1)
+                .build();
 
-        boolean purchaseSuccess = false;
-        if (heroGoldBeforePurchase >= ballistaCost) {
-            heroGoldBeforePurchase -= ballistaCost;
-            heroWarMachines.add("BALLISTA");
-            purchaseSuccess = true;
-        }
+        BallistaTargetStrategy strategy = new PlayerChoiceTargetStrategy();
+        Optional<Creature> result = strategy.selectTarget(List.of(validEnemy), impostor);
 
-        assertFalse(purchaseSuccess, "Transakcja powinna się nie powieść z powodu braku funduszy.");
-        assertEquals(1000, heroGoldBeforePurchase, "Stan konta bohatera nie powinien ulec zmianie.");
-        assertFalse(heroWarMachines.contains("BALLISTA"), "Balista NIE POWINNA zostać dodana do ekwipunku.");
-    }
-
-    @Test
-    public void wallDurabilityShouldNotDropBelowZero() {
-        int wallDurability = 20;
-        int powerfulCatapultDamage = 50;
-
-        wallDurability = Math.max(0, wallDurability - powerfulCatapultDamage);
-
-        assertEquals(0, wallDurability, "Wytrzymałość muru po potężnym strzale powinna wynosić dokładnie 0, a nie -30.");
-    }
-
-    @Test
-    public void warMachineShouldBeExtendableWithNewAbilitiesPolymorphically() {
-        List<String> machineAbilities = new ArrayList<>();
-        machineAbilities.add("HEAL");
-
-        String futureExtension = "CAST_AIR_SHIELD";
-        machineAbilities.add(futureExtension);
-
-        assertTrue(machineAbilities.contains("CAST_AIR_SHIELD"), "Architektura powinna umożliwiać dynamiczne dodawanie nowych unikalnych akcji dla zaawansowanych maszyn.");
+        assertTrue(result.isEmpty());
     }
 
     @Test
