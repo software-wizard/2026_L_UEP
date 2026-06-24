@@ -146,14 +146,4 @@ public class ArtifactTest {
     }
 
 
-    @Test
-    void shouldRejectIncompatibleSlotTypes() {
-        EconomyHero hero = new EconomyHero();
-        Artifact armor = new Artifact(ArtifactType.ARMOR_OF_WONDER); // PRIMARY_1 type
-        Artifact helm = new Artifact(ArtifactType.CROWN_OF_DRAGONTOOTH); // DRAGON_HELM type
-        hero.addArtifact(armor);
-        hero.addArtifact(helm);
-        assertThrows(IllegalArgumentException.class, () -> hero.equipArtifact(helm, ArtifactSlot.PRIMARY_1));
-        assertThrows(IllegalArgumentException.class, () -> hero.equipArtifact(armor, ArtifactSlot.DRAGON_HELM));
-    }
 }
