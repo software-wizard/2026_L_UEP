@@ -103,7 +103,6 @@ public class GameEngine {
     // Ranged attack: any enemy on the board, no distance limit
     public boolean canShoot(final BattlePoint aBattlePoint) {
         Creature current = turnQueue.getCurrentCreature();
-        System.out.println("canShoot: " + current.getName() + " isRanged=" + current.isRanged() + " target=" + board.getCreature(aBattlePoint).isPresent());
         if (!current.isRanged()) return false;
         Optional<Creature> target = board.getCreature(aBattlePoint);
         if (target.isEmpty()) return false;

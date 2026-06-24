@@ -72,7 +72,9 @@ public class Creature implements PropertyChangeListener {
         if (isRooter() && aDefender.isAlive()) {
             applyRoot(aDefender);
         }
-
+        System.out.println("after root: attacker=" + getName()
+                + " defender=" + aDefender.getName()
+                + " defenderMovePoints=" + aDefender.getRemainingMovePoints());
         if (canCounterAttack(aDefender)) {
             counterAttack(aDefender);
         }
