@@ -15,7 +15,7 @@ import lombok.Setter;
  */
 public class Hero implements java.beans.PropertyChangeListener {
     @Getter
-    private List< Creature > creatures = List.of();
+    private List< Creature > creatures = new java.util.ArrayList<>();
     @Getter
     private List<Spell> spells;
     @Getter
@@ -27,7 +27,7 @@ public class Hero implements java.beans.PropertyChangeListener {
 
     public Hero(final List< Creature > aCreatures, List<Spell> aSpells)
     {
-        creatures = aCreatures;
+        creatures = new java.util.ArrayList<>(aCreatures);
         spells = new ArrayList<>(aSpells);
     }
     public Hero() {

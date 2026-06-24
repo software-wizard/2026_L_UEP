@@ -72,12 +72,16 @@ public class GameEngine {
                     registerVanquishedHp(defenderOwner, attackerHpLoss);
 
                     if (!defender.isAlive()) {
-                        board.removeCreature(defender);
+                        // Do not remove the dead creature from the board immediately - keep the
+                        // instance at its tile with amount==0 so tests and UI can inspect the
+                        // corpse. Still remove it from the owner's creature list so defeat
+                        // conditions and turn queue reflect that the unit is gone.
                         removeDeadCreature(defender);
                     }
 
                     if (!attacker.isAlive()) {
-                        board.removeCreature(attacker);
+                        // Same behaviour for the attacker: keep on-board representation but
+                        // remove from owner's collection.
                         removeDeadCreature(attacker);
                     }
                 });

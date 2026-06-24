@@ -41,6 +41,7 @@ public class MainBattleController implements PropertyChangeListener {
                                 final Consumer<BattleResult> aBattleFinishedHandler) {
         gameEngine = new GameEngineProxy(aHero1, aHero2, aSpecialField, bankEnemy);
         battleFinishedHandler = aBattleFinishedHandler;
+        new pl.psi.ai.AIController(gameEngine, aHero2, new pl.psi.ai.BattleAI());
     }
 
     @FXML

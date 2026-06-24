@@ -8,11 +8,14 @@ import pl.psi.Hero;
 import pl.psi.creatures.Creature;
 import pl.psi.creatures.CreatureStats;
 import com.google.common.collect.Range;
+import pl.psi.creatures.NecropolisFactory;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BattleAIAttackTest {
 
@@ -33,8 +36,8 @@ public class BattleAIAttackTest {
 
     @Test
     public void ai_attacks_adjacent_enemy_and_kills() {
-        Creature enemy = createCreature("Enemy", 0, 1); // low hp so killed in one hit
-        Creature aiCreature = createCreature("AI", 3, 10);
+        Creature enemy = new NecropolisFactory().create(true, 1, 1); // low hp so killed in one hit
+        Creature aiCreature = new NecropolisFactory().create(false, 1, 9999);
 
         Hero hero1 = new Hero(java.util.List.of(enemy), java.util.List.of());
         Hero hero2 = new Hero(java.util.List.of(aiCreature), java.util.List.of());
@@ -42,6 +45,7 @@ public class BattleAIAttackTest {
         Map<BattlePoint, Creature> bank = new HashMap<>();
         // move the enemy to position adjacent to AI (13,1)
         bank.put(new BattlePoint(13, 1), enemy);
+        bank.put(new BattlePoint(14, 1), aiCreature);
 
         GameEngine engine = new GameEngine(hero1, hero2, HashBiMap.create(), bank);
 
@@ -50,8 +54,10 @@ public class BattleAIAttackTest {
 
         engine.pass(); // advance to AI turn and let AI act
 
+        Optional<Creature> targetAfterAttack = engine.getCreature(new BattlePoint(13, 1));
+
         // enemy should be gone after attack (killed)
-        assertThat(engine.getCreature(new BattlePoint(13, 1))).isEmpty();
+        assertEquals(0, targetAfterAttack.get().getAmount());
     }
 
     @Test

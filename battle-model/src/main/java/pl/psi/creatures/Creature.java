@@ -73,18 +73,26 @@ public class Creature implements PropertyChangeListener {
     }
 
     public void applyDamage(final Creature aDefender, final int aDamage) {
-        int hpToSubstract = aDamage % aDefender.getMaxHp();
-        int amountToSubstract = Math.round(aDamage / aDefender.getMaxHp());
+        // Convert defender's total hp (all creatures in the stack) to a single number,
+        // subtract damage and recalculate amount and currentHp.
+        final int maxHp = aDefender.getMaxHp();
+        int totalHp = (aDefender.getAmount() - 1) * maxHp + aDefender.getCurrentHp();
+        int remainingHp = totalHp - aDamage;
 
-        int hp = aDefender.getCurrentHp() - hpToSubstract;
-        if (hp <= 0) {
-            aDefender.setCurrentHp(aDefender.getMaxHp() - hp);
-            aDefender.setAmount(aDefender.getAmount() - 1);
+        if (remainingHp <= 0) {
+            // whole stack dead
+            aDefender.setAmount(0);
+            aDefender.setCurrentHp(0);
+            return;
         }
-        else{
-            aDefender.setCurrentHp(hp);
-        }
-        aDefender.setAmount(aDefender.getAmount() - amountToSubstract * (int) Math.ceil(1-reduceDemegeFactor));
+
+        int fullCreatures = remainingHp / maxHp;
+        int rem = remainingHp % maxHp;
+        int newAmount = fullCreatures + (rem > 0 ? 1 : 0);
+        int newCurrentHp = rem > 0 ? rem : maxHp;
+
+        aDefender.setAmount(newAmount);
+        aDefender.setCurrentHp(newCurrentHp);
     }
 
     public int getMaxHp() {
