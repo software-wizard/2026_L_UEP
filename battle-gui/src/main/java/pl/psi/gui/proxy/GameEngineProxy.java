@@ -17,9 +17,12 @@ import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class GameEngineProxy extends GameEngine {
     private static final String BASE_URL = "http://localhost:8080/api/battle";
+    private static final Logger LOG = Logger.getLogger(GameEngineProxy.class.getName());
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final ObjectMapper objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -34,8 +37,13 @@ public class GameEngineProxy extends GameEngine {
                     .header("Content-Type", "application/json")
                     .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .build();
-            httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) { e.printStackTrace(); }
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() < 200 || res.statusCode() >= 300) {
+                fail("Nie udało się uruchomić backendu walki", null, "HTTP " + res.statusCode() + ": " + res.body());
+            }
+        } catch (Exception e) {
+            fail("Wyjątek podczas uruchamiania backendu walki", e, null);
+        }
     }
 
     private Map<String, Object> getTileState(int x, int y) {
@@ -45,12 +53,17 @@ public class GameEngineProxy extends GameEngine {
                 HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
                 if (res.statusCode() == 200) {
                     cachedBoardState = objectMapper.readValue(res.body(), new com.fasterxml.jackson.core.type.TypeReference<>() {});
+                } else {
+                    fail("Nie udało się pobrać stanu planszy walki", null, "HTTP " + res.statusCode() + ": " + res.body());
                 }
-            } catch (Exception e) { e.printStackTrace(); }
+            } catch (Exception e) {
+                fail("Wyjątek podczas pobierania stanu planszy walki", e, null);
+            }
         }
         if (cachedBoardState != null) {
             return cachedBoardState.getOrDefault(x + "," + y, Map.of());
         }
+        fail("Brak stanu planszy walki", null, "Serwer nie zwrócił danych boardState");
         return Map.of();
     }
 
@@ -131,7 +144,7 @@ public class GameEngineProxy extends GameEngine {
                 HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).POST(HttpRequest.BodyPublishers.noBody()).build();
                 httpClient.send(req, HttpResponse.BodyHandlers.ofString());
             } catch (Exception e) {
-                e.printStackTrace();
+                fail("Wyjątek podczas rzucania czaru w walce", e, null);
             }
             invalidateCache();
         }
@@ -142,7 +155,22 @@ public class GameEngineProxy extends GameEngine {
         try {
             String url = x >= 0 ? BASE_URL + endpoint + "?x=" + x + "&y=" + y : BASE_URL + endpoint;
             HttpRequest req = HttpRequest.newBuilder().uri(URI.create(url)).POST(HttpRequest.BodyPublishers.noBody()).build();
-            httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-        } catch (Exception e) { e.printStackTrace(); }
+            HttpResponse<String> res = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (res.statusCode() < 200 || res.statusCode() >= 300) {
+                fail("Błąd akcji walki " + endpoint, null, "HTTP " + res.statusCode() + ": " + res.body());
+            }
+        } catch (Exception e) {
+            fail("Wyjątek podczas wysyłania akcji walki " + endpoint, e, null);
+        }
+    }
+
+    private void fail(final String message, final Exception exception, final String details) {
+        String fullMessage = details == null ? message : message + " -> " + details;
+        if (exception != null) {
+            LOG.log(Level.SEVERE, fullMessage, exception);
+            throw new IllegalStateException(fullMessage, exception);
+        }
+        LOG.severe(fullMessage);
+        throw new IllegalStateException(fullMessage);
     }
 }
